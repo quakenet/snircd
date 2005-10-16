@@ -1,0 +1,9 @@
+makefile
+Makefile
+config.log
+config.h
+stamp-h
+config.status
+config.cache
+.project
+ircu.tags
