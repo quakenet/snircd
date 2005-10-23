@@ -403,6 +403,7 @@ static struct FeatureDesc {
   F_S(HIS_SERVERNAME, 0, "*.undernet.org", feature_notify_servername),
   F_S(HIS_SERVERINFO, 0, "The Undernet Underworld", feature_notify_serverinfo),
   F_S(HIS_URLSERVERS, 0, "http://www.undernet.org/servers.php", 0),
+  F_B(HIS_USERGLINE, 0, 1, 0),
 
   /* Misc. random stuff */
   F_S(NETWORK, 0, "UnderNet", 0),

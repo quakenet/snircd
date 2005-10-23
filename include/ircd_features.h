@@ -150,6 +150,7 @@ enum Feature {
   FEAT_HIS_SERVERNAME,
   FEAT_HIS_SERVERINFO,
   FEAT_HIS_URLSERVERS,
+  FEAT_HIS_USERGLINE,
 
   /* Misc. random stuff */
   FEAT_NETWORK,
