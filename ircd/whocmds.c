@@ -269,17 +269,17 @@ count_users(char *mask)
 {
   struct Client *acptr;
   int count = 0;
-  char namebuf[USERLEN + HOSTLEN + 2];
+  char namebuf[NICKLEN + USERLEN + HOSTLEN + 3];
   char ipbuf[USERLEN + 16 + 2];
 
   for (acptr = GlobalClientList; acptr; acptr = cli_next(acptr)) {
     if (!IsUser(acptr))
       continue;
 
-    ircd_snprintf(0, namebuf, sizeof(namebuf), "%s@%s",
+    ircd_snprintf(0, namebuf, sizeof(namebuf), "%s!%s@%s", cli_name(acptr),
 		  cli_user(acptr)->username, cli_user(acptr)->host);
-    ircd_snprintf(0, ipbuf, sizeof(ipbuf), "%s@%s", cli_user(acptr)->username,
-		  ircd_ntoa(&cli_ip(acptr)));
+    ircd_snprintf(0, ipbuf, sizeof(ipbuf), "%s!%s@%s", cli_name(acptr),
+                  cli_user(acptr)->username, ircd_ntoa(&(cli_ip(acptr))));
 
     if (!match(mask, namebuf) || !match(mask, ipbuf))
       count++;

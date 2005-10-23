@@ -592,7 +592,7 @@ static Numeric replyTable[] = {
 /* 279 */
   { 0 },
 /* 280 */
-  { RPL_GLIST, "%s%s%s %Tu %s %c :%s", "280" },
+  { RPL_GLIST, "%s%s%s%s%s %Tu %s %c :%s", "280" },
 /* 281 */
   { RPL_ENDOFGLIST, ":End of G-line List", "281" },
 /* 282 */
