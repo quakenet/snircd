@@ -640,7 +640,7 @@ static Numeric replyTable[] = {
 /* 303 */
   { RPL_ISON, ":", "303" },
 /* 304 */
-  { 0 },
+  { RPL_TEXT, "%s", "304" },
 /* 305 */
   { RPL_UNAWAY, ":You are no longer marked as being away", "305" },
 /* 306 */
@@ -828,9 +828,9 @@ static Numeric replyTable[] = {
 /* 397 */
   { 0 },
 /* 398 */
-  { 0 },
+  { RPL_STATSSLINE, "%d %s %s %s %s", "398" },
 /* 399 */
-  { 0 },
+  { RPL_USINGSLINE, ":Using S-line privilege", "399" },
 /* 400 */
   { 0 },
 /* 401 */
@@ -1092,9 +1092,9 @@ static Numeric replyTable[] = {
 /* 529 */
   { 0 },
 /* 530 */
-  { 0 },
+  { ERR_BADHOSTMASK, "%s :Invalid username/hostmask", "530" },
 /* 531 */
-  { 0 },
+  { ERR_HOSTUNAVAIL, "%s :sethost not found", "531" },
 /* 532 */
   { 0 },
 /* 533 */

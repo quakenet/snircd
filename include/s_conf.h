@@ -80,6 +80,20 @@ struct qline
   char *reason;       /**< Reason for quarantine. */
 };
 
+struct sline {
+  struct sline *next;
+  char *spoofhost;
+  char *passwd;
+  char *realhost;
+  char *username;
+  struct irc_in_addr address;
+  unsigned int flags;
+  char bits; /* Number of bits for CIDR match on realhost */
+};
+
+#define SLINE_FLAGS_HOSTNAME 0x0001 /* S-line by hostname */
+#define SLINE_FLAGS_IP       0x0002 /* S-line by IP address/CIDR */
+
 /** Local K-line structure. */
 struct DenyConf {
   struct DenyConf*    next;     /**< Next DenyConf in #denyConfList. */
@@ -157,6 +171,7 @@ extern struct ConfItem* GlobalConfList;
 extern int              GlobalConfCount;
 extern struct s_map*    GlobalServiceMapList;
 extern struct qline*    GlobalQuarantineList;
+extern struct sline*	GlobalSList;
 
 /*
  * Proto types
@@ -187,6 +202,11 @@ extern void lookup_confhost(struct ConfItem *aconf);
 extern void conf_parse_userhost(struct ConfItem *aconf, char *host);
 extern struct ConfItem *conf_debug_iline(const char *client);
 extern void free_mapping(struct s_map *smap);
+
+extern void conf_add_sline(const char* const* fields, int count);
+extern void clear_slines(void);
+extern int conf_check_slines(struct Client *cptr);
+extern void free_spoofhost(struct sline *spoof);
 
 extern void yyerror(const char *msg);
 

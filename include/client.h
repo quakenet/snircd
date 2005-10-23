@@ -169,6 +169,7 @@ enum Flag
     FLAG_ACCOUNTONLY,               /**< ASUKA_R: hide privmsgs/notices if
 				      user is not authed or opered */
     FLAG_HIDDENHOST,                /**< user's host is hidden */
+    FLAG_SETHOST,                   /**< ASUKA_h: oper's host is changed */
     FLAG_NOCHAN,                    /**< user's channels are hidden */
     FLAG_NOIDLE,                    /**< user's idletime is hidden */
     FLAG_XTRAOP,                    /**< oper has special powers */
@@ -626,6 +627,9 @@ struct Client {
 #define IsPrivileged(x)         (IsAnOper(x) || IsServer(x))
 /** Return non-zero if the client's host is hidden. */
 #define HasHiddenHost(x)        (IsHiddenHost(x) && IsAccount(x))
+/** Return non-zero if the client is using a spoofhost */
+#define IsSetHost(x)            HasFlag(x, FLAG_SETHOST)
+#define HasSetHost(x)           (IsSetHost(x))
 
 /** Mark a client as having an in-progress net.burst. */
 #define SetBurst(x)             SetFlag(x, FLAG_BURST)
@@ -667,6 +671,8 @@ struct Client {
 #define SetAccount(x)           SetFlag(x, FLAG_ACCOUNT)
 /** Mark a client as having mode +x (hidden host). */
 #define SetHiddenHost(x)        SetFlag(x, FLAG_HIDDENHOST)
+/** Mark a client as having mode +h (spoofhost). */
+#define SetSetHost(x)           SetFlag(x, FLAG_SETHOST)
 /** Mark a client as having mode +X (xtraop). */
 #define SetXtraOp(x)            SetFlag(x, FLAG_XTRAOP)
 /** Mark a client as having mode +n (hide channels). */
@@ -708,6 +714,8 @@ struct Client {
 #define ClearServNotice(x)      ClrFlag(x, FLAG_SERVNOTICE)
 /** Remove mode +x (hidden host) from the client. */
 #define ClearHiddenHost(x)      ClrFlag(x, FLAG_HIDDENHOST)
+/** Remove mode +h (spoofhost) from a client. */
+#define ClearSetHost(x)         ClrFlag(x, FLAG_SETHOST)
 /** Remove mode +X (xtraop) from a client. */
 #define ClearXtraOp(x)          ClrFlag(x, FLAG_XTRAOP)
 /** Remove mode +n (hide channels) from a client. */

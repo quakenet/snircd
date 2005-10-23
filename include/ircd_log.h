@@ -65,6 +65,7 @@ enum LogSys {
   LS_SOCKET,     /**< Unexpected socket operation errors. */
   LS_IAUTH,      /**< IAuth status. */
   LS_DEBUG,      /**< Debug messages. */
+  LS_SETHOST,    /**< Usage of the sethost command. */
   LS_LAST_SYSTEM /**< Count of valid LogSys values. */
 };
 

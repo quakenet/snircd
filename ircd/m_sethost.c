@@ -1,5 +1,5 @@
 /*
- * IRC - Internet Relay Chat, ircd/m_userhost.c
+ * IRC - Internet Relay Chat, ircd/m_sethost.c
  * Copyright (C) 1990 Jarkko Oikarinen and
  *                    University of Oulu, Computing Center
  *
@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_userhost.c,v 1.15 2005/04/22 01:39:07 klmitch Exp $
+ * $Id: asuka-sethost.patch,v 1.27 2005/02/13 17:28:11 froo Exp $
  */
 
 /*
@@ -82,43 +82,62 @@
 #include "config.h"
 
 #include "client.h"
-#include "ircd_log.h"
 #include "ircd_reply.h"
 #include "ircd_string.h"
+#include "ircd_features.h"
 #include "msgq.h"
 #include "numeric.h"
 #include "s_user.h"
+#include "s_debug.h"
 #include "struct.h"
 
-/* #include <assert.h> -- Now using assert in ircd_log.h */
-
-static void userhost_formatter(struct Client* cptr, struct Client *sptr, struct MsgBuf* mb)
-{
-  assert(IsUser(cptr));
-  msgq_append(0, mb, "%s%s=%c%s@%s", cli_name(cptr),
-              SeeOper(sptr,cptr) ? "*" : "",
-	      cli_user(cptr)->away ? '-' : '+', cli_user(cptr)->username,
-	      /* Do not *EVER* change this to give opers the real host.
-	       * Too many scripts rely on this data and can inadvertently
-	       * publish the user's real host, thus breaking the security
-	       * of +x.  If an oper wants the real host, he should go to
-	       * /whois to get it.
-	       */
-	      !IsAnOper(sptr) ?
-	      cli_user(cptr)->host : cli_user(cptr)->realhost);
-}
+#include <assert.h>
+#include <stdlib.h>
 
 /*
- * m_userhost - generic message handler
+ * m_sethost - generic message handler
+ *
+ * mimic old lain syntax:
+ *
+ * (Oper) /SETHOST ident host.cc [quit-message]
+ * (User) /SETHOST host.cc password
+ * (Both) /SETHOST undo
+ *
+ * check for undo, prepend parv w. <nick> -h or +h
  */
-int m_userhost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+int m_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  assert(0 != cptr);
-  assert(sptr == cptr);
+  char hostmask[512];
+  struct Flags setflags;
+
+  /* Back up the flags first */
+  setflags = cli_flags(sptr);
 
   if (parc < 2)
-    return need_more_params(sptr, "USERHOST");
+    return need_more_params(sptr, "SETHOST");
 
-  send_user_info(sptr, parv[1], RPL_USERHOST, userhost_formatter);
-  return 0;
+  if (0 == ircd_strcmp("undo", parv[1])) {
+    set_hostmask(sptr, NULL, NULL);
+  } else {
+    if (parc<3)
+      return need_more_params(sptr, "SETHOST");
+    if (IsAnOper(sptr)) {
+      ircd_snprintf(0, hostmask, USERLEN + HOSTLEN + 1, "%s@%s", parv[1], parv[2]);
+      if (!is_hostmask(hostmask)) {
+	send_reply(sptr, ERR_BADHOSTMASK, hostmask);
+	return 0;
+      }
+      if (set_hostmask(sptr, hostmask, NULL))
+      	FlagClr(&setflags, FLAG_SETHOST);
+    } else {
+      if (!is_hostmask(parv[1])) {
+	send_reply(sptr, ERR_BADHOSTMASK, parv[1]);
+	return 0;
+      }
+      if (set_hostmask(sptr, parv[1], parv[2]))
+        FlagClr(&setflags, FLAG_SETHOST);
+    }
+  }  
+
+  send_umode_out(cptr, sptr, &setflags, 0);
 }

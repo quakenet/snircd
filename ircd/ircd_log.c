@@ -164,6 +164,7 @@ static struct LogDesc {
   S(SOCKET, -1, 0),
   S(IAUTH, -1, SNO_NETWORK),
   S(DEBUG, -1, SNO_DEBUG),
+  S(SETHOST, -1, SNO_OLDSNO),
 #undef S
   { LS_LAST_SYSTEM, 0, 0, -1, 0, -1, 0 }
 };

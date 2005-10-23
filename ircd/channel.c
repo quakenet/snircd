@@ -357,7 +357,7 @@ struct Ban *find_ban(struct Client *cptr, struct Ban *banlist)
   ircd_ntoa_r(iphost, &cli_ip(cptr));
   if (!IsAccount(cptr))
     sr = NULL;
-  else if (HasHiddenHost(cptr))
+  else if (HasHiddenHost(cptr) || HasSetHost(cptr))
     sr = cli_user(cptr)->realhost;
   else
   {

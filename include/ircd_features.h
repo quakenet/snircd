@@ -101,6 +101,10 @@ enum Feature {
 
   /* features that affect all operators */
   FEAT_CONFIG_OPERCMDS,
+  FEAT_SETHOST,
+  FEAT_SETHOST_FREEFORM,
+  FEAT_SETHOST_USER,
+  FEAT_SETHOST_AUTO,
 
   /* HEAD_IN_SAND Features */
   FEAT_HIS_SNOTICES,
@@ -129,6 +133,7 @@ enum Feature {
   FEAT_HIS_STATS_q,
   FEAT_HIS_STATS_R,
   FEAT_HIS_STATS_r,
+  FEAT_HIS_STATS_s,
   FEAT_HIS_STATS_t,
   FEAT_HIS_STATS_T,
   FEAT_HIS_STATS_u,

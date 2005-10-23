@@ -354,6 +354,10 @@ static struct FeatureDesc {
 
   /* features that affect all operators */
   F_B(CONFIG_OPERCMDS, 0, 0, 0),
+  F_B(SETHOST, 0, 0, 0),
+  F_B(SETHOST_FREEFORM, 0, 0, 0),
+  F_B(SETHOST_USER, 0, 0, 0),
+  F_B(SETHOST_AUTO, 0, 0, 0),
 
   /* HEAD_IN_SAND Features */
   F_B(HIS_SNOTICES, 0, 1, 0),
@@ -382,6 +386,7 @@ static struct FeatureDesc {
   F_B(HIS_STATS_q, 0, 1, 0),
   F_B(HIS_STATS_R, 0, 1, 0),
   F_B(HIS_STATS_r, 0, 1, 0),
+  F_B(HIS_STATS_s, 0, 1, 0),
   F_B(HIS_STATS_t, 0, 1, 0),
   F_B(HIS_STATS_T, 0, 1, 0),
   F_B(HIS_STATS_u, 0, 0, 0),
