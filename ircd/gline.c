@@ -239,9 +239,10 @@ do_gline(struct Client *cptr, struct Client *sptr, struct Gline *gline)
                            get_client_name(acptr, SHOW_IP));
 
       /* and get rid of him */
-      if ((tval = exit_client_msg(cptr, acptr, &me, "G-lined (%s)",
-          gline->gl_reason)))
-        retval = tval; /* retain killed status */
+      /* Asuka - Reimplement HEAD_IN_SAND_GLINE from Lain */
+      if ((tval = exit_client_msg(cptr, acptr, &me, 
+          feature_bool(FEAT_HIS_GLINE) ? "G-lined" : "G-lined (%s)", gline->gl_reason)))
+      retval = tval; /* retain killed status */
     }
   }
   return retval;
