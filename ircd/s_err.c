@@ -1000,9 +1000,9 @@ static Numeric replyTable[] = {
 /* 483 */
   { ERR_CANTKILLSERVER, ":You cant kill a server!", "483" },
 /* 484 */
-  { ERR_ISCHANSERVICE, "%s %s :Cannot kill, kick or deop a network service", "484" },
+  { ERR_ISCHANSERVICE, "%s %s :Cannot kill, kick or deop an IRC operator", "484" },
 /* 485 */
-  { 0 },
+  { ERR_ISREALSERVICE, "%s %s :Cannot kill, kick or deop a network service", "485" },
 /* 486 */
   { ERR_ACCOUNTONLY, "%s :You must be authed in order to message this user", "486" },
 /* 487 */

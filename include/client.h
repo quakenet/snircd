@@ -90,7 +90,7 @@ typedef unsigned long flagpage_t;
 #define FlagClr(set,flag) ((set)->bits[FLAGSET_INDEX(flag)] &= ~FLAGSET_MASK(flag))
 
 /** String containing valid user modes, in no particular order. */
-#define infousermodes "dioswkgxR"
+#define infousermodes "dioswkgxRXIn"
 
 /** Operator privileges. */
 enum Priv
@@ -169,6 +169,10 @@ enum Flag
     FLAG_ACCOUNTONLY,               /**< ASUKA_R: hide privmsgs/notices if
 				      user is not authed or opered */
     FLAG_HIDDENHOST,                /**< user's host is hidden */
+    FLAG_NOCHAN,                    /**< user's channels are hidden */
+    FLAG_NOIDLE,                    /**< user's idletime is hidden */
+    FLAG_XTRAOP,                    /**< oper has special powers */
+
     FLAG_LAST_FLAG,                 /**< number of flags */
     FLAG_LOCAL_UMODES = FLAG_LOCOP, /**< First local mode flag */
     FLAG_GLOBAL_UMODES = FLAG_OPER  /**< First global mode flag */
@@ -606,6 +610,12 @@ struct Client {
 #define IsAccount(x)            HasFlag(x, FLAG_ACCOUNT)
 /** Return non-zero if the client has set mode +x (hidden host). */
 #define IsHiddenHost(x)         HasFlag(x, FLAG_HIDDENHOST)
+/** Return non-zero if the client has set mode +X (xtraop) */
+#define IsXtraOp(x)             HasFlag(x, FLAG_XTRAOP)
+/** Return non-zero if the client has set mode +n (hide channels) */
+#define IsNoChan(x)             HasFlag(x, FLAG_NOCHAN)
+/** Return non-zero if the client has set mode +I (hide idletime) */
+#define IsNoIdle(x)             HasFlag(x, FLAG_NOIDLE)
 /** Return non-zero if the client has an active PING request. */
 #define IsPingSent(x)           HasFlag(x, FLAG_PINGSENT)
 /** Return non-zero if the client should not receive privmsgs/notices
@@ -657,6 +667,12 @@ struct Client {
 #define SetAccount(x)           SetFlag(x, FLAG_ACCOUNT)
 /** Mark a client as having mode +x (hidden host). */
 #define SetHiddenHost(x)        SetFlag(x, FLAG_HIDDENHOST)
+/** Mark a client as having mode +X (xtraop). */
+#define SetXtraOp(x)            SetFlag(x, FLAG_XTRAOP)
+/** Mark a client as having mode +n (hide channels). */
+#define SetNoChan(x)            SetFlag(x, FLAG_NOCHAN)
+/** Mark a client as having mode +I (hide idletime). */
+#define SetNoIdle(x)            SetFlag(x, FLAG_NOIDLE)
 /** Mark a client as having a pending PING. */
 #define SetPingSent(x)          SetFlag(x, FLAG_PINGSENT)
 /** Mark a client as having mode +R (account only). */
@@ -692,6 +708,12 @@ struct Client {
 #define ClearServNotice(x)      ClrFlag(x, FLAG_SERVNOTICE)
 /** Remove mode +x (hidden host) from the client. */
 #define ClearHiddenHost(x)      ClrFlag(x, FLAG_HIDDENHOST)
+/** Remove mode +X (xtraop) from a client. */
+#define ClearXtraOp(x)          ClrFlag(x, FLAG_XTRAOP)
+/** Remove mode +n (hide channels) from a client. */
+#define ClearNoChan(x)          ClrFlag(x, FLAG_NOCHAN)
+/** Remove mode +I (hide idletime) from a client. */
+#define ClearNoIdle(x)          ClrFlag(x, FLAG_NOIDLE)
 /** Clear the client's pending PING flag. */
 #define ClearPingSent(x)        ClrFlag(x, FLAG_PINGSENT)
 /** Remove mode +R (account only) from a client */

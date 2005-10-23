@@ -715,7 +715,10 @@ static const struct UserMode {
   { FLAG_DEBUG,       'g' },
   { FLAG_ACCOUNT,     'r' },
   { FLAG_HIDDENHOST,  'x' },
-  { FLAG_ACCOUNTONLY, 'R' }
+  { FLAG_ACCOUNTONLY, 'R' },
+  { FLAG_XTRAOP,      'X' },
+  { FLAG_NOCHAN,      'n' },
+  { FLAG_NOIDLE,      'I' }
 };
 
 /** Length of #userModeList. */
@@ -817,7 +820,7 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     if (MyUser(sptr)) {
       const char* channel_name;
       struct Membership *member;
-      if ((channel_name = find_no_nickchange_channel(sptr))) {
+      if ((channel_name = find_no_nickchange_channel(sptr)) && !IsXtraOp(sptr)) {
         return send_reply(cptr, ERR_BANNICKCHANGE, channel_name);
       }
       /*
@@ -1352,6 +1355,24 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
         else
           ClearChannelService(sptr);
         break;
+      case 'X':
+        if (what == MODE_ADD)
+          SetXtraOp(sptr);
+        else
+          ClearXtraOp(sptr);
+        break;
+      case 'n':
+        if (what == MODE_ADD)
+          SetNoChan(sptr);
+        else
+          ClearNoChan(sptr);
+        break;
+      case 'I':
+        if (what == MODE_ADD)
+          SetNoIdle(sptr);
+        else
+          ClearNoIdle(sptr);
+        break;
       case 'g':
         if (what == MODE_ADD)
           SetDebug(sptr);
@@ -1388,8 +1409,15 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
      * new umode; servers can set it, local users cannot;
      * prevents users from /kick'ing or /mode -o'ing
      */
-    if (!FlagHas(&setflags, FLAG_CHSERV))
+    if (!FlagHas(&setflags, FLAG_CHSERV) && !IsOper(sptr))
       ClearChannelService(sptr);
+    if (!FlagHas(&setflags, FLAG_XTRAOP) && !IsOper(sptr))
+      ClearXtraOp(sptr);
+    if (!FlagHas(&setflags, FLAG_NOCHAN) && !(IsOper(sptr) || feature_bool(FEAT_USER_HIDECHANS)))
+      ClearNoChan(sptr);
+    if (!FlagHas(&setflags, FLAG_NOIDLE) && !IsOper(sptr))
+      ClearNoIdle(sptr);
+
     /*
      * only send wallops to opers
      */

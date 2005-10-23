@@ -88,7 +88,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
   if (repchan)
     chan = find_channel_member(acptr, repchan);
   else if ((!fields || (fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
-           && !IsChannelService(acptr))
+           && !IsChannelService(acptr) && !IsNoChan(acptr)) 
   {
     for (chan = cli_user(acptr)->channel; chan; chan = chan->next_channel)
       if (PubChannel(chan->channel) &&

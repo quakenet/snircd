@@ -205,6 +205,14 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else if (*chptr->mode.key && (!key || strcmp(key, chptr->mode.key)))
         err = ERR_BADCHANNELKEY;
 
+      /*
+       * ASUKA_X:
+       * Allow XtraOpers to join all channels.
+       * --Bigfoot
+       */
+      if (IsXtraOp(sptr))
+        err = 0;
+      
       /* An oper with WALK_LCHAN privilege can join a local channel
        * he otherwise could not join by using "OVERRIDE" as the key.
        * This will generate a HACK(4) notice, but fails if the oper
