@@ -790,6 +790,12 @@ void channel_modes(struct Client *cptr, char *mbuf, char *pbuf, int buflen,
     *mbuf++ = 'n';
   if (chptr->mode.mode & MODE_REGONLY)
     *mbuf++ = 'r';
+  if (chptr->mode.mode & MODE_NOCOLOUR)
+    *mbuf++ = 'c';
+  if (chptr->mode.mode & MODE_NOCTCP)
+    *mbuf++ = 'C';
+  if (chptr->mode.mode & MODE_NONOTICE)
+    *mbuf++ = 'N';
   if (chptr->mode.mode & MODE_NOQUITPARTS)
     *mbuf++ = 'u';
   if (chptr->mode.mode & MODE_DELJOINS)
@@ -1555,6 +1561,9 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
 /*  MODE_APASS,		'A', */
 /*  MODE_UPASS,		'U', */
     MODE_NOQUITPARTS,   'u',
+    MODE_NOCOLOUR,      'c',
+    MODE_NOCTCP,        'C',
+    MODE_NONOTICE,	'N',
     0x0, 0x0
   };
   int i;
@@ -1950,8 +1959,9 @@ modebuf_mode(struct ModeBuf *mbuf, unsigned int mode)
   assert(0 != (mode & (MODE_ADD | MODE_DEL)));
 
   mode &= (MODE_ADD | MODE_DEL | MODE_PRIVATE | MODE_SECRET | MODE_MODERATED |
-	   MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS | MODE_REGONLY |
-           MODE_DELJOINS | MODE_WASDELJOINS | MODE_NOQUITPARTS);
+           MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS | MODE_REGONLY |
+           MODE_DELJOINS | MODE_WASDELJOINS | MODE_NOQUITPARTS  | MODE_NOCOLOUR |
+           MODE_NOCTCP | MODE_NONOTICE);
 
   if (!(mode & ~(MODE_ADD | MODE_DEL))) /* don't add empty modes... */
     return;
@@ -2099,6 +2109,9 @@ modebuf_extract(struct ModeBuf *mbuf, char *buf)
     MODE_REGONLY,	'r',
     MODE_DELJOINS,      'D',
     MODE_NOQUITPARTS,   'u',
+    MODE_NOCOLOUR,      'c',
+    MODE_NOCTCP,        'C',
+    MODE_NONOTICE,      'N',
     0x0, 0x0
   };
   unsigned int add;
@@ -3139,6 +3152,9 @@ mode_parse(struct ModeBuf *mbuf, struct Client *cptr, struct Client *sptr,
     MODE_REGONLY,	'r',
     MODE_DELJOINS,      'D',
     MODE_NOQUITPARTS,   'u',
+    MODE_NOCOLOUR,      'c',
+    MODE_NOCTCP,        'C',
+    MODE_NONOTICE,      'N',
     MODE_ADD,		'+',
     MODE_DEL,		'-',
     0x0, 0x0
