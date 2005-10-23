@@ -215,6 +215,9 @@ static void do_whois(struct Client* sptr, struct Client *acptr, int parc)
       send_reply(sptr, RPL_WHOISACTUALLY, name, user->realusername,
                  user->realhost, ircd_ntoa(&cli_ip(acptr)));
 
+    if (!IsAnOper(sptr) && IsParanoid(acptr) && IsAnOper(acptr))
+      sendcmdto_one(&me, CMD_NOTICE, acptr, "%C :whois: %s performed a /WHOIS on you.", acptr, cli_name(sptr));
+    
     /* Hint: if your looking to add more flags to a user, eg +h, here's
      *       probably a good place to add them :)
      */

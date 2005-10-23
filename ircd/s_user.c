@@ -741,7 +741,8 @@ static const struct UserMode {
   { FLAG_XTRAOP,      'X' },
   { FLAG_NOCHAN,      'n' },
   { FLAG_NOIDLE,      'I' },
-  { FLAG_SETHOST,     'h' }
+  { FLAG_SETHOST,     'h' },
+  { FLAG_PARANOID,    'P' }
 };
 
 /** Length of #userModeList. */
@@ -1641,6 +1642,12 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
         else
           ClearAccountOnly(sptr);
         break;
+      case 'P':
+	if (what == MODE_ADD)
+          SetParanoid(sptr);
+        else
+          ClearParanoid(sptr);
+	break;
       default:
         send_reply(sptr, ERR_UMODEUNKNOWNFLAG, *m);
         break;
@@ -1669,6 +1676,8 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
       ClearNoChan(sptr);
     if (!FlagHas(&setflags, FLAG_NOIDLE) && !IsOper(sptr))
       ClearNoIdle(sptr);
+    if (!FlagHas(&setflags, FLAG_PARANOID) && !IsOper(sptr))
+      ClearParanoid(sptr);
 
     /*
      * only send wallops to opers
