@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include "gline.h"
+#include "channel.h"
 #include "client.h"
 #include "ircd.h"
 #include "ircd_alloc.h"
@@ -44,6 +45,7 @@
 #include "numnicks.h"
 #include "numeric.h"
 #include "whocmds.h"
+#include "hash.h"
 
 /* #include <assert.h> -- Now using assert in ircd_log.h */
 #include <string.h>
@@ -183,8 +185,8 @@ make_gline(char *user, char *host, char *reason, time_t expire, time_t lastmod,
 }
 
 /** Check local clients against a new G-line.
- * If the G-line is inactive or a badchan, return immediately.
- * Otherwise, if any users match it, disconnect them.
+ * If the G-line is inactive, return immediately.
+ * Otherwise, if any users match it, disconnect them or kick them if the G-line is a BADCHAN.
  * @param[in] cptr Peer connect that sent the G-line.
  * @param[in] sptr Client that originated the G-line.
  * @param[in] gline New G-line to check.
@@ -196,53 +198,86 @@ do_gline(struct Client *cptr, struct Client *sptr, struct Gline *gline)
   struct Client *acptr;
   int fd, retval = 0, tval;
 
-  if (GlineIsBadChan(gline)) /* no action taken on badchan glines */
-    return 0;
   if (!GlineIsActive(gline)) /* no action taken on inactive glines */
     return 0;
 
-  for (fd = HighestFd; fd >= 0; --fd) {
-    /*
-     * get the users!
-     */
-    if ((acptr = LocalClientArray[fd])) {
-      if (!cli_user(acptr))
-	continue;
+  if (GlineIsBadChan(gline)) {
+    /* Handle BADCHAN gline */
+    struct Channel *chptr,*nchptr;
+    struct Membership *member,*nmember;
 
-      if (GlineIsRealName(gline)) { /* Realname Gline */
-	Debug((DEBUG_DEBUG,"Realname Gline: %s %s",(cli_info(acptr)),
-					gline->gl_user+2));
-        if (match(gline->gl_user+2, cli_info(acptr)) != 0)
+    if (string_has_wildcards(gline->gl_user)) {
+      for(chptr=GlobalChannelList;chptr;chptr=nchptr) {
+        nchptr=chptr->next;
+        if (match(gline->gl_user, chptr->chname))
+           continue;
+        for (member=chptr->members;member;member=nmember) {
+          nmember=member->next_member;
+          if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
             continue;
-        Debug((DEBUG_DEBUG,"Matched!"));
-      } else { /* Host/IP gline */
-        if (cli_user(acptr)->username &&
-            match(gline->gl_user, (cli_user(acptr))->realusername) != 0)
-          continue;
-
-        if (GlineIsIpMask(gline)) {
-          if (!ipmask_check(&cli_ip(acptr), &gline->gl_addr, gline->gl_bits))
-            continue;
+          sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+          sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+          make_zombie(member, member->user, &me, &me, chptr);
+          retval=1;
         }
-        else {
-          if (match(gline->gl_host, cli_sockhost(acptr)) != 0)
+      }      
+    } else {
+      if ((chptr=FindChannel(gline->gl_user))) {
+        for (member=chptr->members;member;member=nmember) {
+          nmember=member->next_member;
+          if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
             continue;
+          sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+          sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+          make_zombie(member, member->user, &me, &me, chptr);
+          retval=1;
         }
       }
+    }
+  } else {
+    for (fd = HighestFd; fd >= 0; --fd) {
+      /*
+       * get the users!
+       */
+      if ((acptr = LocalClientArray[fd])) {
+        if (!cli_user(acptr))
+          continue;
 
-      /* ok, here's one that got G-lined */
-      send_reply(acptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP, ":%s",
-      	   gline->gl_reason);
+        if (GlineIsRealName(gline)) { /* Realname Gline */
+          Debug((DEBUG_DEBUG,"Realname Gline: %s %s",(cli_info(acptr)),
+					  gline->gl_user+2));
+          if (match(gline->gl_user+2, cli_info(acptr)) != 0)
+              continue;
+          Debug((DEBUG_DEBUG,"Matched!"));
+        } else { /* Host/IP gline */
+          if (cli_user(acptr)->username &&
+              match(gline->gl_user, (cli_user(acptr))->realusername) != 0)
+            continue;
 
-      /* let the ops know about it */
-      sendto_opmask_butone(0, SNO_GLINE, "G-line active for %s",
-                           get_client_name(acptr, SHOW_IP));
+          if (GlineIsIpMask(gline)) {
+            if (!ipmask_check(&cli_ip(acptr), &gline->gl_addr, gline->gl_bits))
+              continue;
+          }
+          else {
+            if (match(gline->gl_host, cli_sockhost(acptr)) != 0)
+              continue;
+          }
+        }
 
-      /* and get rid of him */
-      /* Asuka - Reimplement HEAD_IN_SAND_GLINE from Lain */
-      if ((tval = exit_client_msg(cptr, acptr, &me, 
-          feature_bool(FEAT_HIS_GLINE) ? "G-lined" : "G-lined (%s)", gline->gl_reason)))
-      retval = tval; /* retain killed status */
+        /* ok, here's one that got G-lined */
+        send_reply(acptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP, ":%s",
+        	   gline->gl_reason);
+
+        /* let the ops know about it */
+        sendto_opmask_butone(0, SNO_GLINE, "G-line active for %s",
+                             get_client_name(acptr, SHOW_IP));
+
+        /* and get rid of him */
+        /* Asuka - Reimplement HEAD_IN_SAND_GLINE from Lain */
+        if ((tval = exit_client_msg(cptr, acptr, &me, 
+            feature_bool(FEAT_HIS_GLINE) ? "G-lined" : "G-lined (%s)", gline->gl_reason)))
+        retval = tval; /* retain killed status */
+      }
     }
   }
   return retval;
