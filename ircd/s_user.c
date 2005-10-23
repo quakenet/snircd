@@ -1013,6 +1013,10 @@ int check_target_limit(struct Client *sptr, void *target, const char *name,
   if (IsChannelName(name) && IsInvited(sptr, target))
     return 0;
 
+  /* opers always have a free target */
+  if (IsAnOper(sptr))
+    return 0;
+
   /*
    * Same target as last time?
    */
