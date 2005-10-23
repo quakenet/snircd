@@ -475,7 +475,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
     /*
      * following block for the benefit of time-dependent K:-lines
      */
-    killreason = find_kill(sptr);
+    killreason = find_kill(sptr, 1);
     if (killreason) {
       ServerStats->is_ref++;
       return exit_client(cptr, sptr, &me,

@@ -181,7 +181,7 @@ extern struct ConfItem* find_conf_exact(const char* name, struct Client *cptr, i
 extern enum AuthorizationCheckResult conf_check_client(struct Client *cptr);
 extern int  conf_check_server(struct Client *cptr);
 extern int rehash(struct Client *cptr, int sig);
-extern int find_kill(struct Client *cptr);
+extern int find_kill(struct Client *cptr, int glinecheck);
 extern const char *find_quarantine(const char* chname);
 extern void lookup_confhost(struct ConfItem *aconf);
 extern void conf_parse_userhost(struct ConfItem *aconf, char *host);

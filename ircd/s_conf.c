@@ -982,7 +982,7 @@ int rehash(struct Client *cptr, int sig)
        * get past K/G's etc, we'll "fix" the bug by actually explaining
        * whats going on.
        */
-      if ((found_g = find_kill(acptr))) {
+      if ((found_g = find_kill(acptr, 0))) {
         sendto_opmask_butone(0, found_g == -2 ? SNO_GLINE : SNO_OPERKILL,
                              found_g == -2 ? "G-line active for %s%s" :
                              "K-line active for %s%s",
@@ -1033,10 +1033,11 @@ int init_conf(void)
 /** Searches for a K/G-line for a client.  If one is found, notify the
  * user and disconnect them.
  * @param cptr Client to search for.
+ * @param glinecheck Whether we check for glines.
  * @return 0 if client is accepted; -1 if client was locally denied
  * (K-line); -2 if client was globally denied (G-line).
  */
-int find_kill(struct Client *cptr)
+int find_kill(struct Client *cptr, int glinecheck)
 {
   const char*      host;
   const char*      name;
@@ -1083,7 +1084,13 @@ int find_kill(struct Client *cptr)
     return -1;
   }
 
-  if ((agline = gline_lookup(cptr, 0))) {
+  /* added glinecheck to define if we check for glines too, shouldn't happen
+   * when rehashing as it is causing problems with big servers and lots of glines.
+   * Think of a 18000 user leaf with 18000 glines present, this will probably
+   * cause the server to split from the net.
+   * -skater_x
+   */
+  if (glinecheck && (agline = gline_lookup(cptr, 0)) && GlineIsActive(agline)) {
     /*
      * find active glines
      * added a check against the user's IP address to find_gline() -Kev
