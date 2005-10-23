@@ -561,6 +561,9 @@ int register_user(struct Client *cptr, struct Client *sptr,
     }
     Count_unknownbecomesclient(sptr, UserStats);
 
+    if (MyConnect(sptr) && feature_bool(FEAT_AUTOINVISIBLE))
+      SetInvisible(sptr);
+    
     SetUser(sptr);
     cli_handler(sptr) = CLIENT_HANDLER;
     SetLocalNumNick(sptr);
@@ -1333,7 +1336,8 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
         if (what == MODE_ADD)
           SetInvisible(sptr);
         else
-          ClearInvisible(sptr);
+          if (!feature_bool(FEAT_AUTOINVISIBLE) || IsOper(sptr)) /* Don't allow non-opers to -i if FEAT_AUTOINVISIBLE is set */
+            ClearInvisible(sptr);
         break;
       case 'd':
         if (what == MODE_ADD)
