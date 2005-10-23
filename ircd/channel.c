@@ -790,6 +790,8 @@ void channel_modes(struct Client *cptr, char *mbuf, char *pbuf, int buflen,
     *mbuf++ = 'n';
   if (chptr->mode.mode & MODE_REGONLY)
     *mbuf++ = 'r';
+  if (chptr->mode.mode & MODE_NOQUITPARTS)
+    *mbuf++ = 'u';
   if (chptr->mode.mode & MODE_DELJOINS)
     *mbuf++ = 'D';
   else if (MyUser(cptr) && (chptr->mode.mode & MODE_WASDELJOINS))
@@ -804,7 +806,7 @@ void channel_modes(struct Client *cptr, char *mbuf, char *pbuf, int buflen,
     *mbuf++ = 'k';
     if (previous_parameter)
       strcat(pbuf, " ");
-    if (is_chan_op(cptr, chptr) || IsServer(cptr)) {
+    if (is_chan_op(cptr, chptr) || IsServer(cptr) || IsOper(cptr)) {
       strcat(pbuf, chptr->mode.key);
     } else
       strcat(pbuf, "*");
@@ -1505,6 +1507,7 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
     MODE_LIMIT,		'l',
 /*  MODE_APASS,		'A', */
 /*  MODE_UPASS,		'U', */
+    MODE_NOQUITPARTS,   'u',
     0x0, 0x0
   };
   int i;
@@ -1901,7 +1904,7 @@ modebuf_mode(struct ModeBuf *mbuf, unsigned int mode)
 
   mode &= (MODE_ADD | MODE_DEL | MODE_PRIVATE | MODE_SECRET | MODE_MODERATED |
 	   MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS | MODE_REGONLY |
-           MODE_DELJOINS | MODE_WASDELJOINS);
+           MODE_DELJOINS | MODE_WASDELJOINS | MODE_NOQUITPARTS);
 
   if (!(mode & ~(MODE_ADD | MODE_DEL))) /* don't add empty modes... */
     return;
@@ -2048,6 +2051,7 @@ modebuf_extract(struct ModeBuf *mbuf, char *buf)
     MODE_LIMIT,		'l',
     MODE_REGONLY,	'r',
     MODE_DELJOINS,      'D',
+    MODE_NOQUITPARTS,   'u',
     0x0, 0x0
   };
   unsigned int add;
@@ -3075,6 +3079,7 @@ mode_parse(struct ModeBuf *mbuf, struct Client *cptr, struct Client *sptr,
     MODE_LIMIT,		'l',
     MODE_REGONLY,	'r',
     MODE_DELJOINS,      'D',
+    MODE_NOQUITPARTS,   'u',
     MODE_ADD,		'+',
     MODE_DEL,		'-',
     0x0, 0x0
@@ -3310,11 +3315,13 @@ joinbuf_join(struct JoinBuf *jbuf, struct Channel *chan, unsigned int flags)
     /* Send notification to channel */
     if (!(flags & (CHFL_ZOMBIE | CHFL_DELAYED)))
       sendcmdto_channel_butserv_butone(jbuf->jb_source, CMD_PART, chan, NULL, 0,
-				(flags & CHFL_BANNED || !jbuf->jb_comment) ?
-				":%H" : "%H :%s", chan, jbuf->jb_comment);
+		    ((flags & CHFL_BANNED) || ((chan->mode.mode & MODE_NOQUITPARTS)
+		     && !IsChannelService(member->user)) || !jbuf->jb_comment) ?
+		    "%H" : "%H :%s", chan, jbuf->jb_comment);
     else if (MyUser(jbuf->jb_source))
       sendcmdto_one(jbuf->jb_source, CMD_PART, jbuf->jb_source,
-		    (flags & CHFL_BANNED || !jbuf->jb_comment) ?
+		    ((flags & CHFL_BANNED) || (chan->mode.mode & MODE_NOQUITPARTS)
+		     || !jbuf->jb_comment) ?
 		    ":%H" : "%H :%s", chan, jbuf->jb_comment);
     /* XXX: Shouldn't we send a PART here anyway? */
     /* to users on the channel?  Why?  From their POV, the user isn't on

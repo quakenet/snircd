@@ -64,7 +64,7 @@
                         feature_int(FEAT_CHANNELLEN), CHANNELLEN
 
 #define FEATURESVALUES2 (feature_bool(FEAT_LOCAL_CHANNELS) ? "#&" : "#"), "(ov)@+", "@+", \
-                        (feature_bool(FEAT_OPLEVELS) ? "b,AkU,l,imnpstrDd" : "b,k,l,imnpstrDd"), \
+                        (feature_bool(FEAT_OPLEVELS) ? "b,AkU,l,imnpstrDdu" : "b,k,l,imnpstrDdu"), \
                         "rfc1459", feature_str(FEAT_NETWORK)
 
 #endif /* INCLUDED_supported_h */
