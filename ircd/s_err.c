@@ -1004,7 +1004,7 @@ static Numeric replyTable[] = {
 /* 485 */
   { 0 },
 /* 486 */
-  { 0 },
+  { ERR_ACCOUNTONLY, "%s :You must be authed in order to message this user", "486" },
 /* 487 */
   { 0 },
 /* 488 */

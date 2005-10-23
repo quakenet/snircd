@@ -181,14 +181,14 @@ extern const struct Numeric* get_error_numeric(int err);
 #define RPL_ENDOFGLIST       281        /* Undernet extension */
 #define RPL_JUPELIST         282        /* Undernet extension - jupe -Kev */
 #define RPL_ENDOFJUPELIST    283        /* Undernet extension - jupe -Kev */
-#define RPL_FEATURE	     284	/* Undernet extension - features */
-/*      RPL_CHANINFO_HANDLE  285           aircd */
-/*      RPL_CHANINFO_USERS   286           aircd */
-/*      RPL_CHANINFO_CHOPS   287           aircd */
-/*      RPL_CHANINFO_VOICES  288           aircd */
-/*      RPL_CHANINFO_AWAY    289           aircd */
-/*      RPL_CHANINFO_OPERS   290           aircd */
-/*	RPL_HELPHDR	     290	Numeric List: Dalnet */
+#define RPL_FEATURE          284        /* QuakeNet - Asuka */
+#define RPL_NEWHOSTIS        285        /* QuakeNet - Asuka */
+#define RPL_CHKHEAD          286        /* QuakeNet - Asuka */
+#define RPL_CHANUSER         287        /* QuakeNet - Asuka */
+#define RPL_PATCHHEAD        288        /* QuakeNet - Asuka */
+#define RPL_PATCHCON         289        /* QuakeNet - Asuka */
+#define RPL_DATASTR          290        /* QuakeNet - Asuka */
+#define RPL_ENDOFCHECK	      291        /* QuakeNet - Asuka */
 /*      RPL_CHANINFO_BANNED  291           aircd */
 /*	RPL_HELPOP	     291	Numeric List: Dalnet */
 /*      RPL_CHANINFO_BANS    292           aircd */
@@ -325,6 +325,7 @@ extern const struct Numeric* get_error_numeric(int err);
 #define ERR_TOOMANYCHANNELS  405
 #define ERR_WASNOSUCHNICK    406
 #define ERR_TOOMANYTARGETS   407
+#define ERR_SEARCHNOMATCH    408		 /* QuakeNet - Asuka */
 /*      ERR_NOSUCHSERVICE    408  IRCnet */
 /*	ERR_NOCOLORSONCHAN   408  Dalnet */
 #define ERR_NOORIGIN         409
@@ -412,6 +413,7 @@ extern const struct Numeric* get_error_numeric(int err);
 /*	ERR_KILLDENY         485	   unreal */
 /*	ERR_CANTKICKADMIN    485	   PTlink */
 /*	ERR_HTMDISABLED      486	   unreal */
+#define ERR_ACCOUNTONLY      486	/* QuakeNet/ASUKA extension */
 /*      ERR_CHANTOORECENT    487           IRCnet extension (?) */
 /*      ERR_TSLESSCHAN       488           IRCnet extension (?) */
 #define ERR_VOICENEEDED      489        /* Undernet extension */

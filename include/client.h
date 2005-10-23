@@ -90,7 +90,7 @@ typedef unsigned long flagpage_t;
 #define FlagClr(set,flag) ((set)->bits[FLAGSET_INDEX(flag)] &= ~FLAGSET_MASK(flag))
 
 /** String containing valid user modes, in no particular order. */
-#define infousermodes "dioswkgx"
+#define infousermodes "dioswkgxR"
 
 /** Operator privileges. */
 enum Priv
@@ -166,6 +166,8 @@ enum Flag
                                        don't display channels in /whois */
     FLAG_DEBUG,                     /**< send global debug/anti-hack info */
     FLAG_ACCOUNT,                   /**< account name has been set */
+    FLAG_ACCOUNTONLY,               /**< ASUKA_R: hide privmsgs/notices if
+				      user is not authed or opered */
     FLAG_HIDDENHOST,                /**< user's host is hidden */
     FLAG_LAST_FLAG,                 /**< number of flags */
     FLAG_LOCAL_UMODES = FLAG_LOCOP, /**< First local mode flag */
@@ -606,6 +608,9 @@ struct Client {
 #define IsHiddenHost(x)         HasFlag(x, FLAG_HIDDENHOST)
 /** Return non-zero if the client has an active PING request. */
 #define IsPingSent(x)           HasFlag(x, FLAG_PINGSENT)
+/** Return non-zero if the client should not receive privmsgs/notices
+ * from unauthed users */
+#define IsAccountOnly(x)        HasFlag(x, FLAG_ACCOUNTONLY)
 
 /** Return non-zero if the client has operator or server privileges. */
 #define IsPrivileged(x)         (IsAnOper(x) || IsServer(x))
@@ -654,6 +659,8 @@ struct Client {
 #define SetHiddenHost(x)        SetFlag(x, FLAG_HIDDENHOST)
 /** Mark a client as having a pending PING. */
 #define SetPingSent(x)          SetFlag(x, FLAG_PINGSENT)
+/** Mark a client as having mode +R (account only). */
+#define SetAccountOnly(x)       SetFlag(x, FLAG_ACCOUNTONLY)
 
 /** Return non-zero if \a sptr sees \a acptr as an operator. */
 #define SeeOper(sptr,acptr) (IsAnOper(acptr) && (HasPriv(acptr, PRIV_DISPLAY) \
@@ -687,6 +694,8 @@ struct Client {
 #define ClearHiddenHost(x)      ClrFlag(x, FLAG_HIDDENHOST)
 /** Clear the client's pending PING flag. */
 #define ClearPingSent(x)        ClrFlag(x, FLAG_PINGSENT)
+/** Remove mode +R (account only) from a client */
+#define ClearAccountOnly(x)     ClrFlag(x, FLAG_ACCOUNTONLY)
 
 /* free flags */
 #define FREEFLAG_SOCKET	0x0001	/**< socket needs to be freed */

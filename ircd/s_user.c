@@ -714,7 +714,8 @@ static const struct UserMode {
   { FLAG_CHSERV,      'k' },
   { FLAG_DEBUG,       'g' },
   { FLAG_ACCOUNT,     'r' },
-  { FLAG_HIDDENHOST,  'x' }
+  { FLAG_HIDDENHOST,  'x' },
+  { FLAG_ACCOUNTONLY, 'R' }
 };
 
 /** Length of #userModeList. */
@@ -1361,6 +1362,12 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
         if (what == MODE_ADD)
 	  do_host_hiding = 1;
 	break;
+      case 'R':
+        if (what == MODE_ADD)
+          SetAccountOnly(sptr);
+        else
+          ClearAccountOnly(sptr);
+        break;
       default:
         send_reply(sptr, ERR_UMODEUNKNOWNFLAG, *m);
         break;
