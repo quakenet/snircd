@@ -174,6 +174,8 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       }
 
       joinbuf_join(&create, chptr, CHFL_CHANOP | CHFL_CHANNEL_MANAGER);
+      if (feature_bool(FEAT_AUTOCHANMODES) && feature_str(FEAT_AUTOCHANMODES_LIST) && strlen(feature_str(FEAT_AUTOCHANMODES_LIST)) > 0)
+        SetAutoChanModes(chptr);
     } else if (find_member_link(chptr, sptr)) {
       continue; /* already on channel */
     } else if (check_target_limit(sptr, chptr, chptr->chname, 0)) {
