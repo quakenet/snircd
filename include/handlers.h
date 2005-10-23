@@ -88,6 +88,19 @@ struct Client;
 
 extern int m_admin(struct Client*, struct Client*, int, char*[]);
 extern int m_away(struct Client*, struct Client*, int, char*[]);
+
+/*
+  * - ASUKA ---------------------------------------------------------------------
+  * Add the command for CHECK.
+  * This was adapted from Lain for use in Asuka.
+  * Original code by Durzel (durzel@quakenet.org).
+  *
+  * qoreQ (qoreQ@quakenet.org) - 08/30/2002
+  * -----------------------------------------------------------------------------
+  */
+
+extern int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]);
+
 extern int m_cap(struct Client*, struct Client*, int, char*[]);
 extern int m_cnotice(struct Client*, struct Client*, int, char*[]);
 extern int m_cprivmsg(struct Client*, struct Client*, int, char*[]);

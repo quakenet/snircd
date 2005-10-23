@@ -100,6 +100,7 @@ enum Feature {
   FEAT_ANNOUNCE_INVITES,
 
   /* features that affect all operators */
+  FEAT_EXTENDED_CHECKCMD,
   FEAT_CONFIG_OPERCMDS,
   FEAT_SETHOST,
   FEAT_SETHOST_FREEFORM,

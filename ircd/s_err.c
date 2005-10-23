@@ -602,19 +602,19 @@ static Numeric replyTable[] = {
 /* 284 */
   { RPL_FEATURE, 0, "284" },
 /* 285 */
-  { 0 },
+  { RPL_NEWHOSTIS, "%s: %s host %s - [%s@%s]" },
 /* 286 */
-  { 0 },
+  { RPL_CHKHEAD, ":Information for %s %s", "286" },
 /* 287 */
-  { 0 },
+  { RPL_CHANUSER, ":    %s%s (%s@%s)   (%s) %s", "287" },
 /* 288 */
   { 0 },
 /* 289 */
   { 0 },
 /* 290 */
-  { 0 },
+  { RPL_DATASTR, ":%s", "290" },
 /* 291 */
-  { 0 },
+  { RPL_ENDOFCHECK, ":%s", "291" },
 /* 292 */
   { 0 },
 /* 293 */
@@ -848,7 +848,7 @@ static Numeric replyTable[] = {
 /* 407 */
   { ERR_TOOMANYTARGETS, "%s :Duplicate recipients. No message delivered", "407" },
 /* 408 */
-  { 0 },
+  { ERR_SEARCHNOMATCH, ":%s %s No matching record(s) found", "408" },
 /* 409 */
   { ERR_NOORIGIN, ":No origin specified", "409" },
 /* 410 */

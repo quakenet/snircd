@@ -353,6 +353,7 @@ static struct FeatureDesc {
   F_B(ANNOUNCE_INVITES, 0, 0, 0),
 
   /* features that affect all operators */
+  F_B(EXTENDED_CHECKCMD, 0, 0, 0),
   F_B(CONFIG_OPERCMDS, 0, 0, 0),
   F_B(SETHOST, 0, 0, 0),
   F_B(SETHOST_FREEFORM, 0, 0, 0),
