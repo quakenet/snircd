@@ -875,12 +875,15 @@ gline_resend(struct Client *cptr, struct Gline *gline)
   if (GlineIsLocal(gline) || !gline->gl_lastmod)
     return 0;
 
-  sendcmdto_one(&me, CMD_GLINE, cptr, "* %c%s%s%s %Tu %Tu :%s",
-		GlineIsRemActive(gline) ? '+' : '-', gline->gl_user,
-		gline->gl_host ? "@" : "",
+  sendcmdto_one(&me, CMD_GLINE, cptr, "* %c%s%s%s%s%s %Tu %Tu :%s",
+                GlineIsRemActive(gline) ? '+' : '-',
+                GlineIsBadChan(gline)|GlineIsRealName(gline) ? "" : gline->gl_nick,
+                GlineIsBadChan(gline)|GlineIsRealName(gline) ? "" : "!",
+                gline->gl_user,
+                gline->gl_host ? "@" : "",
                 gline->gl_host ? gline->gl_host : "",
-		gline->gl_expire - CurrentTime, gline->gl_lastmod,
-		gline->gl_reason);
+                gline->gl_expire - CurrentTime, gline->gl_lastmod,
+                gline->gl_reason);
 
   return 0;
 }
