@@ -1273,9 +1273,9 @@ int SetAutoChanModes(struct Channel *chptr)
     MODE_INVITEONLY,    'i',
     MODE_NOPRIVMSGS,    'n',
     MODE_REGONLY,       'r',
-/*    MODE_NOCOLOUR,      'c',
+    MODE_NOCOLOUR,      'c',
     MODE_NOCTCP,        'C',
-    MODE_NONOTICE,      'N',*/
+    MODE_NONOTICE,      'N',
     MODE_DELJOINS,      'D',
     MODE_NOQUITPARTS,   'u'
   };
