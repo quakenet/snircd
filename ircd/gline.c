@@ -910,7 +910,6 @@ gline_list(struct Client *sptr, char *userhost)
                GlineIsBadChan(gline) | GlineIsRealName(gline) ? "" : gline->gl_nick,
                GlineIsBadChan(gline) | GlineIsRealName(gline) ? "" : "!",
                gline->gl_user, GlineIsBadChan(gline) || GlineIsRealName(gline) ? "" : "@",
-               gline->gl_host ? "@" : "",
                gline->gl_host ? gline->gl_host : "",
 	       gline->gl_expire + TSoffset,
 	       GlineIsLocal(gline) ? cli_name(&me) : "*",
