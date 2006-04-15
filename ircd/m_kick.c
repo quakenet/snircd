@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_kick.c,v 1.19.2.1 2005/10/01 21:10:34 entrope Exp $
+ * $Id: m_kick.c,v 1.19.2.4 2005/11/14 21:17:07 entrope Exp $
  */
 
 /*
@@ -131,15 +131,7 @@ int m_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0; /* find_chasing sends the reply for us */
 
   /* Don't allow the channel service to be kicked */
-  /*
-   * ASUKA_X:
-   * Allow +X'ed users to kick +k'ed, but not U-lined services.
-   * --Bigfoot
-   */
-  if (IsChannelService(who) && IsService(cli_user(who)->server))
-    return send_reply(sptr, ERR_ISREALSERVICE, cli_name(who), chptr->chname);
-
-  if (IsChannelService(who) && !IsXtraOp(sptr) && (who!=sptr))
+  if (IsChannelService(who))
     return send_reply(sptr, ERR_ISCHANSERVICE, cli_name(who), chptr->chname);
 
   /* Prevent kicking opers from local channels -DM- */
@@ -150,8 +142,12 @@ int m_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!(member = find_member_link(chptr, who)) || IsZombie(member))
     return send_reply(sptr, ERR_USERNOTINCHANNEL, cli_name(who), chptr->chname);
 
-  /* Don't allow to kick member with a higher or equal op-level */
-  if (chptr->mode.apass[0] && OpLevel(member) <= OpLevel(member2))
+  /* Don't allow to kick member with a higher op-level,
+   * or members with the same op-level unless both are MAXOPLEVEL.
+   */
+  if (OpLevel(member) < OpLevel(member2)
+      || (OpLevel(member) == OpLevel(member2)
+          && OpLevel(member) < MAXOPLEVEL))
     return send_reply(sptr, ERR_NOTLOWEROPLEVEL, cli_name(who), chptr->chname,
 	OpLevel(member2), OpLevel(member), "kick",
 	OpLevel(member) == OpLevel(member2) ? "the same" : "a higher");
@@ -172,7 +168,7 @@ int m_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     sendcmdto_one(sptr, CMD_KICK, sptr, "%H %C :%s", chptr, who, comment);
     CheckDelayedJoins(chptr);
   } else
-    sendcmdto_channel_butserv_butone((IsServer(sptr) ? &me : sptr), CMD_KICK, chptr, NULL, 0, "%H %C :%s", chptr, who,
+    sendcmdto_channel_butserv_butone(sptr, CMD_KICK, chptr, NULL, 0, "%H %C :%s", chptr, who,
                                      comment);
 
   make_zombie(member, who, cptr, sptr, chptr);
@@ -217,7 +213,7 @@ int ms_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /* 2002-10-17: Don't send HACK if the users local server is kicking them */
   if (IsServer(sptr) &&
       !IsBurstOrBurstAck(sptr) &&
-      sptr!=cli_from(who))
+      sptr!=cli_user(who)->server)
     sendto_opmask_butone(0, SNO_HACK4, "HACK: %C KICK %H %C %s", sptr, chptr,
 			 who, comment);
 
@@ -257,7 +253,7 @@ int ms_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (IsDelayedJoin(member)) {
         if (MyUser(who))
           sendcmdto_one(IsServer(sptr) ? &his : sptr, CMD_KICK,
-                        who, "%h %C :%s", chptr, who, comment);
+                        who, "%H %C :%s", chptr, who, comment);
       } else {
         sendcmdto_channel_butserv_butone(IsServer(sptr) ? &his : sptr, CMD_KICK,
                                          chptr, NULL, 0, "%H %C :%s", chptr, who,

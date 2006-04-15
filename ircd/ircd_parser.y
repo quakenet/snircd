@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_parser.y,v 1.56.2.1 2005/10/06 00:37:31 entrope Exp $
+ * $Id: ircd_parser.y,v 1.56.2.2 2005/12/13 23:12:41 entrope Exp $
  */
 %{
 
@@ -65,7 +65,6 @@
   extern struct ServerConf* serverConfList;
   extern struct s_map*      GlobalServiceMapList;
   extern struct qline*      GlobalQuarantineList;
-  extern struct sline*      GlobalSList;
 
   int yylex(void);
   /* Now all the globals we need :/... */
@@ -76,7 +75,6 @@
   struct DenyConf *dconf;
   struct ServerConf *sconf;
   struct s_map *smap;
-  struct sline *spoof; 
   struct Privs privs;
   struct Privs privs_dirty;
 
@@ -158,7 +156,6 @@ static void parse_error(char *pattern,...) {
 %token TIMEOUT
 %token FAST
 %token AUTOCONNECT
-%token SPOOFHOST
 /* and now a lot of privileges... */
 %token TPRIV_CHAN_LIMIT TPRIV_MODE_LCHAN TPRIV_DEOP_LCHAN TPRIV_WALK_LCHAN
 %token TPRIV_LOCAL_KILL TPRIV_REHASH TPRIV_RESTART TPRIV_DIE
@@ -185,7 +182,7 @@ blocks: blocks block | block;
 block: adminblock | generalblock | classblock | connectblock |
        uworldblock | operblock | portblock | jupeblock | clientblock |
        killblock | cruleblock | motdblock | featuresblock | quarantineblock |
-       pseudoblock | iauthblock | spoofblock | error ';';
+       pseudoblock | iauthblock | error ';';
 
 /* The timespec, sizespec and expr was ripped straight from
  * ircd-hybrid-7. */
@@ -746,7 +743,7 @@ clientclass: CLASS '=' QSTRING ';'
 {
   c_class = find_class($3);
   if (!c_class)
-    parse_error("No such connection class '%s' for Class block", $3);
+    parse_error("No such connection class '%s' for Client block", $3);
   MyFree($3);
 };
 clientpass: PASS '=' QSTRING ';'
@@ -1046,63 +1043,4 @@ iauthconnfreq: CONNECTFREQ '=' timespec ';'
 iauthtimeout: TIMEOUT '=' timespec ';'
 {
   tping = $3;
-};
-
-spoofblock: SPOOFHOST QSTRING '{'
-{
-  spoof = MyCalloc(1, sizeof(struct sline));
-  spoof->spoofhost = $2;
-  spoof->passwd = NULL;
-  spoof->realhost = NULL;
-  spoof->username = NULL;
-}
-spoofitems '}' ';'
-{
-  struct irc_in_addr ip;
-  char bits;
-
-  if (spoof->username == NULL && spoof->realhost) {
-    parse_error("Username missing in spoofhost.");
-  } else if (spoof->realhost == NULL && spoof->username) {
-    parse_error("Realhost missing in spoofhost.");
-  }
-
-  if (spoof->realhost) {
-    if (!string_has_wildcards(spoof->realhost)) {
-      if (ipmask_parse(spoof->realhost, &ip, &bits) != 0) {
-        spoof->address = ip;
-        spoof->bits = bits;
-        spoof->flags = SLINE_FLAGS_IP;
-      } else {
-        Debug((DEBUG_DEBUG, "S-Line: \"%s\" appears not to be a valid IP address, might be wildcarded.", spoof->realhost));
-        spoof->flags = SLINE_FLAGS_HOSTNAME;
-      }
-    } else
-      spoof->flags = SLINE_FLAGS_HOSTNAME;
-  } else
-    spoof->flags = 0;
-
-
-  spoof->next = GlobalSList;
-  GlobalSList = spoof;
-
-  spoof = NULL;
-};
-
-spoofitems: spoofitem spoofitems | spoofitem;
-spoofitem: spoofpassword | spoofrealhost | spoofrealident;
-spoofpassword: PASS '=' QSTRING ';'
-{
-  MyFree(spoof->passwd);
-  spoof->passwd = $3;
-};
-spoofrealhost: HOST '=' QSTRING ';'
-{
-  MyFree(spoof->realhost);
-  spoof->realhost = $3;
-};
-spoofrealident: USERNAME '=' QSTRING ';'
-{
-  MyFree(spoof->username);
-  spoof->username = $3;
 };

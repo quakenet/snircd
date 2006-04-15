@@ -285,7 +285,9 @@ int ip_registry_check_local(const struct irc_in_addr *addr, time_t* next_target_
    */
   if (0 == ++entry->connected)
   {
-    ++entry->connected;
+    entry->connected--;
+    Debug((DEBUG_DNS, "IPcheck refusing local connection from %s: counter overflow.", ircd_ntoa(&entry->addr)));
+    return 0;
   }
 
   if (CONNECTED_SINCE(entry->last_connect) > IPCHECK_CLONE_PERIOD)

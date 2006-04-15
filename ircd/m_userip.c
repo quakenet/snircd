@@ -95,7 +95,6 @@
 
 static void userip_formatter(struct Client* cptr, struct Client *sptr, struct MsgBuf* mb)
 {
-  /* !!FIXME!! */
   assert(IsUser(cptr));
   msgq_append(0, mb, "%s%s=%c%s@%s", cli_name(cptr),
 	      SeeOper(sptr,cptr) ? "*" : "",
@@ -106,7 +105,7 @@ static void userip_formatter(struct Client* cptr, struct Client *sptr, struct Ms
 	       * of +x.  If an oper wants the real IP, he should go to
 	       * /whois to get it.
 	       */
-	      (HasHiddenHost(cptr) || HasSetHost(cptr)) && !IsAnOper(sptr) ?
+	      HasHiddenHost(cptr) && (sptr != cptr) ?
 	      feature_str(FEAT_HIDDEN_IP) :
 	      ircd_ntoa(&cli_ip(cptr)));
 }

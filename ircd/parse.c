@@ -617,13 +617,6 @@ struct Message msgtab[] = {
     /* UNREG, CLIENT, SERVER, OPER, SERVICE */
     { m_ignore, m_not_oper, ms_asll, mo_asll, m_ignore }
    },
-  {
-    MSG_SETHOST,
-    TOK_SETHOST,
-    0, MAXPARA, MFLG_SLOW, 0, NULL,
-    /* UNREG, CLIENT, SERVER, OPER, SERVICE */
-    { m_unregistered, m_sethost, m_ignore, m_sethost, m_ignore }
-  },
 #if WE_HAVE_A_REAL_CAPABILITY_NOW
   {
     MSG_CAP,
@@ -633,23 +626,6 @@ struct Message msgtab[] = {
     { m_cap, m_cap, m_ignore, m_cap, m_ignore }
   },
 #endif
-
-  /*
-   * - ASUKA ---------------------------------------------------------------------
-   * Add the command for CHECK.
-   * This was adapted from Lain for use in Asuka.
-   * Original code by Durzel (durzel@quakenet.org).
-   *
-   * qoreQ (qoreQ@quakenet.org) - 08/14/2002
-   * -----------------------------------------------------------------------------
-   */
-  {
-    MSG_CHECK,
-    TOK_CHECK,
-    0, MAXPARA, MFLG_SLOW, 0, NULL,
-    { m_unregistered, m_not_oper, m_check, m_check, m_ignore }
-  },
-
   /* This command is an alias for QUIT during the unregistered part of
    * of the server.  This is because someone jumping via a broken web
    * proxy will send a 'POST' as their first command - which we will
@@ -892,14 +868,8 @@ parse_client(struct Client *cptr, char *buffer, char *bufend)
   paramcount = mptr->parameters;
   i = bufend - ((s) ? s : ch);
   mptr->bytes += i;
-  if ((mptr->flags & MFLG_SLOW) || !IsAnOper(cptr)) {
-    if (IsAnOper(cptr)) {
-      cli_since(cptr) += 1;
-    } else {
-      cli_since(cptr) += (2 + i / 120);
-    }
-  }
-
+  if ((mptr->flags & MFLG_SLOW) || !IsAnOper(cptr))
+    cli_since(cptr) += (2 + i / 120);
   /*
    * Allow only 1 msg per 2 seconds
    * (on average) to prevent dumping.

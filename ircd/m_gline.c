@@ -155,26 +155,23 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     flags |= GLINE_FORCE;
 
   if (!(target[0] == '*' && target[1] == '\0')) {
-    if (!( (acptr = FindNServer(target)) || 
-           (acptr = SeekServer(target)) ) )
+    if (!(acptr = FindNServer(target)))
       return 0; /* no such server */
 
     if (!IsMe(acptr)) { /* manually propagate */
       if (!lastmod)
 	sendcmdto_one(sptr, CMD_GLINE, acptr,
-		      (parc == 3) ? "%s %s" : "%s %s %s :%s", target, mask,
+		      (parc == 3) ? "%C %s" : "%C %s %s :%s", acptr, mask,
 		      parv[3], reason);
       else
-	sendcmdto_one(sptr, CMD_GLINE, acptr, "%s %s%s %s %s :%s", target,
+	sendcmdto_one(sptr, CMD_GLINE, acptr, "%C %s%s %s %s :%s", acptr,
 		      flags & GLINE_OPERFORCE ? "!" : "", mask, parv[3],
 		      parv[4], reason);
 
       return 0;
     }
 
-    /* For asuka we don't want glines sent this way treated as local
-     * flags |= GLINE_LOCAL;
-     */
+    flags |= GLINE_LOCAL;
   }
 
   if (*mask == '-')
@@ -336,9 +333,6 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 int
 m_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  if (feature_bool(FEAT_HIS_USERGLINE))
-    return send_reply(sptr, ERR_DISABLED, "GLINE");
-
   if (parc < 2)
     return send_reply(sptr, ERR_NOSUCHGLINE, "");
 

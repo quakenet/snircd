@@ -88,7 +88,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
   if (repchan)
     chan = find_channel_member(acptr, repchan);
   else if ((!fields || (fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
-           && !IsChannelService(acptr) && !IsNoChan(acptr)) 
+           && !IsChannelService(acptr))
   {
     for (chan = cli_user(acptr)->channel; chan; chan = chan->next_channel)
       if (PubChannel(chan->channel) &&
@@ -127,7 +127,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
 
   if (fields & WHO_FIELD_NIP)
   {
-    const char* p2 = (HasHiddenHost(acptr) || HasSetHost(acptr)) && !IsAnOper(sptr) ?
+    const char* p2 = HasHiddenHost(acptr) && !IsAnOper(sptr) ?
       feature_str(FEAT_HIDDEN_IP) :
       ircd_ntoa(&cli_ip(acptr));
     *(p1++) = ' ';
@@ -203,8 +203,6 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
         *(p1++) = 'w';
       if (SendDebug(acptr))
         *(p1++) = 'g';
-      if (HasSetHost(acptr))
-        *(p1++) = 'h';
     }
     if (HasHiddenHost(acptr))
       *(p1++) = 'x';
@@ -269,17 +267,17 @@ count_users(char *mask)
 {
   struct Client *acptr;
   int count = 0;
-  char namebuf[NICKLEN + USERLEN + HOSTLEN + 3];
+  char namebuf[USERLEN + HOSTLEN + 2];
   char ipbuf[USERLEN + 16 + 2];
 
   for (acptr = GlobalClientList; acptr; acptr = cli_next(acptr)) {
     if (!IsUser(acptr))
       continue;
 
-    ircd_snprintf(0, namebuf, sizeof(namebuf), "%s!%s@%s", cli_name(acptr),
+    ircd_snprintf(0, namebuf, sizeof(namebuf), "%s@%s",
 		  cli_user(acptr)->username, cli_user(acptr)->host);
-    ircd_snprintf(0, ipbuf, sizeof(ipbuf), "%s!%s@%s", cli_name(acptr),
-                  cli_user(acptr)->username, ircd_ntoa(&(cli_ip(acptr))));
+    ircd_snprintf(0, ipbuf, sizeof(ipbuf), "%s@%s", cli_user(acptr)->username,
+		  ircd_ntoa(&cli_ip(acptr)));
 
     if (!match(mask, namebuf) || !match(mask, ipbuf))
       count++;

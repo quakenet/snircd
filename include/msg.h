@@ -260,9 +260,6 @@ struct Client;
 #define TOK_SERVSET             "SERVSET"
 #define CMD_SERVSET		MSG_SERVSET, TOK_SERVSET
 
-#define MSG_CHECK       "CHECK"
-#define TOK_CHECK       "CC"
-
 #define MSG_REHASH              "REHASH"        /* REHA */
 #define TOK_REHASH              "REHASH"
 #define CMD_REHASH		MSG_REHASH, TOK_REHASH
@@ -358,10 +355,6 @@ struct Client;
 #define MSG_PRIVS		"PRIVS"		/* PRIV */
 #define TOK_PRIVS		"PR"
 #define CMD_PRIVS               MSG_PRIVS, TOK_PRIVS
-
-#define MSG_SETHOST		"SETHOST"	/* SETHOST */
-#define TOK_SETHOST		"SH"
-#define CMD_SETHOST		MSG_SETHOST, TOK_SETHOST
 
 #define MSG_CAP			"CAP"
 #define TOK_CAP			"CAP"

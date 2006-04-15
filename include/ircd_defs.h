@@ -68,7 +68,7 @@
  * with the ACCOUNT (AC) command.  This is used for keeping track of who's
  * logged into which account, for the benefit of irc services.
  */
-#define ACCOUNTLEN      15
+#define ACCOUNTLEN      12
 /** Maximum length for user supplied information about a client
  * connection (gcos). This information is set at client/server registration
  * time.
@@ -83,7 +83,7 @@
 #define SOCKIPLEN 45
 /** Maximum length for channel topics and kill comments.
  */
-#define TOPICLEN        250
+#define TOPICLEN        160
 /** Maximum length for away messages.
  */
 #define AWAYLEN		160
@@ -95,7 +95,7 @@
 /** Maximum available targets for a user. */
 #define MAXTARGETS      20
 /** Starting free targets for a user. */
-#define STARTTARGETS    20
+#define STARTTARGETS    10
 /** Target number to start assigning new targets. */
 #define RESERVEDTARGETS 12
 

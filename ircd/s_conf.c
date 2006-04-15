@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.1 2005/10/06 00:37:31 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.2 2005/12/31 01:40:00 entrope Exp $
  */
 #include "config.h"
 
@@ -74,8 +74,6 @@ int              GlobalConfCount;
 struct s_map     *GlobalServiceMapList;
 /** Global list of channel quarantines. */
 struct qline     *GlobalQuarantineList;
-/** Global list of spoofhosts. */
-struct sline    *GlobalSList = 0;
 
 /** Current line number in scanner input. */
 int lineno;
@@ -484,7 +482,8 @@ struct ConfItem *conf_debug_iline(const char *client)
             (aconf->username ? aconf->username : "(null)"),
             (aconf->host ? aconf->host : "(null)"),
             (aconf->name ? aconf->name : "(null)"),
-            ConfClass(aconf), aconf->maximum,  aconf->passwd);
+            ConfClass(aconf), aconf->maximum,
+            (aconf->passwd ? aconf->passwd : "(null)"));
     break;
   }
 
@@ -944,7 +943,6 @@ int rehash(struct Client *cptr, int sig)
   clearNickJupes();
 
   clear_quarantines();
-  clear_slines();
 
   if (sig != 2)
     restart_resolver();
@@ -985,7 +983,7 @@ int rehash(struct Client *cptr, int sig)
        * get past K/G's etc, we'll "fix" the bug by actually explaining
        * whats going on.
        */
-      if ((found_g = find_kill(acptr, 0))) {
+      if ((found_g = find_kill(acptr))) {
         sendto_opmask_butone(0, found_g == -2 ? SNO_GLINE : SNO_OPERKILL,
                              found_g == -2 ? "G-line active for %s%s" :
                              "K-line active for %s%s",
@@ -1036,11 +1034,10 @@ int init_conf(void)
 /** Searches for a K/G-line for a client.  If one is found, notify the
  * user and disconnect them.
  * @param cptr Client to search for.
- * @param glinecheck Whether we check for glines.
  * @return 0 if client is accepted; -1 if client was locally denied
  * (K-line); -2 if client was globally denied (G-line).
  */
-int find_kill(struct Client *cptr, int glinecheck)
+int find_kill(struct Client *cptr)
 {
   const char*      host;
   const char*      name;
@@ -1087,13 +1084,7 @@ int find_kill(struct Client *cptr, int glinecheck)
     return -1;
   }
 
-  /* added glinecheck to define if we check for glines too, shouldn't happen
-   * when rehashing as it is causing problems with big servers and lots of glines.
-   * Think of a 18000 user leaf with 18000 glines present, this will probably
-   * cause the server to split from the net.
-   * -skater_x
-   */
-  if (glinecheck && (agline = gline_lookup(cptr, 0)) && GlineIsActive(agline)) {
+  if ((agline = gline_lookup(cptr, 0))) {
     /*
      * find active glines
      * added a check against the user's IP address to find_gline() -Kev
@@ -1195,81 +1186,3 @@ int conf_check_server(struct Client *cptr)
   return 0;
 }
 
-void clear_slines(void)
-{
-  struct sline *sline;
-  while ((sline = GlobalSList)) {
-    GlobalSList = sline->next;
-    MyFree(sline->spoofhost);
-    if (!EmptyString(sline->passwd))
-      MyFree(sline->passwd);
-    if (!EmptyString(sline->realhost))
-      MyFree(sline->realhost);
-    if (!EmptyString(sline->username))
-      MyFree(sline->username);
-    MyFree(sline);
-  }
-}
-
-/*
- * conf_check_slines()
- *
- * Check S lines for the specified client, passed in cptr struct.
- * If the client's IP is S-lined, process the substitution here.
- *
- * Precondition
- *  cptr != NULL
- *
- * Returns
- *  0 = No S-line found
- *  1 = S-line found and substitution done.
- *
- * -mbuna 9/2001
- * -froo 1/2003
- *
- */
-
-int
-conf_check_slines(struct Client *cptr)
-{
-  struct sline *sconf;
-  char *hostonly;
-
-  for (sconf = GlobalSList; sconf; sconf = sconf->next) {
-    if (sconf->flags == SLINE_FLAGS_IP) {
-      if (!ipmask_check(&(cli_ip(cptr)), &(sconf->address), sconf->bits))
-        continue;
-    } else if (sconf->flags == SLINE_FLAGS_HOSTNAME) {
-        if ((match(sconf->realhost, cli_sockhost(cptr)) != 0) &&
-           (match(sconf->realhost, cli_sock_ip(cptr)) != 0))	/* wildcarded IP address */
-          continue;
-    } else {
-        continue;
-    }
-
-    if (match(sconf->username, cli_user(cptr)->username) == 0) {
-     /* Ignore user part if u@h. */
-     if ((hostonly = strchr(sconf->spoofhost, '@')))
-        hostonly++;
-      else
-        hostonly = sconf->spoofhost;
-
-      if(!*hostonly)
-        continue;
-
-      ircd_strncpy(cli_user(cptr)->host, hostonly, HOSTLEN);
-      log_write(LS_USER, L_INFO, LOG_NOSNOTICE, "S-Line (%s@%s) by (%#R)",
-          cli_user(cptr)->username, hostonly, cptr);
-      return 1;
-    }
-  }
-  return 0;
-}
-
-void free_spoofhost(struct sline *spoof) {
-	MyFree(spoof->spoofhost);
-	MyFree(spoof->passwd);
-	MyFree(spoof->realhost);
-	MyFree(spoof->username);
-	MyFree(spoof);
-}

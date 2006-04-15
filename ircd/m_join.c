@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_join.c,v 1.34.2.1 2005/10/06 23:58:09 entrope Exp $
+ * $Id: m_join.c,v 1.34.2.8 2006/01/07 00:54:09 entrope Exp $
  */
 
 #include "config.h"
@@ -150,9 +150,9 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
     /* BADCHANed channel */
-    if ((gline = gline_find(name, GLINE_BADCHAN)) &&
+    if ((gline = gline_find(name, GLINE_BADCHAN | GLINE_EXACT)) &&
 	GlineIsActive(gline) && !IsAnOper(sptr)) {
-      send_reply(sptr, ERR_BADCHANNAME, name, gline->gl_reason);
+      send_reply(sptr, ERR_BANNEDFROMCHAN, name);
       continue;
     }
 
@@ -167,15 +167,13 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         continue;
 
       /* Try to add the new channel as a recent target for the user. */
-      if (check_target_limit(sptr, chptr, chptr->chname, 1)) {
+      if (check_target_limit(sptr, chptr, chptr->chname, 0)) {
         chptr->members = 0;
         destruct_channel(chptr);
         continue;
       }
 
       joinbuf_join(&create, chptr, CHFL_CHANOP | CHFL_CHANNEL_MANAGER);
-      if (feature_bool(FEAT_AUTOCHANMODES) && feature_str(FEAT_AUTOCHANMODES_LIST) && strlen(feature_str(FEAT_AUTOCHANMODES_LIST)) > 0)
-        SetAutoChanModes(chptr);
     } else if (find_member_link(chptr, sptr)) {
       continue; /* already on channel */
     } else if (check_target_limit(sptr, chptr, chptr->chname, 0)) {
@@ -184,15 +182,17 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       int flags = CHFL_DEOPPED;
       int err = 0;
 
-      /* Check target change limits. */
-
       /* Check Apass/Upass -- since we only ever look at a single
        * "key" per channel now, this hampers brute force attacks. */
       if (key && !strcmp(key, chptr->mode.apass))
         flags = CHFL_CHANOP | CHFL_CHANNEL_MANAGER;
       else if (key && !strcmp(key, chptr->mode.upass))
         flags = CHFL_CHANOP;
-      else if (IsInvited(sptr, chptr)) {
+      else if (chptr->users == 0 && !chptr->mode.apass[0]) {
+        /* Joining a zombie channel (zannel): give ops and increment TS. */
+        flags = CHFL_CHANOP;
+        chptr->creationtime++;
+      } else if (IsInvited(sptr, chptr)) {
         /* Invites bypass these other checks. */
       } else if (chptr->mode.mode & MODE_INVITEONLY)
         err = ERR_INVITEONLYCHAN;
@@ -205,14 +205,6 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else if (*chptr->mode.key && (!key || strcmp(key, chptr->mode.key)))
         err = ERR_BADCHANNELKEY;
 
-      /*
-       * ASUKA_X:
-       * Allow XtraOpers to join all channels.
-       * --Bigfoot
-       */
-      if (IsXtraOp(sptr))
-        err = 0;
-      
       /* An oper with WALK_LCHAN privilege can join a local channel
        * he otherwise could not join by using "OVERRIDE" as the key.
        * This will generate a HACK(4) notice, but fails if the oper
@@ -220,13 +212,17 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (IsLocalChannel(chptr->chname)
           && HasPriv(sptr, PRIV_WALK_LCHAN)
           && !(flags & CHFL_CHANOP)
-          && key && !strcmp(key, "OVERRIDE")
-          && strcmp(chptr->mode.key, "OVERRIDE"))
+          && key && !strcmp(key, "OVERRIDE"))
       {
         switch (err) {
         case 0:
-          send_reply(sptr, ERR_DONTCHEAT, chptr->chname);
-          continue;
+          if (strcmp(chptr->mode.key, "OVERRIDE")
+              && strcmp(chptr->mode.apass, "OVERRIDE")
+              && strcmp(chptr->mode.upass, "OVERRIDE")) {
+            send_reply(sptr, ERR_DONTCHEAT, chptr->chname);
+            continue;
+          }
+          break;
         case ERR_INVITEONLYCHAN: err = 'i'; break;
         case ERR_CHANNELISFULL:  err = 'l'; break;
         case ERR_BANNEDFROMCHAN: err = 'b'; break;
@@ -235,8 +231,9 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         default: err = '?'; break;
         }
         /* send accountability notice */
-        sendto_opmask_butone(0, SNO_HACK4, "OPER JOIN: %C JOIN %H "
-                             "(overriding +%c)", sptr, chptr, err);
+        if (err)
+          sendto_opmask_butone(0, SNO_HACK4, "OPER JOIN: %C JOIN %H "
+                               "(overriding +%c)", sptr, chptr, err);
         err = 0;
       }
 
@@ -247,6 +244,23 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       }
 
       joinbuf_join(&join, chptr, flags);
+      if (flags & CHFL_CHANOP) {
+        struct ModeBuf mbuf;
+#if 0
+        /* Send a MODE to the other servers. If the user used the A/U pass,
+	 * let his server op him, otherwise let him op himself. */
+	modebuf_init(&mbuf, chptr->mode.apass[0] ? &me : sptr, cptr, chptr, MODEBUF_DEST_SERVER);
+#else
+	/* Always let the server op him: this is needed on a net with older servers
+	   because they 'destruct' channels immediately when they become empty without
+	   sending out a DESTRUCT message. As a result, they would always bounce a mode
+	   (as HACK(2)) when the user ops himself. */
+	modebuf_init(&mbuf, &me, cptr, chptr, MODEBUF_DEST_SERVER);
+#endif
+	modebuf_mode_client(&mbuf, MODE_ADD | MODE_CHANOP, sptr,
+                            chptr->mode.apass[0] ? ((flags & CHFL_CHANNEL_MANAGER) ? 0 : 1) : MAXOPLEVEL);
+	modebuf_flush(&mbuf);
+      }
     }
 
     del_invite(sptr, chptr);
@@ -307,18 +321,7 @@ int ms_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   for (name = ircd_strtok(&p, chanlist, ","); name;
        name = ircd_strtok(&p, 0, ",")) {
 
-    if (name[0] == '0' && name[1] == ':')
-    {
-      flags = CHFL_CHANOP | CHFL_CHANNEL_MANAGER;
-      name += 2;
-    }
-    else if (name[0] == '1' && name[1] == ':')
-    {
-      flags = CHFL_CHANOP;
-      name += 2;
-    }
-    else
-      flags = CHFL_DEOPPED;
+    flags = CHFL_DEOPPED;
 
     if (IsLocalChannel(name) || !IsChannelName(name))
     {
@@ -337,8 +340,7 @@ int ms_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       }
       flags |= HasFlag(sptr, FLAG_TS8) ? CHFL_SERVOPOK : 0;
 
-      /* when the network is 2.10.11+ then remove MAGIC_REMOTE_JOIN_TS */
-      chptr->creationtime = creation ? creation : MAGIC_REMOTE_JOIN_TS;
+      chptr->creationtime = creation;
     }
     else { /* We have a valid channel? */
       if ((member = find_member_link(chptr, sptr)))
@@ -354,9 +356,70 @@ int ms_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         flags |= HasFlag(sptr, FLAG_TS8) ? CHFL_SERVOPOK : 0;
       /* Always copy the timestamp when it is older, that is the only way to
-         ensure network-wide synchronization of creation times. */
-      if (creation && creation < chptr->creationtime)
+         ensure network-wide synchronization of creation times.
+         We now also copy a creation time that only 1 second younger...
+         this is needed because the timestamp must be incremented
+         by one when someone joins an existing, but empty, channel.
+         However, this is only necessary when the channel is still
+         empty (also here) and when this channel doesn't have +A set.
+
+         To prevent this from allowing net-rides on the channel, we
+         clear all modes from the channel.
+
+         (Scenario for a net ride: c1 - s1 - s2 - c2, with c1 the only
+         user in the channel; c1 parts and rejoins, gaining ops.
+         Before s2 sees c1's part, c2 joins the channel and parts
+         immediately.  s1 sees c1 part, c1 create, c2 join, c2 part;
+         c2's join resets the timestamp.  s2 sees c2 join, c2 part, c1
+         part, c1 create; but since s2 sees the channel as a zannel or
+         non-existent, it does not bounce the create with the newer
+         timestamp.)
+      */
+      if (creation && (creation < chptr->creationtime ||
+		       (!chptr->mode.apass[0] && chptr->users == 0))) {
+        struct Membership *member;
+        struct ModeBuf mbuf;
+
 	chptr->creationtime = creation;
+        /* Wipe out the current modes on the channel. */
+        modebuf_init(&mbuf, sptr, cptr, chptr, MODEBUF_DEST_CHANNEL | MODEBUF_DEST_HACK3);
+
+        modebuf_mode(&mbuf, MODE_DEL | chptr->mode.mode);
+        chptr->mode.mode &= MODE_BURSTADDED | MODE_WASDELJOINS;
+
+        if (chptr->mode.limit) {
+          modebuf_mode_uint(&mbuf, MODE_DEL | MODE_LIMIT, chptr->mode.limit);
+          chptr->mode.limit = 0;
+        }
+
+        if (chptr->mode.key[0]) {
+          modebuf_mode_string(&mbuf, MODE_DEL | MODE_KEY, chptr->mode.key, 0);
+          chptr->mode.key[0] = '\0';
+        }
+
+        if (chptr->mode.upass[0]) {
+          modebuf_mode_string(&mbuf, MODE_DEL | MODE_UPASS, chptr->mode.upass, 0);
+          chptr->mode.upass[0] = '\0';
+        }
+
+        if (chptr->mode.apass[0]) {
+          modebuf_mode_string(&mbuf, MODE_DEL | MODE_APASS, chptr->mode.apass, 0);
+          chptr->mode.apass[0] = '\0';
+        }
+
+        for (member = chptr->members; member; member = member->next_member)
+        {
+          if (IsChanOp(member)) {
+            modebuf_mode_client(&mbuf, MODE_DEL | MODE_CHANOP, member->user, OpLevel(member));
+	    member->status &= ~CHFL_CHANOP;
+	  }
+          if (HasVoice(member)) {
+            modebuf_mode_client(&mbuf, MODE_DEL | MODE_VOICE, member->user, OpLevel(member));
+	    member->status &= ~CHFL_VOICE;
+          }
+        }
+        modebuf_flush(&mbuf);
+      }
     }
 
     joinbuf_join(&join, chptr, flags);

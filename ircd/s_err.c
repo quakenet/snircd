@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Error handling support.
- * @version $Id: s_err.c,v 1.72 2005/08/29 21:39:26 entrope Exp $
+ * @version $Id: s_err.c,v 1.72.2.1 2005/10/31 23:16:56 entrope Exp $
  */
 #include "config.h"
 
@@ -526,7 +526,7 @@ static Numeric replyTable[] = {
 /* 246 */
   { RPL_STATSTLINE, "%c %s %s", "246" },
 /* 247 */
-  { RPL_STATSGLINE, "%c %s%s%s%s%s %Tu :%s", "247" },
+  { RPL_STATSGLINE, "%c %s%s%s %Tu :%s", "247" },
 /* 248 */
   { RPL_STATSULINE, "U %s", "248" },
 /* 249 */
@@ -592,7 +592,7 @@ static Numeric replyTable[] = {
 /* 279 */
   { 0 },
 /* 280 */
-  { RPL_GLIST, "%s%s%s%s%s %Tu %s %c :%s", "280" },
+  { RPL_GLIST, "%s%s%s %Tu %s %c :%s", "280" },
 /* 281 */
   { RPL_ENDOFGLIST, ":End of G-line List", "281" },
 /* 282 */
@@ -602,19 +602,19 @@ static Numeric replyTable[] = {
 /* 284 */
   { RPL_FEATURE, 0, "284" },
 /* 285 */
-  { RPL_NEWHOSTIS, "%s: %s host %s - [%s@%s]" },
+  { 0 },
 /* 286 */
-  { RPL_CHKHEAD, ":Information for %s %s", "286" },
+  { 0 },
 /* 287 */
-  { RPL_CHANUSER, ":    %s%s (%s@%s)   (%s) %s", "287" },
+  { 0 },
 /* 288 */
   { 0 },
 /* 289 */
   { 0 },
 /* 290 */
-  { RPL_DATASTR, ":%s", "290" },
+  { 0 },
 /* 291 */
-  { RPL_ENDOFCHECK, ":%s", "291" },
+  { 0 },
 /* 292 */
   { 0 },
 /* 293 */
@@ -640,7 +640,7 @@ static Numeric replyTable[] = {
 /* 303 */
   { RPL_ISON, ":", "303" },
 /* 304 */
-  { RPL_TEXT, "%s", "304" },
+  { 0 },
 /* 305 */
   { RPL_UNAWAY, ":You are no longer marked as being away", "305" },
 /* 306 */
@@ -692,7 +692,7 @@ static Numeric replyTable[] = {
 /* 329 */
   { RPL_CREATIONTIME, "%s %Tu", "329" },
 /* 330 */
-  { RPL_WHOISACCOUNT, "%s %s :is authed as", "330" },
+  { RPL_WHOISACCOUNT, "%s %s :is logged in as", "330" },
 /* 331 */
   { RPL_NOTOPIC, "%s :No topic is set.", "331" },
 /* 332 */
@@ -828,9 +828,9 @@ static Numeric replyTable[] = {
 /* 397 */
   { 0 },
 /* 398 */
-  { RPL_STATSSLINE, "%d %s %s %s %s", "398" },
+  { 0 },
 /* 399 */
-  { RPL_USINGSLINE, ":Using S-line privilege", "399" },
+  { 0 },
 /* 400 */
   { 0 },
 /* 401 */
@@ -848,7 +848,7 @@ static Numeric replyTable[] = {
 /* 407 */
   { ERR_TOOMANYTARGETS, "%s :Duplicate recipients. No message delivered", "407" },
 /* 408 */
-  { ERR_SEARCHNOMATCH, ":%s %s No matching record(s) found", "408" },
+  { 0 },
 /* 409 */
   { ERR_NOORIGIN, ":No origin specified", "409" },
 /* 410 */
@@ -974,23 +974,23 @@ static Numeric replyTable[] = {
 /* 470 */
   { 0 },
 /* 471 */
-  { ERR_CHANNELISFULL, "%s :Cannot join channel, Channel is full (+l)", "471" },
+  { ERR_CHANNELISFULL, "%s :Cannot join channel (+l)", "471" },
 /* 472 */
   { ERR_UNKNOWNMODE, "%c :is unknown mode char to me", "472" },
 /* 473 */
-  { ERR_INVITEONLYCHAN, "%s :Cannot join channel, you must be invited (+i)", "473" },
+  { ERR_INVITEONLYCHAN, "%s :Cannot join channel (+i)", "473" },
 /* 474 */
-  { ERR_BANNEDFROMCHAN, "%s :Cannot join channel, you are banned (+b)", "474" },
+  { ERR_BANNEDFROMCHAN, "%s :Cannot join channel (+b)", "474" },
 /* 475 */
-  { ERR_BADCHANNELKEY, "%s :Cannot join channel, you need the correct key (+k)", "475" },
+  { ERR_BADCHANNELKEY, "%s :Cannot join channel (+k)", "475" },
 /* 476 */
   { ERR_BADCHANMASK, "%s :Bad Channel Mask", "476" },
 /* 477 */
-  { ERR_NEEDREGGEDNICK, "%s :Cannot join channel, you must be authed to join (+r)", "477" },
+  { ERR_NEEDREGGEDNICK, "%s :Cannot join channel (+r)", "477" },
 /* 478 */
   { ERR_BANLISTFULL, "%s %s :Channel ban/ignore list is full", "478" },
 /* 479 */
-  { ERR_BADCHANNAME, "%s :Cannot join channel (G-lined: %s)", "479" },
+  { ERR_BADCHANNAME, "%s :Cannot join channel (access denied on this server)", "479" },
 /* 480 */
   { 0 },
 /* 481 */
@@ -1000,11 +1000,11 @@ static Numeric replyTable[] = {
 /* 483 */
   { ERR_CANTKILLSERVER, ":You cant kill a server!", "483" },
 /* 484 */
-  { ERR_ISCHANSERVICE, "%s %s :Cannot kill, kick or deop an IRC operator", "484" },
+  { ERR_ISCHANSERVICE, "%s %s :Cannot kill, kick or deop a network service", "484" },
 /* 485 */
-  { ERR_ISREALSERVICE, "%s %s :Cannot kill, kick or deop a network service", "485" },
+  { 0 },
 /* 486 */
-  { ERR_ACCOUNTONLY, "%s :You must be authed in order to message this user", "486" },
+  { 0 },
 /* 487 */
   { 0 },
 /* 488 */
@@ -1092,9 +1092,9 @@ static Numeric replyTable[] = {
 /* 529 */
   { 0 },
 /* 530 */
-  { ERR_BADHOSTMASK, "%s :Invalid username/hostmask", "530" },
+  { 0 },
 /* 531 */
-  { ERR_HOSTUNAVAIL, "%s :sethost not found", "531" },
+  { 0 },
 /* 532 */
   { 0 },
 /* 533 */
@@ -1158,13 +1158,13 @@ static Numeric replyTable[] = {
 /* 562 */
   { ERR_CHANSECURED, "%s :Channel is older than 48 hours and secured. Cannot change Admin pass anymore", "562" },
 /* 563 */
-  { ERR_UPASSSET, "%s :Cannot remove Admin pass (+A) while User pass (+U) is still set.  First use /MODE %s -U <userpass>", "563" },
+  { ERR_UPASSSET, "%s :Cannot remove Admin pass (+A) while User pass (+U) is still set. First use /MODE %s -U <userpass>", "563" },
 /* 564 */
-  { ERR_UPASSNOTSET, "%s :Cannot set user pass (+U) until Admin pass (+A) is set.  First use /MODE %s +A <adminpass>", "564" },
+  { ERR_UPASSNOTSET, "%s :Cannot set user pass (+U) until Admin pass (+A) is set. First use /MODE %s +A <adminpass>", "564" },
 /* 565 */
   { 0 },
 /* 566 */
-  { ERR_NOMANAGER, "%s :Re-create the channel.  The channel must be completely empty before it can be recreated.", "566" },
+  { ERR_NOMANAGER, "%s :Re-create the channel. The channel must be completely empty for a period of %s before it can be recreated.", "566" },
 /* 567 */
   { ERR_UPASS_SAME_APASS, "%s :Cannot use the same pass for both admin (+A) and user (+U) pass.", "567" },
 /* 568 */

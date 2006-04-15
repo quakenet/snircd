@@ -62,7 +62,7 @@
 /** @file
  * @brief Report configuration lines and other statistics from this
  * server.
- * @version $Id: s_stats.c,v 1.44.2.1 2005/10/12 01:13:48 entrope Exp $
+ * @version $Id: s_stats.c,v 1.44.2.2 2005/11/19 23:57:13 entrope Exp $
  *
  * Note: The info is reported in the order the server uses
  *       it--not reversed as in ircd.conf!
@@ -397,44 +397,6 @@ stats_quarantine(struct Client* to, const struct StatDesc* sd, char* param)
   }
 }
 
-static void
-stats_sline(struct Client* to, const struct StatDesc* sd, char* param)
-{
-  int y = 1, i = 1;
-  struct sline *sline;
-
-  if (IsAnOper(to))
-    send_reply(to, SND_EXPLICIT | RPL_TEXT, "# Type Spoofhost Realhost Ident");
-  else
-    send_reply(to, SND_EXPLICIT | RPL_TEXT, "# Type Spoofhost");
-
-  for (sline = GlobalSList; sline; sline = sline->next) {
-    if (param && match(param, sline->spoofhost)) { /* narrow search */
-      if (IsAnOper(to))
-          y++;
-      else
-        if (!EmptyString(sline->passwd))
-          y++;
-      continue;
-    }
-
-    if (IsAnOper(to)) {
-      send_reply(to, RPL_STATSSLINE, (param) ? y : i, 
-         (EmptyString(sline->passwd)) ? "oper" : "user",
-         sline->spoofhost, 
-         (EmptyString(sline->realhost)) ? "" : sline->realhost,
-         (EmptyString(sline->username)) ? "" : sline->username);
-      i++;
-    } else {
-      if (!EmptyString(sline->passwd)) {
-        send_reply(to, RPL_STATSSLINE, (param) ? y : i, "user", sline->spoofhost,
-           "", "", "");
-        i++;
-      }
-    }
-  }
-}
-
 /** List service pseudo-command mappings.
  * @param[in] to Client requesting statistics.
  * @param[in] sd Stats descriptor for request (ignored).
@@ -493,9 +455,9 @@ stats_servers_verbose(struct Client* sptr, const struct StatDesc* sd,
                "%-20s %-20s Flags Hops Numeric   Lag  RTT   Up Down "
                "Clients/Max Proto %-10s :Info", "Servername", "Uplink",
                "LinkTS");
-    fmt = "%-20s %-20s %c%c%c%c  %4i %s %-4i %5i %4i %4i %4i %5i %5i P%-2i   %Tu :%s";
+    fmt = "%-20s %-20s %c%c%c%c%c  %4i %s %-4i %5i %4i %4i %4i %5i %5i P%-2i   %Tu :%s";
   } else {
-    fmt = "%s %s %c%c%c%c %i %s %i %i %i %i %i %i %i P%i %Tu :%s";
+    fmt = "%s %s %c%c%c%c%c %i %s %i %i %i %i %i %i %i P%i %Tu :%s";
   }
 
   for (acptr = GlobalClientList; acptr; acptr = cli_next(acptr))
@@ -512,6 +474,7 @@ stats_servers_verbose(struct Client* sptr, const struct StatDesc* sd,
                IsBurstAck(acptr) ? 'A' : '-',
                IsHub(acptr) ? 'H' : '-',
                IsService(acptr) ? 'S' : '-',
+               IsIPv6(acptr) ? '6' : '-',
                cli_hopcount(acptr),
                NumServ(acptr),
                base64toint(cli_yxx(acptr)),
@@ -624,9 +587,6 @@ struct StatDesc statsinfo[] = {
     send_usage, 0,
     "System resource usage (Debug only)." },
 #endif
-  { 's', "spoofhosts", (STAT_FLAG_OPERFEAT | STAT_FLAG_VARPARAM), FEAT_HIS_STATS_s,
-    stats_sline, 0,
-    "Spoofed hosts information." },
   { 'T', "motds", (STAT_FLAG_OPERFEAT | STAT_FLAG_CASESENS), FEAT_HIS_STATS_T,
     motd_report, 0,
     "Configured Message Of The Day files." },
