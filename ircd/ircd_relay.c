@@ -86,6 +86,7 @@
 void relay_channel_message(struct Client* sptr, const char* name, const char* text)
 {
   struct Channel* chptr;
+  const char *ch;
   assert(0 != sptr);
   assert(0 != name);
   assert(0 != text);
@@ -105,6 +106,22 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
       check_target_limit(sptr, chptr, chptr->chname, 0))
     return;
 
+  /* +cC checks */
+  if (chptr->mode.mode & MODE_NOCOLOUR)
+    for (ch=text;*ch;ch++)
+      if (*ch==2 || *ch==3 || *ch==22 || *ch==27 || *ch==31) {
+        send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+        return;
+      }
+
+  if ((chptr->mode.mode & MODE_NOCTCP) && ircd_strncmp(text,"\001ACTION ",8))
+    for (ch=text;*ch;)
+      if (*ch++==1) { 
+        send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+        return;
+      }
+
+  
   sendcmdto_channel_butone(sptr, CMD_PRIVATE, chptr, cli_from(sptr),
 			   SKIP_DEAF | SKIP_BURST, "%H :%s", chptr, text);
 }
@@ -118,6 +135,7 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
 void relay_channel_notice(struct Client* sptr, const char* name, const char* text)
 {
   struct Channel* chptr;
+  const char *ch;
   assert(0 != sptr);
   assert(0 != name);
   assert(0 != text);
@@ -133,6 +151,26 @@ void relay_channel_notice(struct Client* sptr, const char* name, const char* tex
   if ((chptr->mode.mode & MODE_NOPRIVMSGS) &&
       check_target_limit(sptr, chptr, chptr->chname, 0))
     return;
+
+  if ((chptr->mode.mode & MODE_NONOTICE)) {
+    send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+    return;
+  }
+
+  /* +cC checks */
+  if (chptr->mode.mode & MODE_NOCOLOUR)
+    for (ch=text;*ch;ch++)
+      if (*ch==2 || *ch==3 || *ch==22 || *ch==27 || *ch==31) {
+        send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+        return;
+      }
+
+  if ((chptr->mode.mode & MODE_NOCTCP) && ircd_strncmp(text,"\001ACTION ",8))
+    for (ch=text;*ch;)
+      if (*ch++==1) { 
+        send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+        return;
+      }
 
   sendcmdto_channel_butone(sptr, CMD_NOTICE, chptr, cli_from(sptr),
 			   SKIP_DEAF | SKIP_BURST, "%H :%s", chptr, text);
@@ -338,6 +376,16 @@ void relay_private_message(struct Client* sptr, const char* name, const char* te
       is_silenced(sptr, acptr))
     return;
 
+  /* ASUKA -- slug
+   * +R check, if target is +R and we're not +r (or opered) then
+   * deny the message
+   */
+
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr)) {
+    send_reply(sptr, ERR_ACCOUNTONLY, cli_name(acptr));
+    return;
+  }
+
   /*
    * send away message if user away
    */
@@ -373,6 +421,15 @@ void relay_private_notice(struct Client* sptr, const char* name, const char* tex
        check_target_limit(sptr, acptr, cli_name(acptr), 0)) ||
       is_silenced(sptr, acptr))
     return;
+
+  /* ASUKA -- slug
+   * +R check, if target is +R and we're not +r (or opered) then
+   * deny the message
+   */
+
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr))
+    return;
+
   /*
    * deliver the message
    */

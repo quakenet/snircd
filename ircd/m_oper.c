@@ -151,7 +151,7 @@ int m_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   {
     send_reply(sptr, ERR_NOOPERHOST);
     sendto_opmask_butone(0, SNO_OLDREALOP, "Failed OPER attempt by %s (%s@%s)",
-			 parv[0], cli_user(sptr)->username, cli_sockhost(sptr));
+			 parv[0], cli_user(sptr)->realusername, cli_sockhost(sptr));
     return 0;
   }
   assert(0 != (aconf->status & CONF_OPERATOR));
@@ -163,7 +163,7 @@ int m_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     if (ACR_OK != attach_conf(sptr, aconf)) {
       send_reply(sptr, ERR_NOOPERHOST);
       sendto_opmask_butone(0, SNO_OLDREALOP, "Failed OPER attempt by %s "
-			   "(%s@%s)", parv[0], cli_user(sptr)->username,
+			   "(%s@%s)", parv[0], cli_user(sptr)->realusername,
 			   cli_sockhost(sptr));
       return 0;
     }
@@ -187,16 +187,16 @@ int m_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     send_reply(sptr, RPL_YOUREOPER);
 
     sendto_opmask_butone(0, SNO_OLDSNO, "%s (%s@%s) is now operator (%c)",
-			 parv[0], cli_user(sptr)->username, cli_sockhost(sptr),
+			 parv[0], cli_user(sptr)->realusername, cli_sockhost(sptr),
 			 IsOper(sptr) ? 'O' : 'o');
 
-    log_write(LS_OPER, L_INFO, 0, "OPER (%s) by (%#C)", name, sptr);
+    log_write(LS_OPER, L_INFO, 0, "OPER (%s) by (%#R)", name, sptr);
   }
   else
   {
     send_reply(sptr, ERR_PASSWDMISMATCH);
     sendto_opmask_butone(0, SNO_OLDREALOP, "Failed OPER attempt by %s (%s@%s)",
-			 parv[0], cli_user(sptr)->username, cli_sockhost(sptr));
+			 parv[0], cli_user(sptr)->realusername, cli_sockhost(sptr));
   }
   return 0;
 }

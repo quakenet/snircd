@@ -19,7 +19,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 dnl
-dnl $Id: configure.in,v 1.34.2.1 2005/12/14 03:01:38 entrope Exp $
+dnl $Id: configure.in,v 1.34 2005/07/17 00:18:58 entrope Exp $
 
 dnl Make sure we are in the correct directory (someone could have run
 dnl 'configure' with a wrong '--srcdir').
@@ -171,7 +171,6 @@ case "$host" in
 	else
 	    unet_poll_syscall=no
 	fi
-        AC_DEFINE([IRCU_SOLARIS], 1, [Define if building on Solaris])
 	;;
 
     *-sunos*)

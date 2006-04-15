@@ -107,9 +107,11 @@ int m_quit(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   if (cli_user(sptr)) {
     struct Membership* chan;
+    /* (slug for +u) removed !IsDelayedJoin(chan) as splidge said to */
     for (chan = cli_user(sptr)->channel; chan; chan = chan->next_channel) {
-        if (!IsZombie(chan) && !IsDelayedJoin(chan) && !member_can_send_to_channel(chan, 0))
-        return exit_client(cptr, sptr, sptr, "Signed off");
+        if (!IsZombie(chan) && (!member_can_send_to_channel(chan, 0)
+           || (chan->channel->mode.mode & MODE_NOQUITPARTS)))
+          return exit_client(cptr, sptr, sptr, "Signed off");
     }
   }
   if (parc > 1 && !BadPtr(parv[parc - 1]))

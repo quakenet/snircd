@@ -17,7 +17,7 @@
  * USA.
  */
 
-#include <ctype.h> /* tolower() */
+#include <ctype.h> /* tolower(), toupper(), isdigit() */
 #include <stdio.h> /* *printf(), fgets() */
 #include <stdlib.h> /* free(), strtol() */
 #include <string.h> /* strlen(), memcpy(), strchr(), strspn() */
@@ -30,7 +30,7 @@ const char *admin_names[] = { "location", "contact", "contact", 0 },
     *general_names[] = { "name", "vhost", "description", "", "#numeric", 0 },
     *motd_names[] = { "host", "file", 0 },
     *class_names[] = { "name", "#pingfreq", "#connectfreq", "#maxlinks", "#sendq", 0 },
-    *removed_features[] = { "VIRTUAL_HOST", "TIMESEC", "OPERS_SEE_IN_SECRET_CHANNELS", "LOCOP_SEE_IN_SECRET_CHANNELS", "HIS_STATS_h", "HIS_DESYNCS", "AUTOHIDE", 0 };
+    *removed_features[] = { "VIRTUAL_HOST", "OPERS_SEE_IN_SECRET_CHANNELS", "LOCOP_SEE_IN_SECRET_CHANNELS", 0 };
 char orig_line[512], line[512], dbuf[512];
 char *fields[MAX_FIELDS + 1];
 unsigned int nfields;
@@ -100,7 +100,7 @@ static void simple_line(const char *block, const char **names, const char *extra
     fputs("};\n", stdout);
 }
 
-#define dupstring(TARGET, SOURCE) do { free(TARGET); if (SOURCE) { size_t len = strlen(SOURCE) + 1; (TARGET) = malloc(len); memcpy((TARGET), (SOURCE), len); } else (TARGET) = 0; } while(0)
+#define dupstring(TARGET, SOURCE) do { free(TARGET); if (SOURCE) { size_t len = strlen(SOURCE); (TARGET) = malloc(len+1); memcpy((TARGET), (SOURCE), len); } else (TARGET) = 0; } while(0)
 
 /*** MANAGING LISTS OF STRINGS ***/
 
@@ -111,14 +111,6 @@ struct string_list {
     char value[1];
 };
 
-/** Find or insert the element from \a list that contains \a value.
- * If an element of \a list already contains \a value, return it.
- * Otherwise, append a new element to \a list containing \a value and
- * return it.
- * @param[in,out] list A list of strings.
- * @param[in] value A string to search for.
- * @return A string list element from \a list containing \a value.
- */
 static struct string_list *string_get(struct string_list **list, const char *value)
 {
     struct string_list *curr;
@@ -159,7 +151,7 @@ static struct connect *get_connect(const char *name)
     nlen = strlen(name);
     for (conn = connects; conn; conn = conn->next)
     {
-        for (ii = 0; tolower(name[ii]) == tolower(conn->name[ii]) && ii < nlen; ++ii) ;
+        for (ii = 0; tolower(name[ii]) == conn->name[ii] && ii < nlen; ++ii) ;
         if (conn->name[ii] == '\0' && name[ii] == '\0')
             break;
     }
@@ -169,7 +161,7 @@ static struct connect *get_connect(const char *name)
     {
         conn = calloc(1, sizeof(*conn) + nlen);
         for (ii = 0; ii < nlen; ++ii)
-            conn->name[ii] = name[ii];
+            conn->name[ii] = tolower(name[ii]);
         conn->next = connects;
         connects = conn;
     }
@@ -213,15 +205,6 @@ static void finish_connects(void)
     {
         for (sl = conn->origins; sl; sl = sl->next)
             fprintf(stdout, "# %s\n", sl->value);
-	if (conn->name == NULL
-            || conn->host == NULL
-            || conn->password == NULL
-            || conn->class == NULL)
-        {
-	    fprintf(stderr, "H:line missing C:line for %s\n",sl->value);
-	    continue;
-	}
-
         fprintf(stdout,
                 "Connect {\n\tname =\"%s\";\n\thost = \"%s\";\n"
                 "\tpassword = \"%s\";\n\tclass = \"%s\";\n",
@@ -311,7 +294,7 @@ static void do_feature(void)
     ii = strlen(fields[0]);
     feat = calloc(1, sizeof(*feat) + ii);
     while (ii-- > 0)
-        feat->name[ii] = fields[0][ii];
+        feat->name[ii] = toupper(fields[0][ii]);
     feat->next = features;
     features = feat;
     string_get(&feat->origins, orig_line);
@@ -326,15 +309,9 @@ static void finish_features(void)
     struct feature *feat;
     size_t ii;
 
-    fputs("Features {\n", stdout);
-    fputs("\t\"OPLEVELS\" = \"FALSE\";\n", stdout);
-    fputs("\t\"ZANNELS\" = \"FALSE\";\n", stdout);
+    fputs("Features {\n\t\"OPLEVELS\" = \"FALSE\";\n", stdout);
 
     for (feat = features; feat; feat = feat->next) {
-        /* Display the original feature line we are talking about. */
-        for (sl = feat->origins; sl; sl = sl->next)
-            fprintf(stdout, "# %s\n", sl->value);
-
         /* See if the feature was remapped to an oper privilege. */
         for (rmf = remapped_features; rmf->name; rmf++)
             if (0 == strcmp(feat->name, rmf->name))
@@ -430,7 +407,7 @@ static void finish_operators(void)
         }
         for (ii = 0; (remap = &remapped_features[ii++])->name; ) {
             if (!remap->feature || !remap->privilege
-                || !remap->feature->values || !(remap->flags & mask))
+                || !remap->feature->values || !remap->flags & mask)
                 continue;
             fprintf(stdout, "\t%s = %s;\n", remap->privilege,
                     strcmp(remap->feature->values->value, "TRUE") ? "no" : "yes");
@@ -610,10 +587,9 @@ int main(int argc, char *argv[])
             fputs(line, stdout);
             continue;
         }
-        /* Strip trailing whitespace. */
-        while (len > 0 && isspace(line[len-1]))
+        /* Strip EOL character(s) and pass blank lines through. */
+        while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r'))
             line[--len] = '\0';
-        /* Pass blank lines through. */
         if (len == 0) {
             fputc('\n', stdout);
             continue;

@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h,v 1.55.2.1 2005/12/23 17:12:06 klmitch Exp $
+ * @version $Id: channel.h,v 1.55 2005/09/27 02:41:57 entrope Exp $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
@@ -101,6 +101,9 @@ struct Client;
 #define MODE_LIMIT      0x0400		/**< +l Limit */
 #define MODE_REGONLY    0x0800  	/**< Only +r users may join */
 #define MODE_DELJOINS   0x1000  	/**< New join messages are delayed */
+#define MODE_NOCOLOUR   0x2000          /**< No mIRC/ANSI colors/bold */
+#define MODE_NOCTCP     0x4000          /**< No channel CTCPs */
+#define MODE_NONOTICE   0x8000          /**< No channel notices */
 #define MODE_SAVE	0x20000		/**< save this mode-with-arg 'til 
 					 * later */
 #define MODE_FREE	0x40000 	/**< string needs to be passed to 
@@ -110,6 +113,8 @@ struct Client;
 #define MODE_APASS	0x200000
 #define MODE_WASDELJOINS 0x400000 	/**< Not DELJOINS, but some joins 
 					 * pending */
+#define MODE_NOQUITPARTS 0x800000
+
 /** mode flags which take another parameter (With PARAmeterS)
  */
 #define MODE_WPARAS     (MODE_CHANOP|MODE_VOICE|MODE_BAN|MODE_KEY|MODE_LIMIT|MODE_APASS|MODE_UPASS)
@@ -162,6 +167,15 @@ typedef enum ChannelGetType {
  * existing bugs.
  */
 #define TS_LAG_TIME 86400
+
+/**
+ * A Magic TS that is used for channels that are created by JOIN,
+ * a channel with this TS accepts all TS without complaining that
+ * it might receive later via MODE or CREATE.
+ *
+ * Part of the P9 compatibility, shouldn't occur on a P10 network.
+ */
+#define MAGIC_REMOTE_JOIN_TS 1270080000
 
 
 
@@ -367,6 +381,7 @@ extern void send_hack_notice(struct Client *cptr, struct Client *sptr,
                              int parc, char *parv[], int badop, int mtype);
 extern struct Channel *get_channel(struct Client *cptr,
                                    char *chname, ChannelGetType flag);
+extern int SetAutoChanModes(struct Channel *chptr);
 extern struct Membership* find_member_link(struct Channel * chptr,
                                            const struct Client* cptr);
 extern int sub1_from_channel(struct Channel* chptr);

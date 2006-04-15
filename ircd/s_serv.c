@@ -247,7 +247,7 @@ int server_estab(struct Client *cptr, struct ConfItem *aconf)
       sendcmdto_one(cli_user(acptr)->server, CMD_NICK, cptr,
 		    "%s %d %Tu %s %s %s%s%s%s %s%s :%s",
 		    cli_name(acptr), cli_hopcount(acptr) + 1, cli_lastnick(acptr),
-		    cli_user(acptr)->username, cli_user(acptr)->realhost,
+		    cli_user(acptr)->realusername, cli_user(acptr)->realhost,
 		    *s ? "+" : "", s, *s ? " " : "",
 		    iptobase64(xxx_buf, &cli_ip(acptr), sizeof(xxx_buf), IsIPv6(cptr)),
 		    NumNick(acptr), cli_info(acptr));

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_mode.c,v 1.15.2.1 2005/10/31 23:16:56 entrope Exp $
+ * $Id: m_mode.c,v 1.15 2005/09/13 15:17:46 entrope Exp $
  */
 
 /*
@@ -179,11 +179,12 @@ ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		    MODEBUF_DEST_HACK4));  /* Send a HACK(4) message */
     else
       /* Servers need to be able to op people who join using the Apass
-       * or upass, as well as people joining a zannel, therefore we no
-       * longer generate HACK3. */
+       * or upass, therefore we accept modes for channels with an Apass
+       * without generating a HACK3. */
       modebuf_init(&mbuf, sptr, cptr, chptr,
 		   (MODEBUF_DEST_CHANNEL | /* Send mode to clients */
-		    MODEBUF_DEST_SERVER));   /* Send mode to servers */
+		    MODEBUF_DEST_SERVER |   /* Send mode to servers */
+		    (*chptr->mode.apass ? 0 : MODEBUF_DEST_HACK3)));
 
     mode_parse(&mbuf, cptr, sptr, chptr, parc - 2, parv + 2,
 	       (MODE_PARSE_SET    | /* Set the mode */
@@ -191,9 +192,7 @@ ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		MODE_PARSE_FORCE),  /* And force it to be accepted */
 	        NULL);
   } else {
-    if (!(member = find_member_link(chptr, sptr))
-        /* Allow people to op themselves on an empty channel. */
-        || (!IsChanOp(member) && chptr->users > 1)) {
+    if (!(member = find_member_link(chptr, sptr)) || !IsChanOp(member)) {
       modebuf_init(&mbuf, sptr, cptr, chptr,
 		   (MODEBUF_DEST_SERVER |  /* Send mode to server */
 		    MODEBUF_DEST_HACK2  |  /* Send a HACK(2) message */

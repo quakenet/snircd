@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Solaris /dev/poll event engine.
- * @version $Id: engine_devpoll.c,v 1.6.2.1 2005/12/30 13:28:40 entrope Exp $
+ * @version $Id: engine_devpoll.c,v 1.6 2004/12/11 05:13:44 klmitch Exp $
  */
 #include "config.h"
 
@@ -429,6 +429,8 @@ engine_loop(struct Generators* gen)
 	}
 	break;
       }
+
+      assert(s_fd(sock) == polls[i].fd);
 
       gen_ref_dec(sock); /* we're done with it */
     }

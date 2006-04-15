@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Public interfaces and declarations for dealing with configurable features.
- * @version $Id: ircd_features.h,v 1.38.2.4 2006/01/10 01:23:28 entrope Exp $
+ * @version $Id: ircd_features.h,v 1.38 2005/07/15 03:02:32 entrope Exp $
  */
 
 struct Client;
@@ -54,11 +54,14 @@ enum Feature {
   FEAT_HOST_HIDING,
   FEAT_HIDDEN_HOST,
   FEAT_HIDDEN_IP,
+  FEAT_AUTOINVISIBLE,
   FEAT_CONNEXIT_NOTICES,
+  FEAT_USER_HIDECHANS,
   FEAT_OPLEVELS,
-  FEAT_ZANNELS,
   FEAT_LOCAL_CHANNELS,
   FEAT_TOPIC_BURST,
+  FEAT_AUTOCHANMODES,
+  FEAT_AUTOCHANMODES_LIST,
 
   /* features that probably should not be touched */
   FEAT_KILLCHASETIMELIMIT,
@@ -97,7 +100,12 @@ enum Feature {
   FEAT_ANNOUNCE_INVITES,
 
   /* features that affect all operators */
+  FEAT_EXTENDED_CHECKCMD,
   FEAT_CONFIG_OPERCMDS,
+  FEAT_SETHOST,
+  FEAT_SETHOST_FREEFORM,
+  FEAT_SETHOST_USER,
+  FEAT_SETHOST_AUTO,
 
   /* HEAD_IN_SAND Features */
   FEAT_HIS_SNOTICES,
@@ -126,6 +134,7 @@ enum Feature {
   FEAT_HIS_STATS_q,
   FEAT_HIS_STATS_R,
   FEAT_HIS_STATS_r,
+  FEAT_HIS_STATS_s,
   FEAT_HIS_STATS_t,
   FEAT_HIS_STATS_T,
   FEAT_HIS_STATS_u,
@@ -140,15 +149,18 @@ enum Feature {
   FEAT_HIS_WHOIS_LOCALCHAN,
   FEAT_HIS_WHO_SERVERNAME,
   FEAT_HIS_WHO_HOPCOUNT,
-  FEAT_HIS_MODEWHO,
+  FEAT_HIS_WHO_FILTERIP,
   FEAT_HIS_BANWHO,
   FEAT_HIS_KILLWHO,
+  /* Asuka - Reimplement HEAD_IN_SAND_GLINE from Lain */
+  FEAT_HIS_GLINE,
   FEAT_HIS_REWRITE,
   FEAT_HIS_REMOTE,
   FEAT_HIS_NETSPLIT,
   FEAT_HIS_SERVERNAME,
   FEAT_HIS_SERVERINFO,
   FEAT_HIS_URLSERVERS,
+  FEAT_HIS_USERGLINE,
 
   /* Misc. random stuff */
   FEAT_NETWORK,

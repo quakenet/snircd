@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_names.c,v 1.22.2.2 2005/11/17 00:05:00 entrope Exp $
+ * $Id: m_names.c,v 1.22.2.1 2005/10/06 04:00:26 entrope Exp $
  */
 
 /*
@@ -242,8 +242,7 @@ int m_names(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   
   s = strchr(para, ','); /* Recursively call m_names for each comma-separated channel. Eww. */
   if (s) {
-    *s++ = '\0';
-    parv[1+showingdelayed] = s;
+    parv[1+showingdelayed] = ++s;
     m_names(cptr, sptr, parc, parv);
   }
  
@@ -390,8 +389,7 @@ int ms_names(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   
   s = strchr(para, ','); /* Recursively call m_names for each comma-separated channel. */
   if (s) {
-    *s++ = '\0';
-    parv[1+!!showingdelayed] = s;
+    parv[1+!!showingdelayed] = ++s;
     m_names(cptr, sptr, parc, parv);
   }
  

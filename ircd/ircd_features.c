@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50.2.4 2006/01/10 01:23:28 entrope Exp $
+ * @version $Id: ircd_features.c,v 1.50 2005/07/15 21:28:34 entrope Exp $
  */
 #include "config.h"
 
@@ -307,16 +307,19 @@ static struct FeatureDesc {
   F_B(HOST_HIDING, 0, 1, 0),
   F_S(HIDDEN_HOST, FEAT_CASE, "users.undernet.org", 0),
   F_S(HIDDEN_IP, 0, "127.0.0.1", 0),
+  F_B(AUTOINVISIBLE, 0, 1, 0),
   F_B(CONNEXIT_NOTICES, 0, 0, 0),
+  F_B(USER_HIDECHANS, 0, 0, 0),
   F_B(OPLEVELS, 0, 1, 0),
-  F_B(ZANNELS, 0, 1, 0),
   F_B(LOCAL_CHANNELS, 0, 1, 0),
   F_B(TOPIC_BURST, 0, 0, 0),
+  F_B(AUTOCHANMODES, 0, 1, 0),
+  F_S(AUTOCHANMODES_LIST, FEAT_CASE | FEAT_NULL, "ntCN", 0),
 
   /* features that probably should not be touched */
   F_I(KILLCHASETIMELIMIT, 0, 30, 0),
   F_I(MAXCHANNELSPERUSER, 0, 10, 0),
-  F_I(NICKLEN, 0, 12, 0),
+  F_I(NICKLEN, 0, 15, 0),
   F_I(AVBANLEN, 0, 40, 0),
   F_I(MAXBANS, 0, 45, 0),
   F_I(MAXSILES, 0, 15, 0),
@@ -350,7 +353,12 @@ static struct FeatureDesc {
   F_B(ANNOUNCE_INVITES, 0, 0, 0),
 
   /* features that affect all operators */
+  F_B(EXTENDED_CHECKCMD, 0, 0, 0),
   F_B(CONFIG_OPERCMDS, 0, 0, 0),
+  F_B(SETHOST, 0, 0, 0),
+  F_B(SETHOST_FREEFORM, 0, 0, 0),
+  F_B(SETHOST_USER, 0, 0, 0),
+  F_B(SETHOST_AUTO, 0, 0, 0),
 
   /* HEAD_IN_SAND Features */
   F_B(HIS_SNOTICES, 0, 1, 0),
@@ -379,6 +387,7 @@ static struct FeatureDesc {
   F_B(HIS_STATS_q, 0, 1, 0),
   F_B(HIS_STATS_R, 0, 1, 0),
   F_B(HIS_STATS_r, 0, 1, 0),
+  F_B(HIS_STATS_s, 0, 1, 0),
   F_B(HIS_STATS_t, 0, 1, 0),
   F_B(HIS_STATS_T, 0, 1, 0),
   F_B(HIS_STATS_u, 0, 0, 0),
@@ -393,15 +402,18 @@ static struct FeatureDesc {
   F_B(HIS_WHOIS_LOCALCHAN, 0, 1, 0),
   F_B(HIS_WHO_SERVERNAME, 0, 1, 0),
   F_B(HIS_WHO_HOPCOUNT, 0, 1, 0),
-  F_B(HIS_MODEWHO, 0, 1, 0),
+  F_B(HIS_WHO_FILTERIP, 0, 1, 0),
   F_B(HIS_BANWHO, 0, 1, 0),
   F_B(HIS_KILLWHO, 0, 1, 0),
+  /* Asuka - Reimplement HEAD_IN_SAND_GLINE from Lain */
+  F_B(HIS_GLINE, 0, 1, 0),
   F_B(HIS_REWRITE, 0, 1, 0),
   F_I(HIS_REMOTE, 0, 1, 0),
   F_B(HIS_NETSPLIT, 0, 1, 0),
   F_S(HIS_SERVERNAME, 0, "*.undernet.org", feature_notify_servername),
   F_S(HIS_SERVERINFO, 0, "The Undernet Underworld", feature_notify_serverinfo),
   F_S(HIS_URLSERVERS, 0, "http://www.undernet.org/servers.php", 0),
+  F_B(HIS_USERGLINE, 0, 1, 0),
 
   /* Misc. random stuff */
   F_S(NETWORK, 0, "UnderNet", 0),
