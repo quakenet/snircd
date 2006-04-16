@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h,v 1.55 2005/09/27 02:41:57 entrope Exp $
+ * @version $Id: channel.h,v 1.55.2.1 2005/12/23 17:12:06 klmitch Exp $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
@@ -167,15 +167,6 @@ typedef enum ChannelGetType {
  * existing bugs.
  */
 #define TS_LAG_TIME 86400
-
-/**
- * A Magic TS that is used for channels that are created by JOIN,
- * a channel with this TS accepts all TS without complaining that
- * it might receive later via MODE or CREATE.
- *
- * Part of the P9 compatibility, shouldn't occur on a P10 network.
- */
-#define MAGIC_REMOTE_JOIN_TS 1270080000
 
 
 

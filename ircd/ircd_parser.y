@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_parser.y,v 1.56.2.1 2005/10/06 00:37:31 entrope Exp $
+ * $Id: ircd_parser.y,v 1.56.2.2 2005/12/13 23:12:41 entrope Exp $
  */
 %{
 
@@ -746,7 +746,7 @@ clientclass: CLASS '=' QSTRING ';'
 {
   c_class = find_class($3);
   if (!c_class)
-    parse_error("No such connection class '%s' for Class block", $3);
+    parse_error("No such connection class '%s' for Client block", $3);
   MyFree($3);
 };
 clientpass: PASS '=' QSTRING ';'

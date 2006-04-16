@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.1 2005/10/06 00:37:31 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.2 2005/12/31 01:40:00 entrope Exp $
  */
 #include "config.h"
 
@@ -484,7 +484,8 @@ struct ConfItem *conf_debug_iline(const char *client)
             (aconf->username ? aconf->username : "(null)"),
             (aconf->host ? aconf->host : "(null)"),
             (aconf->name ? aconf->name : "(null)"),
-            ConfClass(aconf), aconf->maximum,  aconf->passwd);
+            ConfClass(aconf), aconf->maximum,
+            (aconf->passwd ? aconf->passwd : "(null)"));
     break;
   }
 

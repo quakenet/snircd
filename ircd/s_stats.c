@@ -62,7 +62,7 @@
 /** @file
  * @brief Report configuration lines and other statistics from this
  * server.
- * @version $Id: s_stats.c,v 1.44.2.1 2005/10/12 01:13:48 entrope Exp $
+ * @version $Id: s_stats.c,v 1.44.2.2 2005/11/19 23:57:13 entrope Exp $
  *
  * Note: The info is reported in the order the server uses
  *       it--not reversed as in ircd.conf!
@@ -493,9 +493,9 @@ stats_servers_verbose(struct Client* sptr, const struct StatDesc* sd,
                "%-20s %-20s Flags Hops Numeric   Lag  RTT   Up Down "
                "Clients/Max Proto %-10s :Info", "Servername", "Uplink",
                "LinkTS");
-    fmt = "%-20s %-20s %c%c%c%c  %4i %s %-4i %5i %4i %4i %4i %5i %5i P%-2i   %Tu :%s";
+    fmt = "%-20s %-20s %c%c%c%c%c  %4i %s %-4i %5i %4i %4i %4i %5i %5i P%-2i   %Tu :%s";
   } else {
-    fmt = "%s %s %c%c%c%c %i %s %i %i %i %i %i %i %i P%i %Tu :%s";
+    fmt = "%s %s %c%c%c%c%c %i %s %i %i %i %i %i %i %i P%i %Tu :%s";
   }
 
   for (acptr = GlobalClientList; acptr; acptr = cli_next(acptr))
@@ -512,6 +512,7 @@ stats_servers_verbose(struct Client* sptr, const struct StatDesc* sd,
                IsBurstAck(acptr) ? 'A' : '-',
                IsHub(acptr) ? 'H' : '-',
                IsService(acptr) ? 'S' : '-',
+               IsIPv6(acptr) ? '6' : '-',
                cli_hopcount(acptr),
                NumServ(acptr),
                base64toint(cli_yxx(acptr)),

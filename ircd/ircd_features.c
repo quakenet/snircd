@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50 2005/07/15 21:28:34 entrope Exp $
+ * @version $Id: ircd_features.c,v 1.50.2.4 2006/01/10 01:23:28 entrope Exp $
  */
 #include "config.h"
 
@@ -311,6 +311,7 @@ static struct FeatureDesc {
   F_B(CONNEXIT_NOTICES, 0, 0, 0),
   F_B(USER_HIDECHANS, 0, 0, 0),
   F_B(OPLEVELS, 0, 1, 0),
+  F_B(ZANNELS, 0, 1, 0),
   F_B(LOCAL_CHANNELS, 0, 1, 0),
   F_B(TOPIC_BURST, 0, 0, 0),
   F_B(AUTOCHANMODES, 0, 1, 0),
@@ -403,6 +404,7 @@ static struct FeatureDesc {
   F_B(HIS_WHO_SERVERNAME, 0, 1, 0),
   F_B(HIS_WHO_HOPCOUNT, 0, 1, 0),
   F_B(HIS_WHO_FILTERIP, 0, 1, 0),
+  F_B(HIS_MODEWHO, 0, 1, 0),
   F_B(HIS_BANWHO, 0, 1, 0),
   F_B(HIS_KILLWHO, 0, 1, 0),
   /* Asuka - Reimplement HEAD_IN_SAND_GLINE from Lain */

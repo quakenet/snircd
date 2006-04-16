@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c,v 1.155 2005/09/27 02:41:57 entrope Exp $
+ * @version $Id: channel.c,v 1.155.2.12 2006/01/07 01:08:29 entrope Exp $
  */
 #include "config.h"
 
@@ -258,18 +258,44 @@ int sub1_from_channel(struct Channel* chptr)
 
   chptr->users = 0;
 
-  /* There is a semantics problem here: Assuming no fragments across a
-   * split, a channel without Apass could be maliciously destroyed and
-   * recreated, and someone could set apass on the new instance.
-   *
-   * This could be fixed by preserving the empty non-Apass channel for
-   * the same time as if it had an Apass (but removing +i and +l), and
-   * reopping the first user to rejoin.  However, preventing net rides
-   * requires a backwards-incompatible protocol change..
+  /*
+   * Also channels without Apass set need to be kept alive,
+   * otherwise Bad Guys(tm) would be able to takeover
+   * existing channels too easily, and then set an Apass!
+   * However, if a channel without Apass becomes empty
+   * then we try to be kind to them and remove possible
+   * limiting modes.
    */
-  if (!chptr->mode.apass[0])         /* If no Apass, destroy now. */
-    destruct_channel(chptr);
-  else if (TStime() - chptr->creationtime < 172800)	/* Channel younger than 48 hours? */
+  chptr->mode.mode &= ~MODE_INVITEONLY;
+  chptr->mode.limit = 0;
+  /*
+   * We do NOT reset a possible key or bans because when
+   * the 'channel owners' can't get in because of a key
+   * or ban then apparently there was a fight/takeover
+   * on the channel and we want them to contact IRC opers
+   * who then will educate them on the use of Apass/Upass.
+   */
+  if (!chptr->mode.apass[0])         		/* If no Apass, reset all modes. */
+  {
+    struct Ban *link, *next;
+    chptr->mode.mode = 0;
+    *chptr->mode.key = '\0';
+    while (chptr->invites)
+      del_invite(chptr->invites->value.cptr, chptr);
+    for (link = chptr->banlist; link; link = next) {
+      next = link->next;
+      free_ban(link);
+    }
+    chptr->banlist = NULL;
+
+    /* Immediately destruct empty -A channels if not using apass. */
+    if (!feature_bool(FEAT_OPLEVELS))
+    {
+      destruct_channel(chptr);
+      return 0;
+    }
+  }
+  if (TStime() - chptr->creationtime < 172800)	/* Channel younger than 48 hours? */
     schedule_destruct_event_1m(chptr);		/* Get rid of it in approximately 4-5 minutes */
   else
     schedule_destruct_event_48h(chptr);		/* Get rid of it in approximately 48 hours */
@@ -647,7 +673,7 @@ int has_voice(struct Client* cptr, struct Channel* chptr)
  *
  * @param member	The membership of the user
  * @param reveal	If true, the user will be "revealed" on a delayed
- * 			joined channel. 
+ * 			joined channel.
  *
  * @returns True if the client can speak on the channel.
  */
@@ -655,10 +681,22 @@ int member_can_send_to_channel(struct Membership* member, int reveal)
 {
   assert(0 != member);
 
-  /* Discourage using the Apass to get op.  They should use the upass. */
+  /* Do not check for users on other servers: This should be a
+   * temporary desynch, or maybe they are on an older server, but
+   * we do not want to send ERR_CANNOTSENDTOCHAN more than once.
+   */
+  if (!MyUser(member->user))
+  {
+    if (IsDelayedJoin(member) && reveal)
+      RevealDelayedJoin(member);
+    return 1;
+  }
+
+  /* Discourage using the Apass to get op.  They should use the Upass. */
   if (IsChannelManager(member) && member->channel->mode.apass[0])
     return 0;
 
+  /* If you have voice or ops, you can speak. */
   if (IsVoicedOrOpped(member))
     return 1;
 
@@ -668,15 +706,13 @@ int member_can_send_to_channel(struct Membership* member, int reveal)
    */
   if (member->channel->mode.mode & MODE_MODERATED)
     return 0;
+
   /* If only logged in users may join and you're not one, you can't speak. */
   if (member->channel->mode.mode & MODE_REGONLY && !IsAccount(member->user))
     return 0;
-  /*
-   * If you're banned then you can't speak either.
-   * but because of the amount of CPU time that is_banned chews
-   * we only check it for our clients.
-   */
-  if (MyUser(member->user) && is_banned(member))
+
+  /* If you're banned then you can't speak either. */
+  if (is_banned(member))
     return 0;
 
   if (IsDelayedJoin(member) && reveal)
@@ -741,9 +777,11 @@ const char* find_no_nickchange_channel(struct Client* cptr)
     struct Membership* member;
     for (member = (cli_user(cptr))->channel; member;
 	 member = member->next_channel) {
-        if (!IsVoicedOrOpped(member) &&
-            (is_banned(member) ||
-             (member->channel->mode.mode & MODE_MODERATED)))
+      if (IsVoicedOrOpped(member))
+        continue;
+      if ((member->channel->mode.mode & MODE_MODERATED)
+          || (member->channel->mode.mode & MODE_REGONLY && !IsAccount(cptr))
+          || is_banned(member))
         return member->channel->chname;
     }
   }
@@ -1554,7 +1592,6 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
     MODE_NOPRIVMSGS,	'n',
     MODE_REGONLY,	'r',
     MODE_DELJOINS,      'D',
-    MODE_WASDELJOINS,   'd',
 /*  MODE_KEY,		'k', */
 /*  MODE_BAN,		'b', */
     MODE_LIMIT,		'l',
@@ -1566,15 +1603,19 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
     MODE_NONOTICE,	'N',
     0x0, 0x0
   };
+  static int local_flags[] = {
+    MODE_WASDELJOINS,   'd',
+    0x0, 0x0
+  };
   int i;
   int *flag_p;
 
   struct Client *app_source; /* where the MODE appears to come from */
 
-  char addbuf[20]; /* accumulates +psmtin, etc. */
-  int addbuf_i = 0;
-  char rembuf[20]; /* accumulates -psmtin, etc. */
-  int rembuf_i = 0;
+  char addbuf[20], addbuf_local[20]; /* accumulates +psmtin, etc. */
+  int addbuf_i = 0, addbuf_local_i = 0;
+  char rembuf[20], rembuf_local[20]; /* accumulates -psmtin, etc. */
+  int rembuf_i = 0, rembuf_local_i = 0;
   char *bufptr; /* we make use of indirection to simplify the code */
   int *bufptr_i;
 
@@ -1600,7 +1641,10 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
 
   /* Ok, if we were given the OPMODE flag, or its a server, hide the source.
    */
-  if (mbuf->mb_dest & MODEBUF_DEST_OPMODE || IsServer(mbuf->mb_source) || IsMe(mbuf->mb_source))
+  if (feature_bool(FEAT_HIS_MODEWHO) &&
+      (mbuf->mb_dest & MODEBUF_DEST_OPMODE ||
+       IsServer(mbuf->mb_source) ||
+       IsMe(mbuf->mb_source)))
     app_source = &his;
   else
     app_source = mbuf->mb_source;
@@ -1618,6 +1662,14 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
       addbuf[addbuf_i++] = flag_p[1];
     else if (*flag_p & mbuf->mb_rem)
       rembuf[rembuf_i++] = flag_p[1];
+  }
+
+  /* Some flags may be for local display only. */
+  for (flag_p = local_flags; flag_p[0]; flag_p += 2) {
+    if (*flag_p & mbuf->mb_add)
+      addbuf_local[addbuf_local_i++] = flag_p[1];
+    else if (*flag_p & mbuf->mb_rem)
+      rembuf_local[rembuf_local_i++] = flag_p[1];
   }
 
   /* Now go through the modes with arguments... */
@@ -1689,6 +1741,8 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
   /* terminate the mode strings */
   addbuf[addbuf_i] = '\0';
   rembuf[rembuf_i] = '\0';
+  addbuf_local[addbuf_local_i] = '\0';
+  rembuf_local[rembuf_local_i] = '\0';
 
   /* If we're building a user visible MODE or HACK... */
   if (mbuf->mb_dest & (MODEBUF_DEST_CHANNEL | MODEBUF_DEST_HACK2 |
@@ -1776,9 +1830,12 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
 
     if (mbuf->mb_dest & MODEBUF_DEST_CHANNEL)
       sendcmdto_channel_butserv_butone(app_source, CMD_MODE, mbuf->mb_channel, NULL, 0,
-				"%H %s%s%s%s%s%s", mbuf->mb_channel,
-				rembuf_i ? "-" : "", rembuf,
-				addbuf_i ? "+" : "", addbuf, remstr, addstr);
+                                       "%H %s%s%s%s%s%s%s%s", mbuf->mb_channel,
+                                       rembuf_i || rembuf_local_i ? "-" : "",
+                                       rembuf, rembuf_local,
+                                       addbuf_i || addbuf_local_i ? "+" : "",
+                                       addbuf, addbuf_local,
+                                       remstr, addstr);
   }
 
   /* Now are we supposed to propagate to other servers? */
@@ -1793,7 +1850,7 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
      * limit is supressed if we're removing it; we have to figure out which
      * direction is the direction for it to be removed, though...
      */
-    limitdel |= (mbuf->mb_dest & MODEBUF_DEST_HACK2) ? MODE_DEL : MODE_ADD;
+    limitdel |= (mbuf->mb_dest & MODEBUF_DEST_BOUNCE) ? MODE_DEL : MODE_ADD;
 
     for (i = 0; i < mbuf->mb_count; i++) {
       if (MB_TYPE(mbuf, i) & MODE_SAVE)
@@ -1864,7 +1921,7 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
        * We're propagating a normal MODE command to the rest of the network;
        * we send the actual channel TS unless this is a HACK3 or a HACK4
        */
-      if (IsServer(mbuf->mb_source))
+      if (IsServer(mbuf->mb_source) || IsMe(mbuf->mb_source))
 	sendcmdto_serv_butone(mbuf->mb_source, CMD_MODE, mbuf->mb_connect,
 			      "%H %s%s%s%s%s%s %Tu", mbuf->mb_channel,
 			      rembuf_i ? "-" : "", rembuf, addbuf_i ? "+" : "",
@@ -1991,7 +2048,7 @@ modebuf_mode_uint(struct ModeBuf *mbuf, unsigned int mode, unsigned int uint)
   assert(0 != mbuf);
   assert(0 != (mode & (MODE_ADD | MODE_DEL)));
 
-  if (mode == (MODE_LIMIT | MODE_DEL)) {
+  if (mode == (MODE_LIMIT | ((mbuf->mb_dest & MODEBUF_DEST_BOUNCE) ? MODE_ADD : MODE_DEL))) {
       mbuf->mb_rem |= mode;
       return;
   }
@@ -2452,7 +2509,9 @@ mode_parse_upass(struct ParseState *state, int *flag_p)
       send_reply(state->sptr, ERR_NOTMANAGER, state->chptr->chname,
                  state->chptr->chname);
     } else {
-      send_reply(state->sptr, ERR_NOMANAGER, state->chptr->chname);
+      send_reply(state->sptr, ERR_NOMANAGER, state->chptr->chname,
+          (TStime() - state->chptr->creationtime < 172800) ?
+	  "approximately 4-5 minutes" : "approximately 48 hours");
     }
     return;
   }
@@ -2544,31 +2603,48 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
     return;
   }
 
-  /* If a non-service user is trying to force it, refuse. */
-  if (state->flags & MODE_PARSE_FORCE && MyUser(state->sptr)
-      && !HasPriv(state->sptr, PRIV_APASS_OPMODE)) {
-    send_reply(state->sptr, ERR_NOTMANAGER, state->chptr->chname,
-               state->chptr->chname);
-    return;
-  }
-
-  /* Don't allow to change the Apass if the channel is older than 48 hours. */
-  if (MyUser(state->sptr)
-      && TStime() - state->chptr->creationtime >= 172800
-      && !IsAnOper(state->sptr)) {
-    send_reply(state->sptr, ERR_CHANSECURED, state->chptr->chname);
-    return;
-  }
-
-  /* If they are not the channel manager, they are not allowed to change it */
-  if (MyUser(state->sptr) && !(state->flags & MODE_PARSE_FORCE || IsChannelManager(state->member))) {
-    if (*state->chptr->mode.apass) {
-      send_reply(state->sptr, ERR_NOTMANAGER, state->chptr->chname,
-                 state->chptr->chname);
+  if (MyUser(state->sptr)) {
+    if (state->flags & MODE_PARSE_FORCE) {
+      /* If an unprivileged oper is trying to force it, refuse. */
+      if (!HasPriv(state->sptr, PRIV_APASS_OPMODE)) {
+        send_reply(state->sptr, ERR_NOTMANAGER, state->chptr->chname,
+                   state->chptr->chname);
+        return;
+      }
     } else {
-      send_reply(state->sptr, ERR_NOMANAGER, state->chptr->chname);
+      /* If they are not the channel manager, they are not allowed to change it. */
+      if (!IsChannelManager(state->member)) {
+        if (*state->chptr->mode.apass) {
+          send_reply(state->sptr, ERR_NOTMANAGER, state->chptr->chname,
+                     state->chptr->chname);
+        } else {
+          send_reply(state->sptr, ERR_NOMANAGER, state->chptr->chname,
+                     (TStime() - state->chptr->creationtime < 172800) ?
+                     "approximately 4-5 minutes" : "approximately 48 hours");
+        }
+        return;
+      }
+      /* Can't remove the Apass while Upass is still set. */
+      if (state->dir == MODE_DEL && *state->chptr->mode.upass) {
+        send_reply(state->sptr, ERR_UPASSSET, state->chptr->chname, state->chptr->chname);
+        return;
+      }
+      /* Can't add an Apass if one is set, nor can one remove the wrong Apass. */
+      if ((state->dir == MODE_ADD && *state->chptr->mode.apass) ||
+          (state->dir == MODE_DEL && ircd_strcmp(state->chptr->mode.apass, t_str))) {
+        send_reply(state->sptr, ERR_KEYSET, state->chptr->chname);
+        return;
+      }
     }
-    return;
+
+    /* Forbid removing the Apass if the channel is older than 48 hours
+     * unless an oper is doing it. */
+    if (TStime() - state->chptr->creationtime >= 172800
+        && state->dir == MODE_DEL
+        && !IsAnOper(state->sptr)) {
+      send_reply(state->sptr, ERR_CHANSECURED, state->chptr->chname);
+      return;
+    }
   }
 
   if (state->done & DONE_APASS) /* allow apass to be set only once */
@@ -2586,20 +2662,6 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
 
   if (!state->mbuf)
     return;
-
-  if (!(state->flags & MODE_PARSE_FORCE)) {
-    /* can't remove the apass while upass is still set */
-    if (state->dir == MODE_DEL && *state->chptr->mode.upass) {
-      send_reply(state->sptr, ERR_UPASSSET, state->chptr->chname, state->chptr->chname);
-      return;
-    }
-    /* can't add an apass if one is set, nor can one remove the wrong apass */
-    if ((state->dir == MODE_ADD && *state->chptr->mode.apass) ||
-	(state->dir == MODE_DEL && ircd_strcmp(state->chptr->mode.apass, t_str))) {
-      send_reply(state->sptr, ERR_KEYSET, state->chptr->chname);
-      return;
-    }
-  }
 
   if (!(state->flags & MODE_PARSE_WIPEOUT) && state->dir == MODE_ADD &&
       !ircd_strcmp(state->chptr->mode.apass, t_str))
@@ -2629,11 +2691,20 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
 	send_reply(state->sptr, RPL_APASSWARN_SECRET, state->chptr->chname,
                    state->chptr->mode.apass);
       }
-      /* Give the channel manager level 0 ops. */
-      if (!(state->flags & MODE_PARSE_FORCE) && IsChannelManager(state->member))
+      /* Give the channel manager level 0 ops.
+         There should not be tested for IsChannelManager here because
+	 on the local server it is impossible to set the apass if one
+	 isn't a channel manager and remote servers might need to sync
+	 the oplevel here: when someone creates a channel (and becomes
+	 channel manager) during a net.break, and only sets the Apass
+	 after the net rejoined, they will have oplevel MAXOPLEVEL on
+	 all remote servers. */
+      if (state->member)
         SetOpLevel(state->member, 0);
     } else { /* remove the old apass */
       *state->chptr->mode.apass = '\0';
+      /* Clear Upass so that there is never a Upass set when a zannel is burst. */
+      *state->chptr->mode.upass = '\0';
       if (MyUser(state->sptr))
         send_reply(state->sptr, RPL_APASSWARN_CLEAR);
       /* Revert everyone to MAXOPLEVEL. */
@@ -2904,9 +2975,11 @@ static void
 mode_parse_client(struct ParseState *state, int *flag_p)
 {
   char *t_str;
+  char *colon;
   struct Client *acptr;
   struct Membership *member;
   int oplevel = MAXOPLEVEL + 1;
+  int req_oplevel;
   int i;
 
   if (MyUser(state->sptr) && state->max_args <= 0) /* drop if too many args */
@@ -2925,9 +2998,27 @@ mode_parse_client(struct ParseState *state, int *flag_p)
     return;
   }
 
-  if (MyUser(state->sptr)) /* find client we're manipulating */
+  if (MyUser(state->sptr)) {
+    colon = strchr(t_str, ':');
+    if (colon != NULL) {
+      *colon++ = '\0';
+      req_oplevel = atoi(colon);
+      if (!(state->flags & MODE_PARSE_FORCE)
+          && state->member
+          && (req_oplevel < OpLevel(state->member)
+              || (req_oplevel == OpLevel(state->member)
+                  && OpLevel(state->member) < MAXOPLEVEL)
+              || req_oplevel > MAXOPLEVEL))
+        send_reply(state->sptr, ERR_NOTLOWEROPLEVEL,
+                   t_str, state->chptr->chname,
+                   OpLevel(state->member), req_oplevel, "op",
+                   OpLevel(state->member) == req_oplevel ? "the same" : "a higher");
+      else if (req_oplevel <= MAXOPLEVEL)
+        oplevel = req_oplevel;
+    }
+    /* find client we're manipulating */
     acptr = find_chasing(state->sptr, t_str, NULL);
-  else {
+  } else {
     if (t_str[5] == ':') {
       t_str[5] = '\0';
       oplevel = atoi(t_str + 6);
@@ -3029,11 +3120,14 @@ mode_process_clients(struct ParseState *state)
 	  continue;
         }
 
-	/* don't allow to deop members with an op level that is <= our own level */
-	if (state->sptr != state->cli_change[i].client		/* but allow to deop oneself */
-            && state->chptr->mode.apass[0]
+	/* Forbid deopping other members with an oplevel less than
+         * one's own level, and other members with an oplevel the same
+         * as one's own unless both are at MAXOPLEVEL. */
+	if (state->sptr != state->cli_change[i].client
             && state->member
-            && OpLevel(member) <= OpLevel(state->member)) {
+            && ((OpLevel(member) < OpLevel(state->member))
+                || (OpLevel(member) == OpLevel(state->member)
+                    && OpLevel(member) < MAXOPLEVEL))) {
 	    int equal = (OpLevel(member) == OpLevel(state->member));
 	    send_reply(state->sptr, ERR_NOTLOWEROPLEVEL,
 		       cli_name(state->cli_change[i].client),
@@ -3067,7 +3161,7 @@ mode_process_clients(struct ParseState *state)
     /* actually effect the change */
     if (state->flags & MODE_PARSE_SET) {
       if (state->cli_change[i].flag & MODE_ADD) {
-        if (IsDelayedJoin(member))
+        if (IsDelayedJoin(member) && !IsZombie(member))
           RevealDelayedJoin(member);
 	member->status |= (state->cli_change[i].flag &
 			   (MODE_CHANOP | MODE_VOICE));
@@ -3418,17 +3512,10 @@ joinbuf_join(struct JoinBuf *jbuf, struct Channel *chan, unsigned int flags)
     else
       add_user_to_channel(chan, jbuf->jb_source, flags, oplevel);
 
-    /* send notification to all servers */
+    /* send JOIN notification to all servers (CREATE is sent later). */
     if (jbuf->jb_type != JOINBUF_TYPE_CREATE && !is_local)
-    {
-      if (flags & CHFL_CHANOP) {
-        assert(oplevel == 0 || oplevel == 1);
-        sendcmdto_serv_butone(jbuf->jb_source, CMD_JOIN, jbuf->jb_connect,
-                              "%u:%H %Tu", oplevel, chan, chan->creationtime);
-      } else
-        sendcmdto_serv_butone(jbuf->jb_source, CMD_JOIN, jbuf->jb_connect,
-                              "%H %Tu", chan, chan->creationtime);
-    }
+      sendcmdto_serv_butone(jbuf->jb_source, CMD_JOIN, jbuf->jb_connect,
+			    "%H %Tu", chan, chan->creationtime);
 
     if (!((chan->mode.mode & MODE_DELJOINS) && !(flags & CHFL_VOICED_OR_OPPED))) {
       /* Send the notification to the channel */
