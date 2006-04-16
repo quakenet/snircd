@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Public interfaces and declarations for dealing with configurable features.
- * @version $Id: ircd_features.h,v 1.38 2005/07/15 03:02:32 entrope Exp $
+ * @version $Id: ircd_features.h,v 1.38.2.4 2006/01/10 01:23:28 entrope Exp $
  */
 
 struct Client;
@@ -56,6 +56,7 @@ enum Feature {
   FEAT_HIDDEN_IP,
   FEAT_CONNEXIT_NOTICES,
   FEAT_OPLEVELS,
+  FEAT_ZANNELS,
   FEAT_LOCAL_CHANNELS,
   FEAT_TOPIC_BURST,
 
@@ -139,6 +140,7 @@ enum Feature {
   FEAT_HIS_WHOIS_LOCALCHAN,
   FEAT_HIS_WHO_SERVERNAME,
   FEAT_HIS_WHO_HOPCOUNT,
+  FEAT_HIS_MODEWHO,
   FEAT_HIS_BANWHO,
   FEAT_HIS_KILLWHO,
   FEAT_HIS_REWRITE,

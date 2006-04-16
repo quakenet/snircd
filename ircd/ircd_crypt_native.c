@@ -19,13 +19,13 @@
 /**
  * @file
  * @brief Native crypt() function routines
- * @version $Id: ircd_crypt_native.c,v 1.7 2005/05/13 02:03:33 entrope Exp $
+ * @version $Id: ircd_crypt_native.c,v 1.7.2.1 2005/12/14 03:01:38 entrope Exp $
  * 
  * Routines for handling passwords encrypted with the system's native crypt()
  * function (typically a DES encryption routine, but can be anything nowadays).
  * 
  */
-#define _XOPEN_SOURCE 600
+#define _XOPEN_SOURCE 500
 
 #include "config.h"
 #include "ircd_crypt.h"
