@@ -43,6 +43,7 @@
 #include "numnicks.h"
 #include "querycmds.h"
 #include "res.h"
+#include "s_auth.h"
 #include "s_bsd.h"
 #include "s_conf.h"
 #include "s_debug.h"
@@ -62,7 +63,7 @@
 /** @file
  * @brief Report configuration lines and other statistics from this
  * server.
- * @version $Id: s_stats.c,v 1.44.2.2 2005/11/19 23:57:13 entrope Exp $
+ * @version $Id: s_stats.c,v 1.44.2.4 2006/03/14 14:56:50 entrope Exp $
  *
  * Note: The info is reported in the order the server uses
  *       it--not reversed as in ircd.conf!
@@ -109,6 +110,7 @@ stats_configured_links(struct Client *sptr, const struct StatDesc* sd,
 	send_reply(sptr, RPL_STATSCLINE, name, port, maximum, hub_limit, get_conf_class(tmp));
       else if (tmp->status & CONF_CLIENT)
         send_reply(sptr, RPL_STATSILINE,
+                   (tmp->username ? tmp->username : ""), (tmp->username ? "@" : ""),
                    (tmp->host ? tmp->host : "*"), maximum,
                    (name[0] == ':' ? "0" : ""), (tmp->name ? tmp->name : "*"),
                    port, get_conf_class(tmp));
@@ -183,6 +185,7 @@ stats_access(struct Client *to, const struct StatDesc *sd, char *param)
            || (aconf->name && !match(param, aconf->name))))
     {
       send_reply(to, RPL_STATSILINE,
+                 (aconf->username ? aconf->username : ""), (aconf->username ? "@" : ""), 
                  (aconf->host ? aconf->host : "*"), aconf->maximum,
                  (aconf->name && aconf->name[0] == ':' ? "0":""),
                  aconf->name ? aconf->name : "*",
@@ -617,6 +620,12 @@ struct StatDesc statsinfo[] = {
   { 'z', "memory", STAT_FLAG_OPERFEAT, FEAT_HIS_STATS_z,
     count_memory, 0,
     "Memory/Structure allocation information." },
+  { ' ', "iauth", STAT_FLAG_OPERFEAT, FEAT_HIS_STATS_IAUTH,
+    report_iauth_stats, 0,
+    "IAuth statistics." },
+  { ' ', "iauthconf", STAT_FLAG_OPERFEAT, FEAT_HIS_STATS_IAUTH,
+    report_iauth_conf, 0,
+    "IAuth configuration." },
   { '*', "help", STAT_FLAG_CASESENS, FEAT_LAST_F,
     stats_help, 0,
     "Send help for stats." },

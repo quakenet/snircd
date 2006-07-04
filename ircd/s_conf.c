@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.2 2005/12/31 01:40:00 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.3 2006/02/16 03:49:54 entrope Exp $
  */
 #include "config.h"
 
@@ -34,7 +34,6 @@
 #include "hash.h"
 #include "ircd.h"
 #include "ircd_alloc.h"
-#include "ircd_auth.h"
 #include "ircd_chattr.h"
 #include "ircd_log.h"
 #include "ircd_reply.h"
@@ -49,6 +48,7 @@
 #include "opercmds.h"
 #include "parse.h"
 #include "res.h"
+#include "s_auth.h"
 #include "s_bsd.h"
 #include "s_debug.h"
 #include "s_misc.h"
@@ -949,14 +949,14 @@ int rehash(struct Client *cptr, int sig)
 
   class_mark_delete();
   mark_listeners_closing();
-  iauth_mark_closing();
+  auth_mark_closing();
   close_mappings();
 
   read_configuration_file();
 
   log_reopen(); /* reopen log files */
 
-  iauth_close_unused();
+  auth_close_unused();
   close_listeners();
   class_delete_marked();         /* unless it fails */
 

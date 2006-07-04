@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50.2.4 2006/01/10 01:23:28 entrope Exp $
+ * @version $Id: ircd_features.c,v 1.50.2.5 2006/02/16 03:49:54 entrope Exp $
  */
 #include "config.h"
 
@@ -388,6 +388,7 @@ static struct FeatureDesc {
   F_B(HIS_STATS_x, 0, 1, 0),
   F_B(HIS_STATS_y, 0, 1, 0),
   F_B(HIS_STATS_z, 0, 1, 0),
+  F_B(HIS_STATS_IAUTH, 0, 1, 0),
   F_B(HIS_WHOIS_SERVERNAME, 0, 1, 0),
   F_B(HIS_WHOIS_IDLETIME, 0, 1, 0),
   F_B(HIS_WHOIS_LOCALCHAN, 0, 1, 0),

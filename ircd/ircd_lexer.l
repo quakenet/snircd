@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_lexer.l,v 1.21 2005/04/26 03:56:50 entrope Exp $
+ * $Id: ircd_lexer.l,v 1.21.2.2 2006/06/08 02:11:21 entrope Exp $
  */
 
 %{
@@ -102,6 +102,7 @@ static struct lexer_token {
   TOKEN(USERMODE),
   TOKEN(FAST),
   TOKEN(AUTOCONNECT),
+  TOKEN(PROGRAM),
 #undef TOKEN
   { "administrator", ADMIN },
   { "apass_opmode", TPRIV_APASS_OPMODE },
@@ -118,6 +119,7 @@ static struct lexer_token {
   { "gline", TPRIV_GLINE },
   { "kb", KBYTES },
   { "kilobytes", KBYTES },
+  { "list_chan", TPRIV_LIST_CHAN },
   { "local_badchan", TPRIV_LOCAL_BADCHAN },
   { "local_gline", TPRIV_LOCAL_GLINE },
   { "local_jupe", TPRIV_LOCAL_JUPE },

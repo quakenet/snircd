@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_whois.c,v 1.37 2005/07/15 21:12:02 entrope Exp $
+ * $Id: m_whois.c,v 1.37.2.1 2006/06/09 02:16:17 entrope Exp $
  */
 
 /*
@@ -176,7 +176,7 @@ static void do_whois(struct Client* sptr, struct Client *acptr, int parc)
        }
        if (IsDeaf(acptr))
          *(buf + len++) = '-';
-       if (IsOper(sptr) && !ShowChannel(sptr, chptr))
+       if (!ShowChannel(sptr, chptr))
          *(buf + len++) = '*';
        if (IsDelayedJoin(chan) && (sptr != acptr))
          *(buf + len++) = '<';

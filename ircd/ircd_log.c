@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief IRC logging implementation.
- * @version $Id: ircd_log.c,v 1.22 2005/08/25 01:26:46 entrope Exp $
+ * @version $Id: ircd_log.c,v 1.22.2.1 2006/02/16 03:49:54 entrope Exp $
  */
 #include "config.h"
 
@@ -126,7 +126,7 @@ static struct {
   M(NONE),       M(OLDSNO),     M(SERVKILL),   M(OPERKILL),   M(HACK2),
   M(HACK3),      M(UNAUTH),     M(TCPCOMMON),  M(TOOMANY),    M(HACK4),
   M(GLINE),      M(NETWORK),    M(IPMISMATCH), M(THROTTLE),   M(OLDREALOP),
-  M(CONNEXIT),   M(DEBUG),
+  M(CONNEXIT),   M(DEBUG),      M(AUTH),
 #undef M
   { 0, 0 }
 };

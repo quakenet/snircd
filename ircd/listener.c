@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation for handling listening sockets.
- * @version $Id: listener.c,v 1.28 2005/08/15 23:22:50 entrope Exp $
+ * @version $Id: listener.c,v 1.28.2.1 2006/03/14 03:45:52 entrope Exp $
  */
 #include "config.h"
 
@@ -187,7 +187,7 @@ static int inetport(struct Listener* listener)
   /*
    * At first, open a new socket
    */
-  fd = os_socket(&listener->addr, SOCK_STREAM, get_listener_name(listener));
+  fd = os_socket(&listener->addr, SOCK_STREAM, get_listener_name(listener), 0);
   if (fd < 0)
     return 0;
   /*

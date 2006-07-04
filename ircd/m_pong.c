@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_pong.c,v 1.16 2004/12/18 16:26:27 klmitch Exp $
+ * $Id: m_pong.c,v 1.16.2.5 2006/05/14 02:46:58 entrope Exp $
  */
 
 /*
@@ -91,6 +91,7 @@
 #include "numeric.h"
 #include "numnicks.h"
 #include "opercmds.h"
+#include "s_auth.h"
 #include "s_user.h"
 #include "send.h"
 
@@ -162,26 +163,7 @@ int mr_pong(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   assert(!IsRegistered(sptr));
 
   ClrFlag(cptr, FLAG_PINGSENT);
-  cli_lasttime(cptr) = CurrentTime;
-  /*
-   * Check to see if this is a PONG :cookie reply from an
-   * unregistered user.  If so, process it. -record
-   */
-  if (0 != cli_cookie(sptr) && COOKIE_VERIFIED != cli_cookie(sptr)) {
-    if (parc > 1 && cli_cookie(sptr) == atol(parv[parc - 1])) {
-      cli_cookie(sptr) = COOKIE_VERIFIED;
-      cli_unreg(sptr) &= ~CLIREG_COOKIE; /* cookie has been returned... */
-      if (!cli_unreg(sptr)) /* no more registration tasks... */
-        /*
-         * NICK and USER OK
-         */
-        return register_user(cptr, sptr, cli_name(sptr), cli_user(sptr)->username);
-    }
-    else  
-      send_reply(sptr, SND_EXPLICIT | ERR_BADPING,
-		 ":To connect, type /QUOTE PONG %u", cli_cookie(sptr));
-  }
-  return 0;
+  return (parc > 1) ? auth_set_pong(cli_auth(sptr), strtoul(parv[parc - 1], NULL, 10)) : 0;
 }
 
 /*
@@ -195,6 +177,7 @@ int m_pong(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   assert(0 != cptr);
   assert(cptr == sptr);
+
   ClrFlag(cptr, FLAG_PINGSENT);
   cli_lasttime(cptr) = CurrentTime;
   return 0;

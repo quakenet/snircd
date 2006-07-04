@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c,v 1.61 2005/09/22 20:42:21 entrope Exp $
+ * @version $Id: gline.c,v 1.61.2.1 2006/06/09 02:12:25 entrope Exp $
  */
 #include "config.h"
 
@@ -872,7 +872,9 @@ gline_stats(struct Client *sptr, const struct StatDesc *sd,
       send_reply(sptr, RPL_STATSGLINE, 'G', gline->gl_user,
                  gline->gl_host ? "@" : "",
                  gline->gl_host ? gline->gl_host : "",
-		 gline->gl_expire + TSoffset, gline->gl_reason);
+		 gline->gl_expire + TSoffset,
+                 GlineIsActive(gline) ? '+' : '-',
+                 gline->gl_reason);
   }
 }
 

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c,v 1.26 2004/12/11 05:13:46 klmitch Exp $
+ * $Id: m_gline.c,v 1.26.2.1 2006/06/09 02:13:51 entrope Exp $
  */
 
 /*
@@ -139,17 +139,15 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     if (!find_conf_byhost(cli_confs(cptr), cli_name(sptr), CONF_UWORLD))
       return need_more_params(sptr, "GLINE");
 
-    if (parc > 4)
-      reason = parv[4];
     flags |= GLINE_FORCE;
   }
   else if (parc > 5)
-  {
     lastmod = atoi(parv[4]);
-    reason = parv[5];
-  }
   else
     return need_more_params(sptr, "GLINE");
+
+  if (parc > 4)
+    reason = parv[parc - 1];
 
   if (IsServer(sptr))
     flags |= GLINE_FORCE;

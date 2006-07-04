@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief IRC-specific printf() clone implementation.
- * @version $Id: ircd_snprintf.c,v 1.18 2004/12/11 05:13:45 klmitch Exp $
+ * @version $Id: ircd_snprintf.c,v 1.18.2.2 2006/04/07 03:51:48 entrope Exp $
  */
 #include "config.h"
 
@@ -36,7 +36,7 @@
 #include <time.h>
 
 /* Inhibit complaints when we use GCC extensions */
-#if defined(__GNUC__) && defined(HAVE_LONG_LONG)
+#if defined(__GNUC__) && SIZEOF_LONG_LONG
 # define EXTENSION __extension__
 #else
 /** Fallback (empty) definition of EXTENSION. */
@@ -44,7 +44,7 @@
 #endif
 
 /* Find the largest type */
-#ifdef HAVE_LONG_LONG
+#if SIZEOF_LONG_LONG
 EXTENSION typedef long long _large_t;
 EXTENSION typedef unsigned long long _ularge_t;
 # define SIZEOF__LARGE_T SIZEOF_LONG_LONG
@@ -1805,7 +1805,7 @@ doprintf(struct Client *dest, struct BufData *buf_p, const char *fmt,
 	if (fld_s.flags & TYPE_CHAR) /* eg, %hhu */
 	  fld_s.value.v_int = (unsigned char)va_arg(vp, unsigned int);
 	else if (fld_s.flags & TYPE_SHORT) /* eg, %hu */
-	  fld_s.value.v_int = (short)va_arg(vp, unsigned int);
+	  fld_s.value.v_int = (unsigned short)va_arg(vp, unsigned int);
 	else if (fld_s.flags & TYPE_QUAD) /* eg, %qu */
 	  fld_s.value.v_int = va_arg(vp, uint64_t);
 	else if (fld_s.flags & TYPE_LONG) /* eg, %lu */
