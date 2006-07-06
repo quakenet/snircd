@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_whowas.c,v 1.12 2005/04/25 21:25:20 entrope Exp $
+ * $Id: m_whowas.c,v 1.12.2.1 2006/01/01 04:39:07 entrope Exp $
  */
 
 /*
@@ -139,7 +139,7 @@ int m_whowas(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 	send_reply(sptr, RPL_WHOWASUSER, temp->name, temp->username,
 		   temp->hostname, temp->realname);
         if (IsAnOper(sptr) && temp->realhost)
-          send_reply(sptr, RPL_WHOISACTUALLY, temp->name, temp->username, temp->realhost);
+          send_reply(sptr, RPL_WHOISACTUALLY, temp->name, temp->username, temp->realhost, "<untracked>");
         send_reply(sptr, RPL_WHOISSERVER, temp->name,
                    (feature_bool(FEAT_HIS_WHOIS_SERVERNAME) && !IsOper(sptr)) ?
                      feature_str(FEAT_HIS_SERVERNAME) :
