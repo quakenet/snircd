@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_user.c,v 1.9 2004/12/18 16:26:27 klmitch Exp $
+ * $Id: m_user.c,v 1.9.2.1 2006/02/16 03:49:54 entrope Exp $
  */
 
 /*
@@ -90,6 +90,7 @@
 #include "ircd_string.h"
 #include "numeric.h"
 #include "numnicks.h"
+#include "s_auth.h"
 #include "s_debug.h"
 #include "s_misc.h"
 #include "s_user.h"
@@ -113,7 +114,6 @@ int m_user(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char*        username;
   const char*  info;
-  struct User* user;
 
   assert(0 != cptr);
   assert(cptr == sptr);
@@ -139,23 +139,6 @@ int m_user(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   info     = (EmptyString(parv[4])) ? "No Info" : parv[4];
 
-  user = make_user(cptr);
-
-  user->server = &me;
-  ircd_strncpy(cli_info(cptr), info, REALLEN);
-
-  cli_unreg(sptr) &= ~CLIREG_USER; /* username now set */
-
-  if (!cli_unreg(sptr)) {
-    /*
-     * NICK and PONG already received, now we have USER...
-     */
-    return register_user(cptr, sptr, cli_name(sptr), username);
-  }
-  else {
-    ircd_strncpy(user->username, username, USERLEN);
-    ircd_strncpy(user->host, cli_sockhost(cptr), HOSTLEN);
-  }
-  return 0;
+  return auth_set_user(cli_auth(cptr), username, info);
 }
 

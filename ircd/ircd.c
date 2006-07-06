@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Entry point and other initialization functions for the daemon.
- * @version $Id: ircd.c,v 1.91 2005/09/12 22:52:01 decampos Exp $
+ * @version $Id: ircd.c,v 1.91.2.3 2006/05/08 01:55:08 entrope Exp $
  */
 #include "config.h"
 
@@ -180,6 +180,8 @@ void server_restart(const char *message)
 
   close_connections(!(thisServer.bootopt & (BOOT_TTY | BOOT_DEBUG | BOOT_CHKCONF)));
 
+  reap_children();
+
   execv(SPATH, thisServer.argv);
 
   /* Have to reopen since it has been closed above */
@@ -250,15 +252,18 @@ static int check_pid(void)
 static void try_connections(struct Event* ev) {
   struct ConfItem*  aconf;
   struct ConfItem** pconf;
-  time_t            next        = 0;
-  struct ConnectionClass* cltmp;
+  time_t            next;
   struct Jupe*      ajupe;
-  int hold;
+  int               hold;
+  int               done;
 
   assert(ET_EXPIRE == ev_type(ev));
   assert(0 != ev_timer(ev));
 
   Debug((DEBUG_NOTICE, "Connection check at   : %s", myctime(CurrentTime)));
+  next = CurrentTime + feature_int(FEAT_CONNECTFREQUENCY);
+  done = 0;
+
   for (aconf = GlobalConfList; aconf; aconf = aconf->next) {
     /* Only consider server items with non-zero port and non-zero
      * connect times that are not actively juped.
@@ -273,17 +278,16 @@ static void try_connections(struct Event* ev) {
     hold = aconf->hold > CurrentTime;
 
     /* Update next possible connection check time. */
-    if (hold && (next > aconf->hold || next == 0))
+    if (hold && next > aconf->hold)
         next = aconf->hold;
 
-    cltmp = aconf->conn_class;
-
     /* Do not try to connect if its use is still on hold until future,
+     * we have already initiated a connection this try_connections(),
      * too many links in its connection class, it is already linked,
      * or if connect rules forbid a link now.
      */
-    if (hold
-        || (Links(cltmp) > MaxLinks(cltmp))
+    if (hold || done
+        || (ConfLinks(aconf) > ConfMaxLinks(aconf))
         || FindServer(aconf->name)
         || conf_eval_crule(aconf->name, CRULE_MASK))
       continue;
@@ -305,14 +309,10 @@ static void try_connections(struct Event* ev) {
 			   aconf->name);
 
     /* And stop looking for further candidates. */
-    break;
+    done = 1;
   }
 
-  if (next == 0)
-    next = CurrentTime + feature_int(FEAT_CONNECTFREQUENCY);
-
   Debug((DEBUG_NOTICE, "Next connection check : %s", myctime(next)));
-
   timer_add(&connect_timer, try_connections, 0, TT_ABSOLUTE, next);
 }
 
@@ -379,28 +379,18 @@ static void check_pings(struct Event* ev) {
      */
     if (!IsRegistered(cptr)) {
       assert(!IsServer(cptr));
-      if ((CurrentTime-cli_firsttime(cptr) >= max_ping)) {
-       /* Display message if they have sent a NICK and a USER but no
-        * nospoof PONG.
-        */
-       if (*(cli_name(cptr)) && cli_user(cptr) && *(cli_user(cptr))->username) {
-         send_reply(cptr, SND_EXPLICIT | ERR_BADPING,
-           ":Your client may not be compatible with this server.");
-         send_reply(cptr, SND_EXPLICIT | ERR_BADPING,
-           ":Compatible clients are available at %s",
-         feature_str(FEAT_URL_CLIENTS));
-       }
-       exit_client_msg(cptr,cptr,&me, "Registration Timeout");
-       continue;
-      } else {
-        /* OK, they still have enough time left, so we'll just skip to the
-         * next client.  Set the next check to be when their time is up, if
-         * that's before the currently scheduled next check -- hikari */
-        expire = cli_firsttime(cptr) + max_ping;
-        if (expire < next_check)
-          next_check = expire;
+      /* If client authorization time has expired, ask auth whether they
+       * should be checked again later. */
+      if ((CurrentTime-cli_firsttime(cptr) >= max_ping)
+          && auth_ping_timeout(cptr))
         continue;
-      }
+      /* OK, they still have enough time left, so we'll just skip to the
+       * next client.  Set the next check to be when their time is up, if
+       * that's before the currently scheduled next check -- hikari */
+      expire = cli_firsttime(cptr) + max_ping;
+      if (expire < next_check)
+        next_check = expire;
+      continue;
     }
 
     /* Quit the client after max_ping*2 - they should have answered by now */

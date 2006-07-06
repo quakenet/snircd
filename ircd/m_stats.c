@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_stats.c,v 1.31.2.1 2005/10/12 01:13:48 entrope Exp $
+ * $Id: m_stats.c,v 1.31.2.2 2006/05/31 02:43:00 entrope Exp $
  */
 
 /*
@@ -121,7 +121,7 @@ m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   const struct StatDesc *sd;
   char *param = 0;
 
-  /* If we didn't find a descriptor and this is my client, send them help */
+  /* If we didn't find a descriptor, send them help */
   if ((parc < 2) || !(sd = stats_find(parv[1])))
       parv[1] = "*", sd = stats_find("*");
 
@@ -131,15 +131,18 @@ m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
    * not privileged (server or an operator), then the STAT_FLAG_OPERONLY
    * flag must not be set, and if the STAT_FLAG_OPERFEAT flag is set,
    * then the feature given by sd->sd_control must be off.
+   *
+   * This checks cptr rather than sptr so that a local oper may send
+   * /stats queries to other servers.
    */
   if (!IsPrivileged(cptr) &&
       ((sd->sd_flags & STAT_FLAG_OPERONLY) ||
        ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control))))
-    return send_reply(cptr, ERR_NOPRIVILEGES);
+    return send_reply(sptr, ERR_NOPRIVILEGES);
 
   /* Check if they are a local user */
-  if ((sd->sd_flags & STAT_FLAG_LOCONLY) && !MyUser(cptr))
-    return send_reply(cptr, ERR_NOPRIVILEGES);
+  if ((sd->sd_flags & STAT_FLAG_LOCONLY) && !MyUser(sptr))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
 
   /* Check for extra parameter */
   if ((sd->sd_flags & STAT_FLAG_VARPARAM) && parc > 3 && !EmptyString(parv[3]))

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_mode.c,v 1.15 2005/09/13 15:17:46 entrope Exp $
+ * $Id: m_mode.c,v 1.15.2.3 2006/03/18 15:52:58 entrope Exp $
  */
 
 /*
@@ -86,6 +86,7 @@
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
+#include "ircd_features.h"
 #include "ircd_log.h"
 #include "ircd_reply.h"
 #include "ircd_string.h"
@@ -177,14 +178,18 @@ ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		   (MODEBUF_DEST_CHANNEL | /* Send mode to clients */
 		    MODEBUF_DEST_SERVER  | /* Send mode to servers */
 		    MODEBUF_DEST_HACK4));  /* Send a HACK(4) message */
-    else
-      /* Servers need to be able to op people who join using the Apass
-       * or upass, therefore we accept modes for channels with an Apass
-       * without generating a HACK3. */
+    else if (!feature_bool(FEAT_OPLEVELS))
       modebuf_init(&mbuf, sptr, cptr, chptr,
 		   (MODEBUF_DEST_CHANNEL | /* Send mode to clients */
-		    MODEBUF_DEST_SERVER |   /* Send mode to servers */
-		    (*chptr->mode.apass ? 0 : MODEBUF_DEST_HACK3)));
+		    MODEBUF_DEST_SERVER  | /* Send mode to servers */
+		    MODEBUF_DEST_HACK3));  /* Send a HACK(3) message */
+    else
+      /* Servers need to be able to op people who join using the Apass
+       * or upass, as well as people joining a zannel, therefore we do
+       * not generate HACK3 when oplevels are on. */
+      modebuf_init(&mbuf, sptr, cptr, chptr,
+		   (MODEBUF_DEST_CHANNEL | /* Send mode to clients */
+		    MODEBUF_DEST_SERVER));   /* Send mode to servers */
 
     mode_parse(&mbuf, cptr, sptr, chptr, parc - 2, parv + 2,
 	       (MODE_PARSE_SET    | /* Set the mode */
@@ -192,7 +197,7 @@ ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		MODE_PARSE_FORCE),  /* And force it to be accepted */
 	        NULL);
   } else {
-    if (!(member = find_member_link(chptr, sptr)) || !IsChanOp(member)) {
+    if (!(member = find_member_link(chptr, sptr))) {
       modebuf_init(&mbuf, sptr, cptr, chptr,
 		   (MODEBUF_DEST_SERVER |  /* Send mode to server */
 		    MODEBUF_DEST_HACK2  |  /* Send a HACK(2) message */

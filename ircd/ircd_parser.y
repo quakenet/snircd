@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_parser.y,v 1.56.2.2 2005/12/13 23:12:41 entrope Exp $
+ * $Id: ircd_parser.y,v 1.56.2.5 2006/06/08 02:11:21 entrope Exp $
  */
 %{
 
@@ -32,7 +32,6 @@
 #include "hash.h"
 #include "ircd.h"
 #include "ircd_alloc.h"
-#include "ircd_auth.h"
 #include "ircd_chattr.h"
 #include "ircd_log.h"
 #include "ircd_reply.h"
@@ -47,6 +46,7 @@
 #include "opercmds.h"
 #include "parse.h"
 #include "res.h"
+#include "s_auth.h"
 #include "s_bsd.h"
 #include "s_conf.h"
 #include "s_debug.h"
@@ -76,7 +76,7 @@
   struct DenyConf *dconf;
   struct ServerConf *sconf;
   struct s_map *smap;
-  struct sline *spoof; 
+  struct sline *spoof;
   struct Privs privs;
   struct Privs privs_dirty;
 
@@ -158,6 +158,7 @@ static void parse_error(char *pattern,...) {
 %token TIMEOUT
 %token FAST
 %token AUTOCONNECT
+%token PROGRAM
 %token SPOOFHOST
 /* and now a lot of privileges... */
 %token TPRIV_CHAN_LIMIT TPRIV_MODE_LCHAN TPRIV_DEOP_LCHAN TPRIV_WALK_LCHAN
@@ -167,6 +168,7 @@ static void parse_error(char *pattern,...) {
 %token TPRIV_SEE_CHAN TPRIV_SHOW_INVIS TPRIV_SHOW_ALL_INVIS TPRIV_PROPAGATE
 %token TPRIV_UNLIMIT_QUERY TPRIV_DISPLAY TPRIV_SEE_OPERS TPRIV_WIDE_GLINE
 %token TPRIV_FORCE_OPMODE TPRIV_FORCE_LOCAL_OPMODE TPRIV_APASS_OPMODE
+%token TPRIV_LIST_CHAN
 /* and some types... */
 %type <num> sizespec
 %type <num> timespec timefactor factoredtimes factoredtime
@@ -322,7 +324,14 @@ generalvhost: VHOST '=' QSTRING ';'
   MyFree($3);
 };
 
-adminblock: ADMIN '{' adminitems '}' ';'
+adminblock: ADMIN
+{
+  MyFree(localConf.location1);
+  MyFree(localConf.location2);
+  MyFree(localConf.contact);
+  localConf.location1 = localConf.location2 = localConf.contact = NULL;
+}
+'{' adminitems '}' ';'
 {
   if (localConf.location1 == NULL)
     DupString(localConf.location1, "");
@@ -611,6 +620,7 @@ privtype: TPRIV_CHAN_LIMIT { $$ = PRIV_CHAN_LIMIT; } |
           TPRIV_DISPLAY { $$ = PRIV_DISPLAY; } |
           TPRIV_SEE_OPERS { $$ = PRIV_SEE_OPERS; } |
           TPRIV_WIDE_GLINE { $$ = PRIV_WIDE_GLINE; } |
+          TPRIV_LIST_CHAN { $$ = PRIV_LIST_CHAN; } |
           LOCAL { $$ = PRIV_PROPAGATE; invert = 1; } |
           TPRIV_FORCE_OPMODE { $$ = PRIV_FORCE_OPMODE; } |
           TPRIV_FORCE_LOCAL_OPMODE { $$ = PRIV_FORCE_LOCAL_OPMODE; } |
@@ -913,21 +923,14 @@ featureitem: QSTRING
 {
   stringlist[0] = $1;
   stringno = 1;
-} '=' stringlist ';';
-
-stringlist: QSTRING
-{
-  stringlist[1] = $1;
-  stringno = 2;
-} posextrastrings
-{
+} '=' stringlist ';' {
   unsigned int ii;
   feature_set(NULL, (const char * const *)stringlist, stringno);
   for (ii = 0; ii < stringno; ++ii)
     MyFree(stringlist[ii]);
 };
-posextrastrings: /* empty */ | extrastrings;
-extrastrings: extrastrings extrastring | extrastring;
+
+stringlist: stringlist extrastring | extrastring;
 extrastring: QSTRING
 {
   if (stringno < MAX_STRINGS)
@@ -1005,48 +1008,20 @@ pseudoflags: FAST ';'
   smap->flags |= SMAP_FAST;
 };
 
-iauthblock: IAUTH '{'
+iauthblock: IAUTH '{' iauthitems '}' ';'
 {
-  tconn = 60;
-  tping = 60;
-} iauthitems '}' ';'
-{
-  if (!host)
-    parse_error("Missing host in iauth block");
-  else if (!port)
-    parse_error("Missing port in iauth block");
-  else
-    iauth_connect(host, port, pass, tconn, tping);
-  MyFree(pass);
-  MyFree(host);
-  pass = host = NULL;
-  port = tconn = tping = 0;
+  auth_spawn(stringno, stringlist);
+  while (stringno > 0)
+    MyFree(stringlist[stringno--]);
 };
 
 iauthitems: iauthitem iauthitems | iauthitem;
-iauthitem: iauthpass | iauthhost | iauthport | iauthconnfreq | iauthtimeout;
-iauthpass: PASS '=' QSTRING ';'
+iauthitem: iauthprogram;
+iauthprogram: PROGRAM '='
 {
-  MyFree(pass);
-  pass = $3;
-};
-iauthhost: HOST '=' QSTRING ';'
-{
-  MyFree(host);
-  host = $3;
-};
-iauthport: PORT '=' NUMBER ';'
-{
-  port = $3;
-};
-iauthconnfreq: CONNECTFREQ '=' timespec ';'
-{
-  tconn = $3;
-};
-iauthtimeout: TIMEOUT '=' timespec ';'
-{
-  tping = $3;
-};
+  while (stringno > 0)
+    MyFree(stringlist[stringno--]);
+} stringlist ';';
 
 spoofblock: SPOOFHOST QSTRING '{'
 {

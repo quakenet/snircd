@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_create.c,v 1.18 2005/09/27 02:41:57 entrope Exp $
+ * $Id: m_create.c,v 1.18.2.3 2006/03/18 15:52:58 entrope Exp $
  */
 
 /*
@@ -126,8 +126,7 @@ int ms_create(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /* A create that didn't appear during a burst has that servers idea of
    * the current time.  Use it for lag calculations.
    */
-  if (!IsBurstOrBurstAck(sptr) && 0 != chanTS &&
-      MAGIC_REMOTE_JOIN_TS != chanTS)
+  if (!IsBurstOrBurstAck(sptr) && 0 != chanTS)
     cli_serv(cli_user(sptr)->server)->lag = TStime() - chanTS;
 
   /* If this server is >1 minute fast, warn */
@@ -168,27 +167,63 @@ int ms_create(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       /* Check if we need to bounce a mode */
       if (TStime() - chanTS > TS_LAG_TIME ||
 	  (chptr->creationtime && chanTS > chptr->creationtime &&
-	   chptr->creationtime != MAGIC_REMOTE_JOIN_TS)) {
-	modebuf_init(&mbuf, sptr, cptr, chptr,
-		     (MODEBUF_DEST_SERVER |  /* Send mode to server */
-		      MODEBUF_DEST_HACK2  |  /* Send a HACK(2) message */
-		      MODEBUF_DEST_BOUNCE)); /* And bounce the mode */
+	   /* Accept CREATE for zannels. This is only really necessary on a network
+	      with servers prior to 2.10.12.02: we just accept their TS and ignore
+	      the fact that it was a zannel. The influence of this on a network
+	      that is completely 2.10.12.03 or higher is neglectable: Normally
+	      a server only sends a CREATE after first sending a DESTRUCT. Thus,
+	      by receiving a CREATE for a zannel one of three things happened:
+	      1. The DESTRUCT was sent during a net.break; this could mean that
+	         our zannel is at the verge of expiring too, it should have been
+		 destructed. It is correct to copy the newer TS now, all modes
+		 already have been reset, so it will be as if it was destructed
+		 and immediately recreated. In order to avoid desyncs of modes,
+		 we don't accept a CREATE for channels that have +A set.
+	      2. The DESTRUCT passed, then someone created the channel on our
+	         side and left it again. In this situation we have a near
+		 simultaneous creation on two servers; the person on our side
+		 already left within the time span of a message propagation.
+		 The channel will therefore be less than 48 hours old and no
+		 'protection' is necessary.
+              3. The source server sent the CREATE while linking,
+                 before it got the BURST for our zannel.  If this
+                 happens, we should reset the channel back to the old
+                 timestamp.  This can be distinguished from case #1 by
+                 checking IsBurstOrBurstAck(cli_user(sptr)->server).
+	    */
+	   !(chptr->users == 0 && !chptr->mode.apass[0]))) {
+        if (!IsBurstOrBurstAck(cli_user(sptr)->server)) {
+          modebuf_init(&mbuf, sptr, cptr, chptr,
+                       (MODEBUF_DEST_SERVER |  /* Send mode to server */
+                        MODEBUF_DEST_HACK2  |  /* Send a HACK(2) message */
+                        MODEBUF_DEST_BOUNCE)); /* And bounce the mode */
 
-	modebuf_mode_client(&mbuf, MODE_ADD | MODE_CHANOP, sptr, MAXOPLEVEL + 1);
+          modebuf_mode_client(&mbuf, MODE_ADD | MODE_CHANOP, sptr, MAXOPLEVEL + 1);
 
-	modebuf_flush(&mbuf);
+          modebuf_flush(&mbuf);
 
-	badop = 1;
+          badop = 1;
+        } else if (chanTS > chptr->creationtime + 4) {
+          /* If their handling of the BURST will lead to deopping the
+           * user, have the user join without getting ops (if the
+           * server's handling of the BURST keeps their ops, the channel
+           * will use our timestamp).
+           */
+          badop = 1;
+        }
+
+        if (badop)
+          joinbuf_join(&join, chptr, 0);
       }
     }
     else /* Channel doesn't exist: create it */
       chptr = get_channel(sptr, name, CGT_CREATE);
 
-    if (!badop) /* Set/correct TS */
+    if (!badop) {
+      /* Set (or correct) our copy of the TS */
       chptr->creationtime = chanTS;
-
-    joinbuf_join(badop ? &join : &create, chptr,
-		 (badop ? 0 : CHFL_CHANOP));
+      joinbuf_join(&create, chptr, CHFL_CHANOP);
+    }
   }
 
   joinbuf_flush(&join); /* flush out the joins and creates */

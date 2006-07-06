@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Singly and doubly linked list manipulation implementation.
- * @version $Id: list.c,v 1.34 2005/06/27 13:25:51 entrope Exp $
+ * @version $Id: list.c,v 1.34.2.3 2006/05/08 01:30:24 entrope Exp $
  */
 #include "config.h"
 
@@ -219,7 +219,6 @@ struct Client* make_client(struct Client *from, int status)
     cli_connect(cptr) = con; /* set the connection and other fields */
     cli_since(cptr) = cli_lasttime(cptr) = cli_firsttime(cptr) = CurrentTime;
     cli_lastnick(cptr) = TStime();
-    cli_unreg(cptr) = CLIREG_INIT;
   } else
     cli_connect(cptr) = cli_connect(from); /* use 'from's connection */
 
@@ -270,7 +269,7 @@ void free_client(struct Client* cptr)
 	 cptr, cli_connect(cptr)));
 
   if (cli_auth(cptr))
-    destroy_auth_request(cli_auth(cptr), 0);
+    destroy_auth_request(cli_auth(cptr));
 
   /* Make sure we didn't magically get re-added to the list */
   assert(cli_next(cptr) == 0);
@@ -437,6 +436,7 @@ struct SLink* make_link(void)
   }
   assert(0 != lp);
   links.inuse++;
+  memset(lp, 0, sizeof(*lp));
   return lp;
 }
 

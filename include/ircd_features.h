@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Public interfaces and declarations for dealing with configurable features.
- * @version $Id: ircd_features.h,v 1.38.2.4 2006/01/10 01:23:28 entrope Exp $
+ * @version $Id: ircd_features.h,v 1.38.2.5 2006/02/16 03:49:54 entrope Exp $
  */
 
 struct Client;
@@ -145,6 +145,7 @@ enum Feature {
   FEAT_HIS_STATS_x,
   FEAT_HIS_STATS_y,
   FEAT_HIS_STATS_z,
+  FEAT_HIS_STATS_IAUTH,
   FEAT_HIS_WHOIS_SERVERNAME,
   FEAT_HIS_WHOIS_IDLETIME,
   FEAT_HIS_WHOIS_LOCALCHAN,

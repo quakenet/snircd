@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c,v 1.155.2.12 2006/01/07 01:08:29 entrope Exp $
+ * @version $Id: channel.c,v 1.155.2.15 2006/04/04 23:09:47 entrope Exp $
  */
 #include "config.h"
 
@@ -1864,7 +1864,7 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
 	strptr_i = &remstr_i;
       }
 
-      /* if we're changing oplevels we know the oplevel, pass it on */
+      /* if we're changing oplevels and we know the oplevel, pass it on */
       if (mbuf->mb_channel->mode.apass[0]
           && (MB_TYPE(mbuf, i) & MODE_CHANOP)
           && MB_OPLEVEL(mbuf, i) < MAXOPLEVEL)
@@ -1908,9 +1908,9 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
 			    addbuf, remstr, addstr);
     } else if (mbuf->mb_dest & MODEBUF_DEST_BOUNCE) {
       /*
-       * If HACK2 was set, we're bouncing; we send the MODE back to the
-       * connection we got it from with the senses reversed and a TS of 0;
-       * origin is us
+       * If HACK2 was set, we're bouncing; we send the MODE back to
+       * the connection we got it from with the senses reversed and
+       * the proper TS; origin is us
        */
       sendcmdto_one(&me, CMD_MODE, mbuf->mb_connect, "%H %s%s%s%s%s%s %Tu",
 		    mbuf->mb_channel, addbuf_i ? "-" : "", addbuf,
@@ -1918,21 +1918,14 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
 		    mbuf->mb_channel->creationtime);
     } else {
       /*
-       * We're propagating a normal MODE command to the rest of the network;
-       * we send the actual channel TS unless this is a HACK3 or a HACK4
+       * We're propagating a normal (or HACK3 or HACK4) MODE command
+       * to the rest of the network.  We send the actual channel TS.
        */
-      if (IsServer(mbuf->mb_source) || IsMe(mbuf->mb_source))
-	sendcmdto_serv_butone(mbuf->mb_source, CMD_MODE, mbuf->mb_connect,
-			      "%H %s%s%s%s%s%s %Tu", mbuf->mb_channel,
-			      rembuf_i ? "-" : "", rembuf, addbuf_i ? "+" : "",
-			      addbuf, remstr, addstr,
-			      (mbuf->mb_dest & MODEBUF_DEST_HACK4) ? 0 :
-			      mbuf->mb_channel->creationtime);
-      else
-	sendcmdto_serv_butone(mbuf->mb_source, CMD_MODE, mbuf->mb_connect,
-			      "%H %s%s%s%s%s%s", mbuf->mb_channel,
-			      rembuf_i ? "-" : "", rembuf, addbuf_i ? "+" : "",
-			      addbuf, remstr, addstr);
+      sendcmdto_serv_butone(mbuf->mb_source, CMD_MODE, mbuf->mb_connect,
+                            "%H %s%s%s%s%s%s %Tu", mbuf->mb_channel,
+                            rembuf_i ? "-" : "", rembuf, addbuf_i ? "+" : "",
+                            addbuf, remstr, addstr,
+                            mbuf->mb_channel->creationtime);
     }
   }
 
@@ -2461,8 +2454,7 @@ mode_parse_key(struct ParseState *state, int *flag_p)
   if (state->flags & MODE_PARSE_SET) {
     if (state->dir == MODE_DEL) /* remove the old key */
       *state->chptr->mode.key = '\0';
-    else if (!state->chptr->mode.key[0]
-             || ircd_strcmp(t_str, state->chptr->mode.key) < 0)
+    else
       ircd_strncpy(state->chptr->mode.key, t_str, KEYLEN);
   }
 }
@@ -2556,6 +2548,13 @@ mode_parse_upass(struct ParseState *state, int *flag_p)
       !ircd_strcmp(state->chptr->mode.upass, t_str))
     return; /* no upass change */
 
+  /* Skip if this is a burst, we have a Upass already and the new Upass is
+   * after the old one alphabetically */
+  if ((state->flags & MODE_PARSE_BURST) &&
+      *(state->chptr->mode.upass) &&
+      ircd_strcmp(state->chptr->mode.upass, t_str) <= 0)
+    return;
+
   if (state->flags & MODE_PARSE_BOUNCE) {
     if (*state->chptr->mode.upass) /* reset old upass */
       modebuf_mode_string(state->mbuf, MODE_DEL | flag_p[0],
@@ -2568,8 +2567,7 @@ mode_parse_upass(struct ParseState *state, int *flag_p)
   if (state->flags & MODE_PARSE_SET) {
     if (state->dir == MODE_DEL) /* remove the old upass */
       *state->chptr->mode.upass = '\0';
-    else if (state->chptr->mode.upass[0] == '\0'
-             || ircd_strcmp(t_str, state->chptr->mode.upass) < 0)
+    else
       ircd_strncpy(state->chptr->mode.upass, t_str, KEYLEN);
   }
 }
@@ -2667,6 +2665,13 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
       !ircd_strcmp(state->chptr->mode.apass, t_str))
     return; /* no apass change */
 
+  /* Skip if this is a burst, we have an Apass already and the new Apass is
+   * after the old one alphabetically */
+  if ((state->flags & MODE_PARSE_BURST) &&
+      *(state->chptr->mode.apass) &&
+      ircd_strcmp(state->chptr->mode.apass, t_str) <= 0)
+    return;
+
   if (state->flags & MODE_PARSE_BOUNCE) {
     if (*state->chptr->mode.apass) /* reset old apass */
       modebuf_mode_string(state->mbuf, MODE_DEL | flag_p[0],
@@ -2678,12 +2683,10 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
 
   if (state->flags & MODE_PARSE_SET) {
     if (state->dir == MODE_ADD) { /* set the new apass */
-      /* Only accept the new apass if there is no current apass
-       * (e.g. when a user sets it) or the new one is "less" than the
-       * old (for resolving conflicts during burst).
-       */
-      if (state->chptr->mode.apass[0] == '\0'
-          || ircd_strcmp(t_str, state->chptr->mode.apass) < 0)
+      /* Only accept the new apass if there is no current apass or
+       * this is a BURST. */
+      if (state->chptr->mode.apass[0] == '\0' ||
+          (state->flags & MODE_PARSE_BURST))
         ircd_strncpy(state->chptr->mode.apass, t_str, KEYLEN);
       /* Make it VERY clear to the user that this is a one-time password */
       if (MyUser(state->sptr)) {
@@ -2746,8 +2749,12 @@ bmatch(struct Ban *old_ban, struct Ban *new_ban)
   old_ban->banstr[old_ban->nu_len] = new_ban->banstr[new_ban->nu_len] = '@';
   if (res)
     return res;
-  /* Compare the addresses. */
-  return !ipmask_check(&new_ban->address, &old_ban->address, old_ban->addrbits);
+  /* If the old ban's mask mismatches, cannot be a superset. */
+  if (!ipmask_check(&new_ban->address, &old_ban->address, old_ban->addrbits))
+    return 1;
+  /* Otherwise it depends on whether the old ban's text is a superset
+   * of the new. */
+  return mmatch(old_ban->banstr, new_ban->banstr);
 }
 
 /** Add a ban from a ban list and mark bans that should be removed
@@ -3352,7 +3359,7 @@ mode_parse(struct ModeBuf *mbuf, struct Client *cptr, struct Client *sptr,
       state.parc--;
 
       /* is it a TS? */
-      if (IsServer(state.sptr) && !state.parc && IsDigit(*modestr)) {
+      if (IsServer(state.cptr) && !state.parc && IsDigit(*modestr)) {
 	time_t recv_ts;
 
 	if (!(state.flags & MODE_PARSE_SET))	  /* don't set earlier TS if */
@@ -3362,6 +3369,35 @@ mode_parse(struct ModeBuf *mbuf, struct Client *cptr, struct Client *sptr,
 
 	if (recv_ts && recv_ts < state.chptr->creationtime)
 	  state.chptr->creationtime = recv_ts; /* respect earlier TS */
+        else if (recv_ts > state.chptr->creationtime) {
+          struct Client *sserv;
+
+          /* Check whether the originating server has fully processed
+           * the burst to it. */
+          sserv = state.cptr;
+          if (!IsServer(sserv))
+              sserv = cli_user(sserv)->server;
+          if (IsBurstOrBurstAck(sserv)) {
+            /* This is a legal but unusual case; the source server
+             * probably just has not processed the BURST for this
+             * channel.  It SHOULD wipe out all its modes soon, so
+             * silently ignore the mode change rather than send a
+             * bounce that could desync modes from our side (that
+             * have already been sent).
+             */
+            state.mbuf->mb_add = 0;
+            state.mbuf->mb_rem = 0;
+            state.mbuf->mb_count = 0;
+            return state.args_used;
+          } else {
+            /* Server is desynced; bounce the mode and deop the source
+             * to fix it. */
+            state.mbuf->mb_dest &= ~MODEBUF_DEST_CHANNEL;
+            state.mbuf->mb_dest |= MODEBUF_DEST_BOUNCE | MODEBUF_DEST_HACK2;
+            if (!IsServer(state.cptr))
+              state.mbuf->mb_dest |= MODEBUF_DEST_DEOP;
+          }
+        }
 
 	break; /* break out of while loop */
       } else if (state.flags & MODE_PARSE_STRICT ||

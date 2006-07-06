@@ -1,6 +1,6 @@
 /** @file s_user.h
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.h,v 1.20 2004/11/07 19:34:15 entrope Exp $
+ * @version $Id: s_user.h,v 1.20.2.1 2006/02/16 03:49:54 entrope Exp $
  */
 #ifndef INCLUDED_s_user_h
 #define INCLUDED_s_user_h
@@ -50,8 +50,6 @@ struct Flags;
 #define MATCH_SERVER  1 /**< flag for relay_masked_message (etc) to indicate the mask matches a server name */
 #define MATCH_HOST    2 /**< flag for relay_masked_message (etc) to indicate the mask matches host name */
 
-#define COOKIE_VERIFIED 0xffffffff /**< value for cli_cookie() to show completion */
-
 /** Formatter function for send_user_info().
  * @param who Client being displayed.
  * @param sptr Client requesting information.
@@ -64,8 +62,7 @@ typedef void (*InfoFormatter)(struct Client* who, struct Client *sptr, struct Ms
  */
 extern struct User* make_user(struct Client *cptr);
 extern void         free_user(struct User *user);
-extern int          register_user(struct Client* cptr, struct Client* sptr,
-                                  const char* nick, char* username);
+extern int          register_user(struct Client* cptr, struct Client *sptr);
 
 extern void         user_count_memory(size_t* count_out, size_t* bytes_out);
 
