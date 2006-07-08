@@ -84,6 +84,7 @@
 #include "client.h"
 #include "ircd_reply.h"
 #include "ircd_string.h"
+#include "ircd_snprintf.h"
 #include "ircd_features.h"
 #include "msgq.h"
 #include "numeric.h"
@@ -140,4 +141,5 @@ int m_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   }  
 
   send_umode_out(cptr, sptr, &setflags, 0);
+  return 0;
 }

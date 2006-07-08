@@ -1447,7 +1447,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
       ClearXtraOp(sptr);
     if (!FlagHas(&setflags, FLAG_NOCHAN) && !(IsOper(sptr) || feature_bool(FEAT_USER_HIDECHANS)))
       ClearNoChan(sptr);
-    if (!FlagHas(&setflags, FLAG_NOIDLE) && !IsOper(sptr))
+    if (!FlagHas(&setflags, FLAG_NOIDLE) && !(IsOper(sptr) || feature_bool(FEAT_USER_HIDEIDLETIME)))
       ClearNoIdle(sptr);
     if (!FlagHas(&setflags, FLAG_PARANOID) && !IsOper(sptr))
       ClearParanoid(sptr);

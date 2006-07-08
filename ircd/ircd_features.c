@@ -310,6 +310,7 @@ static struct FeatureDesc {
   F_B(AUTOINVISIBLE, 0, 1, 0),
   F_B(CONNEXIT_NOTICES, 0, 0, 0),
   F_B(USER_HIDECHANS, 0, 0, 0),
+  F_B(USER_HIDEIDLETIME, 0, 0, 0),
   F_B(OPLEVELS, 0, 1, 0),
   F_B(ZANNELS, 0, 1, 0),
   F_B(LOCAL_CHANNELS, 0, 1, 0),

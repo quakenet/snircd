@@ -32,6 +32,7 @@
 #include "ircd_reply.h"
 #include "ircd_string.h"
 #include "ircd_snprintf.h"
+#include "ircd_osdep.h"
 #include "list.h"
 #include "listener.h"
 #include "match.h"
