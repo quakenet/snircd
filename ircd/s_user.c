@@ -355,6 +355,9 @@ int register_user(struct Client *cptr, struct Client *sptr)
   {
     assert(cptr == sptr);
 
+  /* Have to set up "realusername" */
+  ircd_strncpy(user->realusername, user->username, USERLEN);
+
     Count_unknownbecomesclient(sptr, UserStats);
 
     if (MyConnect(sptr) && feature_bool(FEAT_AUTOINVISIBLE))
@@ -429,6 +432,7 @@ int register_user(struct Client *cptr, struct Client *sptr)
   else {
     struct Client *acptr = user->server;
 
+    ircd_strncpy(user->username, cli_username(sptr), USERLEN);
     Count_newremoteclient(UserStats, acptr);
 
     if (cli_from(acptr) != cli_from(sptr))
