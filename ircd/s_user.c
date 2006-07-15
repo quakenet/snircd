@@ -571,7 +571,7 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     const char* account = 0;
     char* hostmask = 0;
     char* host = 0;
-    const char* p;
+    const char* p, *pp;
 
     /*
      * A server introducing a new client, change source
@@ -626,9 +626,12 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
       if ((p = strchr(account, ':'))) {
 	len = (p++) - account;
 	cli_user(new_client)->acc_create = atoi(p);
+        if ((pp = strchr(p, ':')))
+          cli_user(new_client)->acc_id = atoi(pp + 1);
 	Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
-	       "account \"%s\", timestamp %Tu", account,
-	       cli_user(new_client)->acc_create));
+	       "account \"%s\", timestamp %Tu id %u", account,
+	       cli_user(new_client)->acc_create,
+               cli_user(new_client)->acc_id));
       }
       ircd_strncpy(cli_user(new_client)->account, account, len);
     }
@@ -1558,8 +1561,13 @@ char *umode_str(struct Client *cptr)
       Debug((DEBUG_DEBUG, "Sending timestamped account in user mode for "
 	     "account \"%s\"; timestamp %Tu", cli_user(cptr)->account,
 	     cli_user(cptr)->acc_create));
-      ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu",
-		    cli_user(cptr)->acc_create);
+      if(cli_user(cptr)->acc_id) {
+        ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu:%lu",
+                      cli_user(cptr)->acc_create, cli_user(cptr)->acc_id);
+      } else {
+        ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu",
+                      cli_user(cptr)->acc_create);
+      }
       m--; /* back up over previous nul-termination */
       while ((*m++ = *t++))
 	; /* Empty loop */

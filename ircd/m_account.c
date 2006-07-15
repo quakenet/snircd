@@ -101,6 +101,8 @@
  * parv[0] = sender prefix
  * parv[1] = numeric of client to act on
  * parv[2] = account name (12 characters or less)
+ * parv[3] = account timestamp (optional)
+ * parv[4] = account id (optional, requires timestamp to be set to use)
  */
 int ms_account(struct Client* cptr, struct Client* sptr, int parc,
 	       char* parv[])
@@ -134,15 +136,28 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
     cli_user(acptr)->acc_create = atoi(parv[3]);
     Debug((DEBUG_DEBUG, "Received timestamped account: account \"%s\", "
            "timestamp %Tu", parv[2], cli_user(acptr)->acc_create));
+    if (parc > 4) {
+      cli_user(acptr)->acc_id = atoi(parv[4]); 
+      Debug((DEBUG_DEBUG, "Received account id for account \"%s\": id %d", parv[2], parv[4]));
+    }
   }
 
   ircd_strncpy(cli_user(acptr)->account, parv[2], ACCOUNTLEN);
   hide_hostmask(acptr, FLAG_ACCOUNT);
 
-  sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr,
-                        cli_user(acptr)->acc_create ? "%C %s %Tu" : "%C %s",
-                        acptr, cli_user(acptr)->account,
-                        cli_user(acptr)->acc_create);
+   if (cli_user(acptr)->acc_id) {
+     sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu",
+                           acptr, cli_user(acptr)->account,
+                           cli_user(acptr)->acc_create,
+                           cli_user(acptr)->acc_id);
+   } else if (cli_user(acptr)->acc_create) {
+     sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu",
+                           acptr, cli_user(acptr)->account,
+                           cli_user(acptr)->acc_create);
+   } else {
+     sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s",
+                           acptr, cli_user(acptr)->account);
+   }
 
   return 0;
 }
