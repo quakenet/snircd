@@ -447,7 +447,7 @@ void checkServer(struct Client *sptr, struct Client *acptr) {
   ircd_snprintf(0, outbuf, sizeof(outbuf), "        Numeric:: %s --> %d", NumServ(acptr), base64toint(acptr->cli_yxx));
   send_reply(sptr, RPL_DATASTR, outbuf);
   
-  ircd_snprintf(0, outbuf, sizeof(outbuf), "          Users:: %d / %d", cli_serv(acptr)->clients, 
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "          Users:: %d / %d", (acptr == &me) ? UserStats.local_clients : cli_serv(acptr)->clients, 
     base64toint(cli_serv(acptr)->nn_capacity));
   send_reply(sptr, RPL_DATASTR, outbuf);
   
