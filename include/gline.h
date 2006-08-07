@@ -109,6 +109,7 @@ extern int gline_deactivate(struct Client *cptr, struct Client *sptr,
 			    unsigned int flags);
 extern struct Gline *gline_find(char *userhost, unsigned int flags);
 extern struct Gline *gline_lookup(struct Client *cptr, unsigned int flags);
+extern struct Gline *gline_lookup_badchan(char *userhost, unsigned int flags);
 extern void gline_free(struct Gline *gline);
 extern void gline_burst(struct Client *cptr);
 extern int gline_resend(struct Client *cptr, struct Gline *gline);

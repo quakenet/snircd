@@ -223,32 +223,18 @@ do_gline(struct Client *cptr, struct Client *sptr, struct Gline *gline)
     struct Channel *chptr,*nchptr;
     struct Membership *member,*nmember;
 
-    if (string_has_wildcards(gline->gl_user)) {
-      for(chptr=GlobalChannelList;chptr;chptr=nchptr) {
-        nchptr=chptr->next;
-        if (match(gline->gl_user, chptr->chname))
-           continue;
-        for (member=chptr->members;member;member=nmember) {
-          nmember=member->next_member;
-          if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
-            continue;
-          sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
-          sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
-          make_zombie(member, member->user, &me, &me, chptr);
-          retval=1;
-        }
-      }      
-    } else {
-      if ((chptr=FindChannel(gline->gl_user))) {
-        for (member=chptr->members;member;member=nmember) {
-          nmember=member->next_member;
-          if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
-            continue;
-          sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
-          sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
-          make_zombie(member, member->user, &me, &me, chptr);
-          retval=1;
-        }
+    for(chptr=GlobalChannelList;chptr;chptr=nchptr) {
+      nchptr=chptr->next;
+      if (match(gline->gl_user, chptr->chname))
+        continue;
+      for (member=chptr->members;member;member=nmember) {
+        nmember=member->next_member;
+        if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
+          continue;
+        sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+        sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+        make_zombie(member, member->user, &me, &me, chptr);
+        retval=1;
       }
     }
   } else {
@@ -750,6 +736,31 @@ gline_find(char *userhost, unsigned int flags)
   MyFree(t_uh);
 
   return gline;
+}
+
+struct Gline *
+gline_lookup_badchan(char *userhost, unsigned int flags)
+{
+  struct Gline *gline;
+  struct Gline *sgline;
+
+  if (flags & (GLINE_BADCHAN | GLINE_ANY)) {
+    for (gline = BadChanGlineList; gline; gline = sgline) {
+      sgline = gline->gl_next;
+
+      if (gline->gl_expire <= CurrentTime)
+        gline_free(gline);
+      else if ((flags & GLINE_GLOBAL && gline->gl_flags & GLINE_LOCAL) ||
+               (flags & GLINE_LASTMOD && !gline->gl_lastmod))
+        continue;
+      else if ((flags & GLINE_EXACT ? ircd_strcmp(gline->gl_user, userhost) :
+                match(gline->gl_user, userhost)) == 0)
+        if (GlineIsActive(gline))
+          return gline;
+    }
+  }
+
+  return 0;
 }
 
 /** Find a matching G-line for a user.
