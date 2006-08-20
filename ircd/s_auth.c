@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c,v 1.37.2.17 2006/06/08 01:58:36 entrope Exp $
+ * @version $Id: s_auth.c,v 1.37.2.20 2006/07/06 03:45:04 entrope Exp $
  */
 #include "config.h"
 
@@ -200,7 +200,9 @@ struct IAuth {
 #define i_debug(iauth) ((iauth)->i_debug)
 
 /** Active instance of IAuth. */
-struct IAuth *iauth;
+static struct IAuth *iauth;
+/** Freelist of AuthRequest structures. */
+static struct AuthRequest *auth_freelist;
 
 static void iauth_sock_callback(struct Event *ev);
 static void iauth_stderr_callback(struct Event *ev);
@@ -425,13 +427,17 @@ static int check_auth_finished(struct AuthRequest *auth)
   else
     FlagSet(&auth->flags, AR_IAUTH_HURRY);
 
-  destroy_auth_request(auth);
-  if (!IsUserPort(auth->client))
-    return 0;
-  memset(cli_passwd(auth->client), 0, sizeof(cli_passwd(auth->client)));
-  res = auth_set_username(auth);
-  if (res == 0)
+  if (IsUserPort(auth->client))
+  {
+    memset(cli_passwd(auth->client), 0, sizeof(cli_passwd(auth->client)));
+    res = auth_set_username(auth);
+    if (res == 0)
       res = register_user(auth->client, auth->client);
+  }
+  else
+    res = 0;
+  if (res == 0)
+    destroy_auth_request(auth);
   return res;
 }
 
@@ -719,7 +725,10 @@ void destroy_auth_request(struct AuthRequest* auth)
 
   if (t_active(&auth->timeout))
     timer_del(&auth->timeout);
+
   cli_auth(auth->client) = NULL;
+  auth->next = auth_freelist;
+  auth_freelist = auth;
 }
 
 /** Handle a 'ping' (authorization) timeout for a client.
@@ -962,8 +971,13 @@ void start_auth(struct Client* client)
   socket_events(&(cli_socket(client)), SOCK_ACTION_SET | SOCK_EVENT_READABLE);
 
   /* Allocate the AuthRequest. */
-  auth = MyCalloc(1, sizeof(*auth));
+  auth = auth_freelist;
+  if (auth)
+      auth_freelist = auth->next;
+  else
+      auth = MyMalloc(sizeof(*auth));
   assert(0 != auth);
+  memset(auth, 0, sizeof(*auth));
   auth->client = client;
   cli_auth(client) = auth;
   s_fd(&auth->socket) = -1;
@@ -1399,6 +1413,7 @@ static int sendto_iauth(struct Client *cptr, const char *format, ...)
   /* Tack it onto the iauth sendq and try to write it. */
   ++iauth->i_sendM;
   msgq_add(i_sendQ(iauth), mb, 0);
+  msgq_clean(mb);
   iauth_write(iauth);
   return 1;
 }

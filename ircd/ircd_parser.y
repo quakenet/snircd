@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_parser.y,v 1.56.2.5 2006/06/08 02:11:21 entrope Exp $
+ * $Id: ircd_parser.y,v 1.56.2.6 2006/06/30 19:54:35 entrope Exp $
  */
 %{
 
@@ -1012,7 +1012,7 @@ iauthblock: IAUTH '{' iauthitems '}' ';'
 {
   auth_spawn(stringno, stringlist);
   while (stringno > 0)
-    MyFree(stringlist[stringno--]);
+    MyFree(stringlist[--stringno]);
 };
 
 iauthitems: iauthitem iauthitems | iauthitem;
@@ -1020,7 +1020,7 @@ iauthitem: iauthprogram;
 iauthprogram: PROGRAM '='
 {
   while (stringno > 0)
-    MyFree(stringlist[stringno--]);
+    MyFree(stringlist[--stringno]);
 } stringlist ';';
 
 spoofblock: SPOOFHOST QSTRING '{'
