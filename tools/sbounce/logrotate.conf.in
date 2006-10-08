@@ -1,0 +1,12 @@
+LOGFILE {
+	size 5M
+	rotate 7
+	missingok
+	notifempty
+	postrotate
+		[ -f PIDFILE ] && kill -HUP `cat PIDFILE`
+	endscript
+	compress
+	delaycompress
+	notifempty
+}
