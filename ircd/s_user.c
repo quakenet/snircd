@@ -627,9 +627,9 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
 	len = (p++) - account;
 	cli_user(new_client)->acc_create = atoi(p);
         if ((pp = strchr(p, ':')))
-          cli_user(new_client)->acc_id = atoi(pp + 1);
+          cli_user(new_client)->acc_id = strtoul(pp + 1, NULL, 10);
 	Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
-	       "account \"%s\", timestamp %Tu id %u", account,
+	       "account \"%s\", timestamp %Tu id %lu", account,
 	       cli_user(new_client)->acc_create,
                cli_user(new_client)->acc_id));
       }

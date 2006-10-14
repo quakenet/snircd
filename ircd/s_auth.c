@@ -1875,7 +1875,7 @@ static int iauth_cmd_done_account(struct IAuth *iauth, struct Client *cli,
     char *end;
     cli_user(cli)->acc_create = strtoul(params[0] + len + 1, &end, 10);
     if (*end == ':')
-      cli_user(cli)->acc_id = strtoul(end, NULL, 10);
+      cli_user(cli)->acc_id = strtoul(end + 1, NULL, 10);
   }
 
   /* Copy account name to User structure. */

@@ -137,8 +137,8 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
     Debug((DEBUG_DEBUG, "Received timestamped account: account \"%s\", "
            "timestamp %Tu", parv[2], cli_user(acptr)->acc_create));
     if (parc > 4) {
-      cli_user(acptr)->acc_id = atoi(parv[4]); 
-      Debug((DEBUG_DEBUG, "Received account id for account \"%s\": id %d", parv[2], parv[4]));
+      cli_user(acptr)->acc_id = strtoul(parv[4], NULL, 10); 
+      Debug((DEBUG_DEBUG, "Received account id for account \"%s\": id %lu", parv[2], cli_user(acptr)->acc_id));
     }
   }
 
