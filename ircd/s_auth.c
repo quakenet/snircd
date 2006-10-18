@@ -265,6 +265,9 @@ static int auth_set_username(struct AuthRequest *auth)
       || ((user->username[0] == '~') && (user->username[1] == '\0')))
     return exit_client(sptr, sptr, &me, "USER: Bogus userid.");
 
+  /* Have to set up "realusername" before doing the gline check below */
+  ircd_strncpy(user->realusername, user->username, USERLEN);
+
   /* Check for K- or G-line. */
   killreason = find_kill(sptr, 1);
   if (killreason) {

@@ -297,6 +297,7 @@ void iauth_close(struct IAuth *iauth)
       /* No active connections - approve the requests and drop them. */
       while ((iar = i_list_head(iauth).iar_next) != &i_list_head(iauth)) {
         struct Client *client = iar->iar_client;
+        ircd_strncpy(cli_user(client)->realusername, cli_username(client), USERLEN);
         iauth_dispose_request(iauth, iar);
         register_user(client, client, cli_name(client), cli_username(client));
       }
@@ -791,6 +792,7 @@ static void iauth_cmd_doneauth(struct IAuth *iauth, int argc, char *argv[])
   }
   client = iar->iar_client;
   ircd_strncpy(cli_username(client), username, USERLEN);
+  ircd_strncpy(cli_user(client)->realusername, username, USERLEN);
   ircd_strncpy(cli_user(client)->host, hostname, HOSTLEN);
   if (account) {
     ircd_strncpy(cli_user(client)->account, account, ACCOUNTLEN);
