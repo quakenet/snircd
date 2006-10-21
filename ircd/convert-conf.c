@@ -218,7 +218,7 @@ static void finish_connects(void)
             || conn->password == NULL
             || conn->class == NULL)
         {
-	    fprintf(stderr, "H:line missing C:line for %s\n",sl->value);
+	    fprintf(stderr, "H:line missing C:line for %s\n",conn->name);
 	    continue;
 	}
 
