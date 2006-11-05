@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_nick.c,v 1.25.2.1 2005/11/16 04:18:47 entrope Exp $
+ * $Id: m_nick.c,v 1.25.2.2 2006/11/04 21:42:00 entrope Exp $
  */
 
 /*
@@ -151,6 +151,9 @@ int m_nick(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   assert(0 != cptr);
   assert(cptr == sptr);
 
+  if (IsServerPort(cptr))
+    return exit_client(cptr, cptr, &me, "Use a different port");
+
   /*
    * parv[0] will be empty for clients connecting for the first time
    */
@@ -160,6 +163,7 @@ int m_nick(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     send_reply(sptr, ERR_NONICKNAMEGIVEN);
     return 0;
   }
+
   /*
    * Don't let them send make us send back a really long string of
    * garbage
