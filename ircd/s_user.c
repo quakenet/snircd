@@ -968,11 +968,6 @@ hide_hostmask(struct Client *cptr, unsigned int flag)
     /* Local users cannot set +x unless FEAT_HOST_HIDING is true. */
     if (MyConnect(cptr) && !feature_bool(FEAT_HOST_HIDING))
       return 0;
-    /* If the user is +h, we don't hide the hostmask.  Set the flag to keep sync though */
-    if (HasSetHost(cptr)) {
-      SetFlag(cptr, flag);
-       return 0;
-    }
     break;
   case FLAG_ACCOUNT:
     /* Invalidate all bans against the user so we check them again */
@@ -985,7 +980,7 @@ hide_hostmask(struct Client *cptr, unsigned int flag)
   }
 
   SetFlag(cptr, flag);
-  if (!HasFlag(cptr, FLAG_HIDDENHOST) || !HasFlag(cptr, FLAG_ACCOUNT))
+  if (!HasFlag(cptr, FLAG_HIDDENHOST) || !HasFlag(cptr, FLAG_ACCOUNT) || HasSetHost(cptr))
     return 0;
 
   sendcmdto_common_channels_butone(cptr, CMD_QUIT, cptr, ":Registered");
