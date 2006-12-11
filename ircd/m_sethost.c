@@ -108,7 +108,9 @@
  */
 int m_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  char hostmask[512];
+  char hostmask[USERLEN + HOSTLEN + 2];
+  char curhostmask[USERLEN + HOSTLEN + 2];
+
   struct Flags setflags;
 
   /* Back up the flags first */
@@ -128,12 +130,25 @@ int m_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 	send_reply(sptr, ERR_BADHOSTMASK, hostmask);
 	return 0;
       }
+      if (IsSetHost(sptr) || IsAccount(sptr)) {
+        ircd_snprintf(0, curhostmask, USERLEN + HOSTLEN + 1, "%s@%s", sptr->cli_user->username, sptr->cli_user->host);
+        if (0 == strcmp(hostmask, curhostmask)) {
+          send_reply(cptr, RPL_HOSTHIDDEN, curhostmask);
+          return 0; 
+        }
+      }
       if (set_hostmask(sptr, hostmask, NULL))
       	FlagClr(&setflags, FLAG_SETHOST);
     } else {
       if (!is_hostmask(parv[1])) {
 	send_reply(sptr, ERR_BADHOSTMASK, parv[1]);
 	return 0;
+      }
+      if (IsSetHost(sptr) || IsAccount(sptr)) {
+        if (0 == strcmp(parv[1], sptr->cli_user->host)) {
+          send_reply(cptr, RPL_HOSTHIDDEN, parv[1]);
+          return 0;
+        }
       }
       if (set_hostmask(sptr, parv[1], parv[2]))
         FlagClr(&setflags, FLAG_SETHOST);
