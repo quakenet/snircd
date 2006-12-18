@@ -126,6 +126,12 @@ enum Priv
     PRIV_FORCE_OPMODE, /**< can hack modes on quarantined channels */
     PRIV_FORCE_LOCAL_OPMODE, /**< can hack modes on quarantined local channels */
     PRIV_APASS_OPMODE, /**< can hack modes +A/-A/+U/-U */
+    PRIV_CHANSERV,       /* oper can set usermode +k */
+    PRIV_XTRA_OPER,      /* oper can set usermode +X */
+    PRIV_NOIDLE, /* oper can set usermode +I */
+    PRIV_FREEFORM,       /* oper can use freeform sethost */
+    PRIV_PARANOID,       /* oper can set paranoid */
+    PRIV_CHECK,          /* oper can use /check */
     PRIV_LAST_PRIV /**< number of privileges */
   };
 

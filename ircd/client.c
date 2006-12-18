@@ -236,6 +236,8 @@ static struct {
   P(BADCHAN),        P(LOCAL_BADCHAN),  P(SEE_CHAN),      P(PROPAGATE),
   P(DISPLAY),        P(SEE_OPERS),      P(WIDE_GLINE),    P(LIST_CHAN),
   P(FORCE_OPMODE),   P(FORCE_LOCAL_OPMODE), P(APASS_OPMODE),
+  P(CHANSERV),       P(XTRA_OPER),      P(NOIDLE),        P(FREEFORM),
+  P(PARANOID),       P(CHECK),
 #undef P
   { 0, 0 }
 };

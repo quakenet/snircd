@@ -580,6 +580,7 @@ static int read_packet(struct Client *cptr, int socket_ready)
   unsigned int dolen = 0;
   unsigned int length = 0;
 
+  errno =0; /* clear errno so that user quit messages make sense */
   if (socket_ready &&
       !(IsUser(cptr) && !IsOper(cptr) &&
 	DBufLength(&(cli_recvQ(cptr))) > feature_int(FEAT_CLIENT_FLOOD))) {

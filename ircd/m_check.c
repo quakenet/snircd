@@ -81,6 +81,9 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
   char *param;
   int flags = CHECK_SHOWUSERS, i;
 
+  if (!HasPriv(sptr, PRIV_CHECK))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   if (parc < 2) {
     send_reply(sptr, ERR_NEEDMOREPARAMS, "CHECK");
     return 0;

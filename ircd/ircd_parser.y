@@ -168,7 +168,9 @@ static void parse_error(char *pattern,...) {
 %token TPRIV_SEE_CHAN TPRIV_SHOW_INVIS TPRIV_SHOW_ALL_INVIS TPRIV_PROPAGATE
 %token TPRIV_UNLIMIT_QUERY TPRIV_DISPLAY TPRIV_SEE_OPERS TPRIV_WIDE_GLINE
 %token TPRIV_FORCE_OPMODE TPRIV_FORCE_LOCAL_OPMODE TPRIV_APASS_OPMODE
-%token TPRIV_LIST_CHAN
+%token TPRIV_CHANSERV TPRIV_XTRA_OPER TPRIV_NOIDLE TPRIV_FREEFORM TPRIV_PARANOID
+%token TPRIV_CHECK
+%token TPRIV_LIST_CHAN 
 /* and some types... */
 %type <num> sizespec
 %type <num> timespec timefactor factoredtimes factoredtime
@@ -624,8 +626,13 @@ privtype: TPRIV_CHAN_LIMIT { $$ = PRIV_CHAN_LIMIT; } |
           LOCAL { $$ = PRIV_PROPAGATE; invert = 1; } |
           TPRIV_FORCE_OPMODE { $$ = PRIV_FORCE_OPMODE; } |
           TPRIV_FORCE_LOCAL_OPMODE { $$ = PRIV_FORCE_LOCAL_OPMODE; } |
-          TPRIV_APASS_OPMODE { $$ = PRIV_APASS_OPMODE; } ;
-
+          TPRIV_APASS_OPMODE { $$ = PRIV_APASS_OPMODE; } | 
+          TPRIV_CHANSERV { $$ = PRIV_CHANSERV; } |
+          TPRIV_XTRA_OPER { $$ = PRIV_XTRA_OPER; } |
+          TPRIV_NOIDLE { $$ = PRIV_NOIDLE; } |
+          TPRIV_FREEFORM { $$ = PRIV_FREEFORM; } |
+          TPRIV_CHECK { $$ = PRIV_CHECK; } |
+          TPRIV_PARANOID { $$ = PRIV_PARANOID; } ;
 yesorno: YES { $$ = 1; } | NO { $$ = 0; };
 
 /* The port block... */

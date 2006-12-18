@@ -1073,7 +1073,7 @@ int set_hostmask(struct Client *cptr, char *hostmask, char *password)
     if (MyConnect(cptr)) {
       if (IsAnOper(cptr)) {
         if ((new_vhost = IsVhost(host, 1)) == NULL) {
-          if (!feature_bool(FEAT_SETHOST_FREEFORM)) {
+          if (!HasPriv(cptr, PRIV_FREEFORM)) {
             send_reply(cptr, ERR_HOSTUNAVAIL, hostmask);
             log_write(LS_SETHOST, L_INFO, LOG_NOSNOTICE,
                 "SETHOST (%s@%s) by (%#R): no such s-line",
@@ -1440,15 +1440,15 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
      * new umode; servers can set it, local users cannot;
      * prevents users from /kick'ing or /mode -o'ing
      */
-    if (!FlagHas(&setflags, FLAG_CHSERV) && !IsOper(sptr))
+    if (!FlagHas(&setflags, FLAG_CHSERV) && !(IsOper(sptr) && HasPriv(sptr, PRIV_CHANSERV)))
       ClearChannelService(sptr);
-    if (!FlagHas(&setflags, FLAG_XTRAOP) && !IsOper(sptr))
+    if (!FlagHas(&setflags, FLAG_XTRAOP) && !(IsOper(sptr) && HasPriv(sptr, PRIV_XTRA_OPER)))
       ClearXtraOp(sptr);
     if (!FlagHas(&setflags, FLAG_NOCHAN) && !(IsOper(sptr) || feature_bool(FEAT_USER_HIDECHANS)))
       ClearNoChan(sptr);
-    if (!FlagHas(&setflags, FLAG_NOIDLE) && !(IsOper(sptr) || feature_bool(FEAT_USER_HIDEIDLETIME)))
+    if (!FlagHas(&setflags, FLAG_NOIDLE) && !((IsOper(sptr) && HasPriv(sptr, PRIV_NOIDLE)) || feature_bool(FEAT_USER_HIDEIDLETIME)))
       ClearNoIdle(sptr);
-    if (!FlagHas(&setflags, FLAG_PARANOID) && !IsOper(sptr))
+    if (!FlagHas(&setflags, FLAG_PARANOID) && !(IsOper(sptr) && HasPriv(sptr, PRIV_PARANOID)))
       ClearParanoid(sptr);
 
     /*

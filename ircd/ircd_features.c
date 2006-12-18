@@ -358,7 +358,6 @@ static struct FeatureDesc {
   F_B(EXTENDED_CHECKCMD, 0, 0, 0),
   F_B(CONFIG_OPERCMDS, 0, 0, 0),
   F_B(SETHOST, 0, 0, 0),
-  F_B(SETHOST_FREEFORM, 0, 0, 0),
   F_B(SETHOST_USER, 0, 0, 0),
   F_B(SETHOST_AUTO, 0, 0, 0),
 
