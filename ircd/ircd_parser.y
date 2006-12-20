@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_parser.y,v 1.56.2.6 2006/06/30 19:54:35 entrope Exp $
+ * $Id: ircd_parser.y,v 1.56.2.9 2006/12/07 05:14:51 entrope Exp $
  */
 %{
 
@@ -58,7 +58,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
+
 #define MAX_STRINGS 80 /* Maximum number of feature params. */
+#define USE_IPV4 (1 << 0)
+#define USE_IPV6 (1 << 1)
+
   extern struct LocalConf   localConf;
   extern struct DenyConf*   denyConfList;
   extern struct CRuleConf*  cruleConfList;
@@ -71,6 +75,7 @@
   int tping, tconn, maxlinks, sendq, port, invert, stringno, flags;
   char *name, *pass, *host, *ip, *username, *origin, *hub_limit;
   char *stringlist[MAX_STRINGS];
+  struct ListenerFlags listen_flags;
   struct ConnectionClass *c_class;
   struct DenyConf *dconf;
   struct ServerConf *sconf;
@@ -157,6 +162,7 @@ static void parse_error(char *pattern,...) {
 %token FAST
 %token AUTOCONNECT
 %token PROGRAM
+%token TOK_IPV4 TOK_IPV6
 /* and now a lot of privileges... */
 %token TPRIV_CHAN_LIMIT TPRIV_MODE_LCHAN TPRIV_DEOP_LCHAN TPRIV_WALK_LCHAN
 %token TPRIV_LOCAL_KILL TPRIV_REHASH TPRIV_RESTART TPRIV_DIE
@@ -169,7 +175,7 @@ static void parse_error(char *pattern,...) {
 /* and some types... */
 %type <num> sizespec
 %type <num> timespec timefactor factoredtimes factoredtime
-%type <num> expr yesorno privtype
+%type <num> expr yesorno privtype address_family
 %left '+' '-'
 %left '*' '/'
 
@@ -309,16 +315,18 @@ generaldesc: DESCRIPTION '=' QSTRING ';'
 generalvhost: VHOST '=' QSTRING ';'
 {
   struct irc_in_addr addr;
-  if (!strcmp($3, "*")) {
+  char *vhost = $3;
+
+  if (!strcmp(vhost, "*")) {
     /* This traditionally meant bind to all interfaces and connect
      * from the default. */
-  } else if (!ircd_aton(&addr, $3))
-    parse_error("Invalid virtual host '%s'.", $3);
+  } else if (!ircd_aton(&addr, vhost))
+    parse_error("Invalid virtual host '%s'.", vhost);
   else if (irc_in_addr_is_ipv4(&addr))
     memcpy(&VirtualHost_v4.addr, &addr, sizeof(addr));
   else
     memcpy(&VirtualHost_v6.addr, &addr, sizeof(addr));
-  MyFree($3);
+  MyFree(vhost);
 };
 
 adminblock: ADMIN
@@ -420,6 +428,8 @@ connectblock: CONNECT
   parse_error("Missing name in connect block");
  else if (pass == NULL)
   parse_error("Missing password in connect block");
+ else if (strlen(pass) > PASSWDLEN)
+  parse_error("Password too long in connect block");
  else if (host == NULL)
   parse_error("Missing host in connect block");
  else if (strchr(host, '*') || strchr(host, '?'))
@@ -521,10 +531,14 @@ operblock: OPER '{' operitems '}' ';'
     parse_error("Missing name in operator block");
   else if (pass == NULL)
     parse_error("Missing password in operator block");
+  /* Do not check password length because it may be crypted. */
   else if (host == NULL)
     parse_error("Missing host in operator block");
   else if (c_class == NULL)
     parse_error("Invalid or missing class in operator block");
+  else if (!FlagHas(&privs_dirty, PRIV_PROPAGATE)
+           && !FlagHas(&c_class->privs_dirty, PRIV_PROPAGATE))
+    parse_error("Operator block for %s and class %s have no LOCAL setting", name, c_class->cc_name);
   else {
     aconf = make_conf(CONF_OPERATOR);
     aconf->name = name;
@@ -533,9 +547,6 @@ operblock: OPER '{' operitems '}' ';'
     aconf->conn_class = c_class;
     memcpy(&aconf->privs, &privs, sizeof(aconf->privs));
     memcpy(&aconf->privs_dirty, &privs_dirty, sizeof(aconf->privs_dirty));
-    if (!FlagHas(&privs_dirty, PRIV_PROPAGATE)
-        && !FlagHas(&c_class->privs_dirty, PRIV_PROPAGATE))
-      parse_error("Operator block for %s and class %s have no LOCAL setting", name, c_class->cc_name);
   }
   if (!aconf) {
     MyFree(name);
@@ -625,29 +636,57 @@ privtype: TPRIV_CHAN_LIMIT { $$ = PRIV_CHAN_LIMIT; } |
 
 yesorno: YES { $$ = 1; } | NO { $$ = 0; };
 
+/* not a recursive definition because some pedant will just come along
+ * and whine that the parser accepts "ipv4 ipv4 ipv4 ipv4"
+ */
+address_family:
+               { $$ = 0; }
+    | TOK_IPV4 { $$ = USE_IPV4; }
+    | TOK_IPV6 { $$ = USE_IPV6; }
+    | TOK_IPV4 TOK_IPV6 { $$ = USE_IPV4 | USE_IPV6; }
+    | TOK_IPV6 TOK_IPV4 { $$ = USE_IPV6 | USE_IPV4; }
+    ;
+
 /* The port block... */
 portblock: PORT '{' portitems '}' ';'
 {
+  if (!FlagHas(&listen_flags, LISTEN_IPV4)
+      && !FlagHas(&listen_flags, LISTEN_IPV6))
+  {
+    FlagSet(&listen_flags, LISTEN_IPV4);
+    FlagSet(&listen_flags, LISTEN_IPV6);
+  }
   if (port > 0 && port <= 0xFFFF)
-    add_listener(port, host, pass, tconn, tping);
+    add_listener(port, host, pass, &listen_flags);
   else
     parse_error("Port %d is out of range", port);
   MyFree(host);
   MyFree(pass);
+  memset(&listen_flags, 0, sizeof(listen_flags));
   host = pass = NULL;
-  port = tconn = tping = 0;
+  port = 0;
 };
 portitems: portitem portitems | portitem;
 portitem: portnumber | portvhost | portmask | portserver | porthidden;
-portnumber: PORT '=' NUMBER ';'
+portnumber: PORT '=' address_family NUMBER ';'
 {
-  port = $3;
+  int families = $3;
+  if (families & USE_IPV4)
+    FlagSet(&listen_flags, LISTEN_IPV4);
+  else if (families & USE_IPV6)
+    FlagSet(&listen_flags, LISTEN_IPV6);
+  port = $4;
 };
 
-portvhost: VHOST '=' QSTRING ';'
+portvhost: VHOST '=' address_family QSTRING ';'
 {
+  int families = $3;
+  if (families & USE_IPV4)
+    FlagSet(&listen_flags, LISTEN_IPV4);
+  else if (families & USE_IPV6)
+    FlagSet(&listen_flags, LISTEN_IPV6);
   MyFree(host);
-  host = $3;
+  host = $4;
 };
 
 portmask: MASK '=' QSTRING ';'
@@ -658,18 +697,18 @@ portmask: MASK '=' QSTRING ';'
 
 portserver: SERVER '=' YES ';'
 {
-  tconn = -1;
+  FlagSet(&listen_flags, LISTEN_SERVER);
 } | SERVER '=' NO ';'
 {
-  tconn = 0;
+  FlagClr(&listen_flags, LISTEN_SERVER);
 };
 
 porthidden: HIDDEN '=' YES ';'
 {
-  tping = -1;
+  FlagSet(&listen_flags, LISTEN_HIDDEN);
 } | HIDDEN '=' NO ';'
 {
-  tping = 0;
+  FlagClr(&listen_flags, LISTEN_HIDDEN);
 };
 
 clientblock: CLIENT
@@ -685,6 +724,8 @@ clientblock: CLIENT
 
   if (!c_class)
     parse_error("Invalid or missing class in Client block");
+  else if (pass && strlen(pass) > PASSWDLEN)
+    parse_error("Password too long in connect block");
   else if (ip && !ipmask_parse(ip, &addr, &addrbits))
     parse_error("Invalid IP address %s in Client block", ip);
   else {
