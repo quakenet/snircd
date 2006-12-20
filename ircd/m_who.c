@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_who.c,v 1.22.2.1 2005/10/01 03:45:19 entrope Exp $
+ * $Id: m_who.c,v 1.22.2.2 2006/11/04 21:35:28 entrope Exp $
  */
 
 /*
@@ -270,6 +270,10 @@ int m_who(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
           case 'a':
           case 'A':
             fields |= WHO_FIELD_ACC;
+            break;
+          case 'o':
+          case 'O':
+            fields |= WHO_FIELD_OPL;
             break;
           default:
             break;
