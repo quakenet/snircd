@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h,v 1.55.2.1 2005/12/23 17:12:06 klmitch Exp $
+ * @version $Id: channel.h,v 1.55.2.2 2006/08/03 03:01:50 entrope Exp $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
@@ -249,7 +249,7 @@ struct Mode {
 /** A single ban for a channel. */
 struct Ban {
   struct Ban* next;           /**< next ban in the channel */
-  struct irc_in_addr address; /**< addres for BAN_IPMASK bans */
+  struct irc_in_addr address; /**< address for BAN_IPMASK bans */
   time_t when;                /**< timestamp when ban was added */
   unsigned short flags;       /**< modifier flags for the ban */
   unsigned char nu_len;       /**< length of nick!user part of banstr */
