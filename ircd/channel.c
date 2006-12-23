@@ -3157,14 +3157,19 @@ mode_process_clients(struct ParseState *state)
        *   MAXOPLEVEL, get oplevel MAXOPLEVEL.
        * Otherwise, get state->member's oplevel+1.
        */
-      if (state->cli_change[i].oplevel <= MAXOPLEVEL)
-        SetOpLevel(member, state->cli_change[i].oplevel);
+      if (state->cli_change[i].oplevel <= MAXOPLEVEL) {
+        if (IsService(cli_user(state->cli_change[i].client)->server)) {
+          SetOpLevel(member, state->cli_change[i].oplevel);
+        } else {
+          SetOpLevel(member, state->cli_change[i].oplevel > MINOPLEVEL ? state->cli_change[i].oplevel : MINOPLEVEL);
+        }
+      }
       else if (!state->member)
         SetOpLevel(member, MAXOPLEVEL);
       else if (OpLevel(state->member) >= MAXOPLEVEL)
           SetOpLevel(member, OpLevel(state->member));
       else
-        SetOpLevel(member, OpLevel(state->member) + 1);
+        SetOpLevel(member, OpLevel(state->member) >= MINOPLEVEL ? OpLevel(state->member) + 1 : MINOPLEVEL);
     }
 
     /* actually effect the change */
