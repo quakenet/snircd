@@ -201,6 +201,7 @@ struct Membership {
 
 #define MAXOPLEVELDIGITS    3
 #define MAXOPLEVEL          999
+#define MINOPLEVEL          100 /* minimum oplevel that ordinary users can set */
 
 #define IsZombie(x)         ((x)->status & CHFL_ZOMBIE) /**< see \ref zombie */
 #define IsDeopped(x)        ((x)->status & CHFL_DEOPPED)
