@@ -365,7 +365,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
     ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Signed on:: %s", myctime(acptr->cli_firsttime));
     send_reply(sptr, RPL_DATASTR, outbuf);
 
-    ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Idle Since:: %s", myctime(cli_user(acptr)->last)); 
+    ircd_snprintf(0, outbuf, sizeof(outbuf),  "     Idle Since:: %s", myctime(cli_user(acptr)->last)); 
     send_reply(sptr, RPL_DATASTR, outbuf);
   }
 
