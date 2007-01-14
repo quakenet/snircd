@@ -1,3 +1,22 @@
+2006-01-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_burst.c (ms_burst): Properly handle member mode :ov.
+
+2006-01-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_create.c (ms_create): Add channel name to the protocol
+	violation notice for a redundant CREATE.
+
+2006-01-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_user.c (set_nick_name): Use user's account name rather
+	than the account parameter, in case the parameter contains a colon
+	(i.e. "account:1234" format).
+
+2006-01-13  Michael Poole <mdpoole@troilus.org>
+
+	* doc/readme.who: Document 'd' user-matching flag.
+
 2006-12-18  Michael Poole <mdpoole@troilus.org>
 
 	* ircd/m_jupe.c (mo_jupe): Fix which privilege is tested.

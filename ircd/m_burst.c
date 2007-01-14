@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_burst.c,v 1.40.2.2 2006/01/12 03:02:50 entrope Exp $
+ * $Id: m_burst.c,v 1.40.2.3 2007/01/13 18:47:19 entrope Exp $
  */
 
 /*
@@ -469,6 +469,14 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		    current_mode_needs_reset = 0;
 		  }
 		  current_mode = (current_mode & ~(CHFL_DEOPPED | CHFL_DELAYED)) | CHFL_CHANOP;
+                  /*
+                   * Older servers may send XXYYY:ov, in which case we
+                   * do not want to use the code for 'v' below.
+                   */
+                  if (ptr[1] == 'v') {
+                    current_mode |= CHFL_VOICE;
+                    ptr++;
+                  }
 		}
 		else if (*ptr == 'v') { /* has voice status */
 		  if (current_mode_needs_reset) {
