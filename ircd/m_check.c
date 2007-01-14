@@ -364,9 +364,6 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   if (MyUser(acptr)) {  
     ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Signed on:: %s", myctime(acptr->cli_firsttime));
     send_reply(sptr, RPL_DATASTR, outbuf);
-
-    ircd_snprintf(0, outbuf, sizeof(outbuf),  "     Idle Since:: %s", myctime(cli_user(acptr)->last)); 
-    send_reply(sptr, RPL_DATASTR, outbuf);
   }
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "      Timestamp:: %s (%d)", myctime(acptr->cli_lastnick), acptr->cli_lastnick);
@@ -384,7 +381,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_snprintf(0, outbuf, sizeof(outbuf), "      Real Name:: %s%c", cli_info(acptr), COLOR_OFF);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  if (IsService(acptr) == -1)
+  if (IsChannelService(acptr) && IsService(cli_user(acptr)->server))
     send_reply(sptr, RPL_DATASTR, "         Status:: Network Service");
   else if (IsAnOper(acptr))
     send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator");
