@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c,v 1.99.2.2 2006/02/16 03:49:54 entrope Exp $
+ * @version $Id: s_user.c,v 1.99.2.3 2007/01/13 18:43:41 entrope Exp $
  */
 #include "config.h"
 
@@ -634,7 +634,8 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     }
     if (HasHiddenHost(new_client))
       ircd_snprintf(0, cli_user(new_client)->host, HOSTLEN, "%s.%s",
-        cli_user(new_client)->account, feature_str(FEAT_HIDDEN_HOST));
+        cli_user(new_client)->account,
+        feature_str(FEAT_HIDDEN_HOST));
     if (HasSetHost(new_client)) {
       if ((host = strrchr(hostmask, '@')) != NULL) {
         *host++ = '\0';

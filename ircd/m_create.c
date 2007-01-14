@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_create.c,v 1.18.2.3 2006/03/18 15:52:58 entrope Exp $
+ * $Id: m_create.c,v 1.18.2.4 2007/01/13 18:45:08 entrope Exp $
  */
 
 /*
@@ -160,7 +160,7 @@ int ms_create(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     {
       /* Is the remote server confused? */
       if (find_member_link(chptr, sptr)) {
-        protocol_violation(sptr, "%s tried to CREATE a channel already joined", cli_name(sptr));
+        protocol_violation(sptr, "%s tried to CREATE a channel already joined (%s)", cli_name(sptr), chptr->chname);
         continue;
       }
 
