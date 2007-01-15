@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Structure definitions for users and servers.
- * @version $Id: struct.h,v 1.9 2005/03/31 04:05:55 entrope Exp $
+ * @version $Id: struct.h,v 1.9.2.1 2007/01/15 03:08:23 entrope Exp $
  */
 #ifndef INCLUDED_struct_h
 #define INCLUDED_struct_h
@@ -57,6 +57,7 @@ struct Server {
   int            asll_rtt;      /**< AsLL round-trip time */
   int            asll_to;       /**< AsLL upstream lag */
   int            asll_from;     /**< AsLL downstream lag */
+  time_t         asll_last;     /**< Last time we sent or received an AsLL ping */
 
   char *last_error_msg;         /**< Allocated memory with last message receive with an ERROR */
   char by[NICKLEN + 1];         /**< Numnick of client who requested the link */

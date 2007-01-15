@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of string operations.
- * @version $Id: ircd_string.c,v 1.24 2005/09/12 16:11:58 entrope Exp $
+ * @version $Id: ircd_string.c,v 1.24.2.1 2007/01/15 03:08:23 entrope Exp $
  */
 #include "config.h"
 
@@ -156,6 +156,8 @@ char* ircd_strncpy(char* s1, const char* s2, size_t n)
 
   while (s < endp && (*s++ = *s2++))
     ;
+  if (s == endp)
+    *s = '\0';
   return s1;
 }
 
