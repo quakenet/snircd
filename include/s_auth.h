@@ -17,7 +17,7 @@
  */
 /** @file
  * @brief Interface for DNS and ident lookups.
- * @version $Id: s_auth.h,v 1.6.2.3 2006/05/08 01:55:08 entrope Exp $
+ * @version $Id: s_auth.h,v 1.6.2.4 2007/01/16 01:21:36 entrope Exp $
  */
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
@@ -36,7 +36,7 @@ struct StatDesc;
 extern void start_auth(struct Client *);
 extern int auth_ping_timeout(struct Client *);
 extern int auth_set_pong(struct AuthRequest *auth, unsigned int cookie);
-extern int auth_set_user(struct AuthRequest *auth, const char *username, const char *userinfo);
+extern int auth_set_user(struct AuthRequest *auth, const char *username, const char *hostname, const char *servername, const char *userinfo);
 extern int auth_set_nick(struct AuthRequest *auth, const char *nickname);
 extern int auth_set_password(struct AuthRequest *auth, const char *password);
 extern int auth_cap_start(struct AuthRequest *auth);
