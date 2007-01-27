@@ -82,8 +82,9 @@
  * @param[in] sptr Client that originated the message.
  * @param[in] name Name of target channel.
  * @param[in] text %Message to relay.
+ * @param[in] targetc Count of channels we're sending the message to.
  */
-void relay_channel_message(struct Client* sptr, const char* name, const char* text)
+void relay_channel_message(struct Client* sptr, const char* name, const char* text, const int targetc)
 {
   struct Channel* chptr;
   const char *ch;
@@ -105,6 +106,12 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
   if ((chptr->mode.mode & MODE_NOPRIVMSGS) &&
       check_target_limit(sptr, chptr, chptr->chname, 0))
     return;
+
+  /* +M check */
+  if((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1)) {
+    send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+    return;
+  }
 
   /* +cC checks */
   if (chptr->mode.mode & MODE_NOCOLOUR)
@@ -131,8 +138,9 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
  * @param[in] sptr Client that originated the message.
  * @param[in] name Name of target channel.
  * @param[in] text %Message to relay.
+ * @param[in] targetc Count of channels we're sending the notice to.
  */
-void relay_channel_notice(struct Client* sptr, const char* name, const char* text)
+void relay_channel_notice(struct Client* sptr, const char* name, const char* text, const int targetc)
 {
   struct Channel* chptr;
   const char *ch;
@@ -153,6 +161,12 @@ void relay_channel_notice(struct Client* sptr, const char* name, const char* tex
     return;
 
   if ((chptr->mode.mode & MODE_NONOTICE)) {
+    send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+    return;
+  }
+
+  /* +M check */
+  if((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1)) {
     send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
     return;
   }

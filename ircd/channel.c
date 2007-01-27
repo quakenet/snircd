@@ -838,6 +838,8 @@ void channel_modes(struct Client *cptr, char *mbuf, char *pbuf, int buflen,
     *mbuf++ = 'u';
   if (chptr->mode.mode & MODE_DELJOINS)
     *mbuf++ = 'D';
+  if (chptr->mode.mode & MODE_NOMULTITARGET)
+    *mbuf++ = 'M';
   else if (MyUser(cptr) && (chptr->mode.mode & MODE_WASDELJOINS))
     *mbuf++ = 'd';
   if (chptr->mode.limit) {
@@ -1318,7 +1320,8 @@ int SetAutoChanModes(struct Channel *chptr)
     MODE_NOCTCP,        'C',
     MODE_NONOTICE,      'N',
     MODE_DELJOINS,      'D',
-    MODE_NOQUITPARTS,   'u'
+    MODE_NOQUITPARTS,   'u',
+    MODE_NOMULTITARGET, 'M'
   };
 
   unsigned int *flag_p;
@@ -1604,6 +1607,7 @@ modebuf_flush_int(struct ModeBuf *mbuf, int all)
     MODE_NOCOLOUR,      'c',
     MODE_NOCTCP,        'C',
     MODE_NONOTICE,	'N',
+    MODE_NOMULTITARGET, 'M',
     0x0, 0x0
   };
   static int local_flags[] = {
@@ -2013,7 +2017,7 @@ modebuf_mode(struct ModeBuf *mbuf, unsigned int mode)
   mode &= (MODE_ADD | MODE_DEL | MODE_PRIVATE | MODE_SECRET | MODE_MODERATED |
            MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS | MODE_REGONLY |
            MODE_DELJOINS | MODE_WASDELJOINS | MODE_NOQUITPARTS  | MODE_NOCOLOUR |
-           MODE_NOCTCP | MODE_NONOTICE);
+           MODE_NOCTCP | MODE_NONOTICE | MODE_NOMULTITARGET);
 
   if (!(mode & ~(MODE_ADD | MODE_DEL))) /* don't add empty modes... */
     return;
@@ -2181,6 +2185,7 @@ modebuf_extract(struct ModeBuf *mbuf, char *buf)
     MODE_NOCOLOUR,      'c',
     MODE_NOCTCP,        'C',
     MODE_NONOTICE,      'N',
+    MODE_NOMULTITARGET, 'M',
     0x0, 0x0
   };
   unsigned int add;
@@ -3276,6 +3281,7 @@ mode_parse(struct ModeBuf *mbuf, struct Client *cptr, struct Client *sptr,
     MODE_NOCOLOUR,      'c',
     MODE_NOCTCP,        'C',
     MODE_NONOTICE,      'N',
+    MODE_NOMULTITARGET, 'M',
     MODE_ADD,		'+',
     MODE_DEL,		'-',
     0x0, 0x0

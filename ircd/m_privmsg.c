@@ -106,6 +106,7 @@ int m_privmsg(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   char*           server;
   int             i;
   int             count;
+  int             chancount;
   char*           vector[MAXTARGETS];
 
   assert(0 != cptr);
@@ -125,13 +126,21 @@ int m_privmsg(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   count = unique_name_vector(parv[1], ',', vector, MAXTARGETS);
 
+  chancount = 0;
+  for (i = 0; i < count; ++i) {
+    name = vector[i];
+
+    if (IsChannelPrefix(*name))
+      chancount++;
+  }
+
   for (i = 0; i < count; ++i) {
     name = vector[i];
     /*
      * channel msg?
      */
     if (IsChannelPrefix(*name)) {
-      relay_channel_message(sptr, name, parv[parc - 1]);
+      relay_channel_message(sptr, name, parv[parc - 1], chancount);
     }
     /*
      * we have to check for the '@' at least once no matter what we do
@@ -197,6 +206,7 @@ int mo_privmsg(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   char*           server;
   int             i;
   int             count;
+  int             chancount;
   char*           vector[MAXTARGETS];
   assert(0 != cptr);
   assert(cptr == sptr);
@@ -215,13 +225,21 @@ int mo_privmsg(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   count = unique_name_vector(parv[1], ',', vector, MAXTARGETS);
 
+  chancount = 0;
+  for (i = 0; i < count; ++i) {
+    name = vector[i];
+
+    if (IsChannelPrefix(*name))
+      chancount++;
+  }
+
   for (i = 0; i < count; ++i) {
     name = vector[i];
     /*
      * channel msg?
      */
     if (IsChannelPrefix(*name))
-      relay_channel_message(sptr, name, parv[parc - 1]);
+      relay_channel_message(sptr, name, parv[parc - 1], chancount);
 
     else if (*name == '$')
       relay_masked_message(sptr, name, parv[parc - 1]);
