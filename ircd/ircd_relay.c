@@ -160,31 +160,23 @@ void relay_channel_notice(struct Client* sptr, const char* name, const char* tex
       check_target_limit(sptr, chptr, chptr->chname, 0))
     return;
 
-  if ((chptr->mode.mode & MODE_NONOTICE)) {
-    send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+  if ((chptr->mode.mode & MODE_NONOTICE))
     return;
-  }
 
   /* +M check */
-  if((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1)) {
-    send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+  if((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1))
     return;
-  }
 
   /* +cC checks */
   if (chptr->mode.mode & MODE_NOCOLOUR)
     for (ch=text;*ch;ch++)
-      if (*ch==2 || *ch==3 || *ch==22 || *ch==27 || *ch==31) {
-        send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+      if (*ch==2 || *ch==3 || *ch==22 || *ch==27 || *ch==31)
         return;
-      }
 
-  if ((chptr->mode.mode & MODE_NOCTCP) && ircd_strncmp(text,"\001ACTION ",8))
+  if (chptr->mode.mode & MODE_NOCTCP)
     for (ch=text;*ch;)
-      if (*ch++==1) { 
-        send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
+      if (*ch++==1)
         return;
-      }
 
   sendcmdto_channel_butone(sptr, CMD_NOTICE, chptr, cli_from(sptr),
 			   SKIP_DEAF | SKIP_BURST, "%H :%s", chptr, text);
