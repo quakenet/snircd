@@ -1189,10 +1189,10 @@ int set_hostmask(struct Client *cptr, char *hostmask, char *password)
         "%H", chan->channel);
     }
     if (IsChanOp(chan) && HasVoice(chan)) {
-      sendcmdto_channel_butserv_butone(&me, CMD_MODE, chan->channel, cptr, 0,
+      sendcmdto_channel_butserv_butone(&his, CMD_MODE, chan->channel, cptr, 0,
         "%H +ov %C %C", chan->channel, cptr, cptr);
     } else if (IsChanOp(chan) || HasVoice(chan)) {
-      sendcmdto_channel_butserv_butone(&me, CMD_MODE, chan->channel, cptr, 0,
+      sendcmdto_channel_butserv_butone(&his, CMD_MODE, chan->channel, cptr, 0,
         "%H +%c %C", chan->channel, IsChanOp(chan) ? 'o' : 'v', cptr);
     }
   }
