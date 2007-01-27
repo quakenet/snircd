@@ -108,7 +108,7 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
     return;
 
   /* +M check */
-  if((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1)) {
+  if ((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1)) {
     send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
     return;
   }
@@ -164,7 +164,7 @@ void relay_channel_notice(struct Client* sptr, const char* name, const char* tex
     return;
 
   /* +M check */
-  if((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1))
+  if ((chptr->mode.mode & MODE_NOMULTITARGET) && (targetc > 1))
     return;
 
   /* +cC checks */
