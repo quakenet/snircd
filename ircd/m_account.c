@@ -119,10 +119,26 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
   if (!(acptr = findNUser(parv[1])))
     return 0; /* Ignore ACCOUNT for a user that QUIT; probably crossed */
 
-  if (IsAccount(acptr))
+  if (IsAccount(acptr) && ((parc < 5) || (parc >= 5 && cli_user(acptr)->acc_id)))
     return protocol_violation(cptr, "ACCOUNT for already registered user %s "
 			      "(%s -> %s)", cli_name(acptr),
 			      cli_user(acptr)->account, parv[2]);
+
+  /* special case for current snircd release only */
+  if (parc >= 5 && cli_user(acptr)->account[0]) {
+    if (strcmp(cli_user(acptr)->account, parv[2])) {
+      return protocol_violation(cptr, "ACCOUNT change for already registered user %s "
+                                "(%s -> %s)", cli_name(acptr),
+                                cli_user(acptr)->account, parv[2]);
+    }
+    cli_user(acptr)->acc_create = atoi(parv[3]);
+    cli_user(acptr)->acc_id = strtoul(parv[4], NULL, 10);      
+    sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu",
+                              acptr, cli_user(acptr)->account,
+                              cli_user(acptr)->acc_create,
+                              cli_user(acptr)->acc_id);
+    return 0;
+  }
 
   assert(0 == cli_user(acptr)->account[0]);
 
