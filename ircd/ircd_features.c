@@ -391,10 +391,10 @@ static struct FeatureDesc {
   F_B(HIS_STATS_s, 0, 1, 0),
   F_B(HIS_STATS_t, 0, 1, 0),
   F_B(HIS_STATS_T, 0, 1, 0),
-  F_B(HIS_STATS_u, 0, 0, 0),
+  F_B(HIS_STATS_u, 0, 1, 0),
   F_B(HIS_STATS_U, 0, 1, 0),
   F_B(HIS_STATS_v, 0, 1, 0),
-  F_B(HIS_STATS_w, 0, 0, 0),
+  F_B(HIS_STATS_w, 0, 1, 0),
   F_B(HIS_STATS_x, 0, 1, 0),
   F_B(HIS_STATS_y, 0, 1, 0),
   F_B(HIS_STATS_z, 0, 1, 0),
@@ -417,6 +417,7 @@ static struct FeatureDesc {
   F_S(HIS_SERVERINFO, 0, "The Undernet Underworld", feature_notify_serverinfo),
   F_S(HIS_URLSERVERS, 0, "http://www.undernet.org/servers.php", 0),
   F_B(HIS_USERGLINE, 0, 1, 0),
+  F_B(HIS_LUSERS_ME, 0, 0, 0),
 
   /* Misc. random stuff */
   F_S(NETWORK, 0, "UnderNet", 0),

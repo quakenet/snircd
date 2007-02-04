@@ -164,6 +164,7 @@ enum Feature {
   FEAT_HIS_SERVERINFO,
   FEAT_HIS_URLSERVERS,
   FEAT_HIS_USERGLINE,
+  FEAT_HIS_LUSERS_ME,
 
   /* Misc. random stuff */
   FEAT_NETWORK,

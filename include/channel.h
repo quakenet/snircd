@@ -115,14 +115,15 @@ struct Client;
 					 * pending */
 #define MODE_NOQUITPARTS 0x800000
 
-#define MODE_NOMULTITARGET 0x1000000
+#define MODE_NOMULTITARGET 0x1000000    /**< +T No multiple targets */
+#define MODE_MODERATENOREG 0x2000000    /**< +M Moderate unauthed users */
 
 /** mode flags which take another parameter (With PARAmeterS)
  */
 #define MODE_WPARAS     (MODE_CHANOP|MODE_VOICE|MODE_BAN|MODE_KEY|MODE_LIMIT|MODE_APASS|MODE_UPASS)
 
 /** Available Channel modes */
-#define infochanmodes feature_bool(FEAT_OPLEVELS) ? "AbiklmnopstUvrDcCNuM" : "biklmnopstvrDcCNuM"
+#define infochanmodes feature_bool(FEAT_OPLEVELS) ? "AbiklmnopstUvrDcCNuMT" : "biklmnopstvrDcCNuMT"
 /** Available Channel modes that take parameters */
 #define infochanmodeswithparams feature_bool(FEAT_OPLEVELS) ? "AbkloUv" : "bklov"
 
