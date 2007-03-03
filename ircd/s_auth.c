@@ -223,13 +223,10 @@ static int auth_set_username(struct AuthRequest *auth)
   char *s;
   int   rlen = USERLEN;
   int   killreason;
-  short upper = 0;
-  short lower = 0;
+  short character = 0;
   short pos = 0;
-  short leadcaps = 0;
   short other = 0;
   short digits = 0;
-  short digitgroups = 0;
   char  ch;
   char  last;
 
@@ -286,27 +283,13 @@ static int auth_set_username(struct AuthRequest *auth)
          (ch = *d++) != '\0';
          pos++, last = ch)
     {
-      if (IsLower(ch))
+      if (IsLower(ch) || IsUpper(ch))
       {
-        lower++;
-      }
-      else if (IsUpper(ch))
-      {
-        upper++;
-        /* Accept caps as leading if we haven't seen lower case or digits yet. */
-        if ((leadcaps || pos == 0) && !lower && !digits)
-          leadcaps++;
+        character++;
       }
       else if (IsDigit(ch))
       {
         digits++;
-        if (pos == 0 || !IsDigit(last))
-        {
-          digitgroups++;
-          /* If more than two groups of digits, reject. */
-          if (digitgroups > 2)
-            goto badid;
-        }
       }
       else if (ch == '-' || ch == '_' || ch == '.')
       {
@@ -319,20 +302,8 @@ static int auth_set_username(struct AuthRequest *auth)
         goto badid;
     }
 
-    /* If mixed case, first must be capital, but no more than three;
-     * but if three capitals, they must all be leading. */
-    if (lower && upper && (!leadcaps || leadcaps > 3 ||
-                           (upper > 2 && upper > leadcaps)))
-      goto badid;
-    /* If two different groups of digits, one must be either at the
-     * start or end. */
-    if (digitgroups == 2 && !(IsDigit(s[0]) || IsDigit(ch)))
-      goto badid;
     /* Must have at least one letter. */
-    if (!lower && !upper)
-      goto badid;
-    /* Final character must not be punctuation. */
-    if (!IsAlnum(last))
+    if (!character)
       goto badid;
   }
 
