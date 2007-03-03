@@ -1627,6 +1627,7 @@ char *umode_str(struct Client *cptr, int opernames)
       char* t = cli_user(cptr)->opername;
       while ((*m++ = *t++))
         ; /* Empty loop */
+      m--; /* Step back over the '\0' */
     } else {
       *m++ = NOOPERNAMECHARACTER;
     }
