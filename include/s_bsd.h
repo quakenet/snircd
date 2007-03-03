@@ -1,6 +1,6 @@
 /** @file s_bsd.h
  * @brief Wrapper functions to avoid direct use of BSD APIs.
- * @version $Id: s_bsd.h,v 1.21 2005/06/27 13:25:51 entrope Exp $
+ * @version $Id: s_bsd.h,v 1.21.2.1 2007/02/25 15:41:48 entrope Exp $
  */
 #ifndef INCLUDED_s_bsd_h
 #define INCLUDED_s_bsd_h
@@ -53,6 +53,8 @@ extern int            HighestFd;
 extern struct Client* LocalClientArray[MAXCONNECTIONS];
 extern struct irc_sockaddr VirtualHost_v4;
 extern struct irc_sockaddr VirtualHost_v6;
+extern struct irc_sockaddr VirtualHost_dns_v4;
+extern struct irc_sockaddr VirtualHost_dns_v6;
 
 /*
  * Proto types

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_join.c,v 1.34.2.9 2006/02/05 00:50:22 entrope Exp $
+ * $Id: m_join.c,v 1.34.2.10 2007/02/25 14:32:41 entrope Exp $
  */
 
 #include "config.h"
@@ -239,7 +239,17 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
       /* Is there some reason the user may not join? */
       if (err) {
-        send_reply(sptr, err, chptr->chname);
+        switch(err) {
+          case ERR_NEEDREGGEDNICK:
+            send_reply(sptr, 
+                       ERR_NEEDREGGEDNICK, 
+                       chptr->chname, 
+                       feature_str(FEAT_URLREG));            
+            break;
+          default:
+            send_reply(sptr, err, chptr->chname);
+            break;
+        }
         continue;
       }
 

@@ -1,6 +1,6 @@
 /** @file
  * @brief IRC resolver API.
- * @version $Id: res.h,v 1.17.2.2 2006/03/14 03:45:52 entrope Exp $
+ * @version $Id: res.h,v 1.17.2.3 2007/02/25 15:41:48 entrope Exp $
  */
 
 #ifndef INCLUDED_res_h
@@ -109,6 +109,8 @@ typedef struct
 } HEADER;
 
 extern void restart_resolver(void);
+extern void clear_nameservers(void);
+extern void add_nameserver(const char *ipaddr);
 extern void add_local_domain(char *hname, size_t size);
 extern size_t cres_mem(struct Client* cptr);
 extern void delete_resolver_queries(const void *vptr);

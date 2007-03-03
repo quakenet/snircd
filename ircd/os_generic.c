@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of OS-dependent operations.
- * @version $Id: os_generic.c,v 1.23.2.6 2007/01/15 03:08:23 entrope Exp $
+ * @version $Id: os_generic.c,v 1.23.2.7 2007/02/28 22:37:08 entrope Exp $
  */
 #include "config.h"
 
@@ -178,13 +178,12 @@ int sockaddr_from_irc(struct sockaddr_in6 *v6, const struct irc_sockaddr *irc, i
 int sockaddr_from_irc(struct sockaddr_in *v4, const struct irc_sockaddr *irc, int compat_fd, int family)
 {
     assert(irc != 0);
+    memset(v4, 0, sizeof(*v4));
     v4->sin_family = AF_INET;
     if (irc) {
         assert(!irc->addr.in6_16[0] && !irc->addr.in6_16[1] && !irc->addr.in6_16[2] && !irc->addr.in6_16[3] && !irc->addr.in6_16[4] && (!irc->addr.in6_16[5] || irc->addr.in6_16[5] == 0xffff));
         memcpy(&v4->sin_addr, &irc->addr.in6_16[6], sizeof(v4->sin_addr));
         v4->sin_port = htons(irc->port);
-    } else{
-        memset(&v4, 0, sizeof(v4));
     }
     (void)compat_fd; (void)family;
     return sizeof(*v4);

@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Error handling support.
- * @version $Id: s_err.c,v 1.72.2.3 2006/06/09 02:12:25 entrope Exp $
+ * @version $Id: s_err.c,v 1.72.2.4 2007/02/25 14:32:41 entrope Exp $
  */
 #include "config.h"
 
@@ -986,7 +986,7 @@ static Numeric replyTable[] = {
 /* 476 */
   { ERR_BADCHANMASK, "%s :Bad Channel Mask", "476" },
 /* 477 */
-  { ERR_NEEDREGGEDNICK, "%s :Cannot join channel (+r)", "477" },
+  { ERR_NEEDREGGEDNICK, "%s :Cannot join channel (+r): this channel requires authentication -- you can obtain an account from %s", "477" },
 /* 478 */
   { ERR_BANLISTFULL, "%s %s :Channel ban/ignore list is full", "478" },
 /* 479 */
