@@ -92,6 +92,9 @@ typedef unsigned long flagpage_t;
 /** String containing valid user modes, in no particular order. */
 #define infousermodes "dioswkgxRXInP"
 
+/** Character to indicate no oper name available */
+#define NOOPERNAMECHARACTER '-'
+
 /** Operator privileges. */
 enum Priv
   {
@@ -179,6 +182,7 @@ enum Flag
     FLAG_NOCHAN,                    /**< user's channels are hidden */
     FLAG_NOIDLE,                    /**< user's idletime is hidden */
     FLAG_XTRAOP,                    /**< oper has special powers */
+    FLAG_OPERNAME,                  /**< Server sends oper name in mode string */
 
     FLAG_LAST_FLAG,                 /**< number of flags */
     FLAG_LOCAL_UMODES = FLAG_LOCOP, /**< First local mode flag */
@@ -607,6 +611,8 @@ struct Client {
 /** Return non-zero if the client should receive notices when someone
  * does a whois on it. */
 #define IsParanoid(x)           HasFlag(x, FLAG_PARANOID)
+/** Return non-zero if the server should send opername information */
+#define IsSendOperName(x)         HasFlag(x, FLAG_OPERNAME)
 
 /** Return non-zero if the client has operator or server privileges. */
 #define IsPrivileged(x)         (IsAnOper(x) || IsServer(x))
@@ -648,6 +654,8 @@ struct Client {
 #define SetHub(x)               SetFlag(x, FLAG_HUB)
 /** Mark a client as being an IPv6-grokking server. */
 #define SetIPv6(x)              SetFlag(x, FLAG_IPV6)
+/** Mark a server as sending opername */
+#define SetOperName(x)          SetFlag(x, FLAG_OPERNAME)
 /** Mark a client as being a services server. */
 #define SetService(x)           SetFlag(x, FLAG_SERVICE)
 /** Mark a client as having an account stamp. */

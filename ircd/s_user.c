@@ -113,6 +113,8 @@ void free_user(struct User* user)
   if (--user->refcnt == 0) {
     if (user->away)
       MyFree(user->away);
+    if (user->opername)
+      MyFree(user->opername);
     /*
      * sanity check
      */
@@ -479,10 +481,12 @@ int register_user(struct Client *cptr, struct Client *sptr)
   if (IsOper(sptr))
     ++UserStats.opers;
 
-  tmpstr = umode_str(sptr);
-  /* Send full IP address to IPv6-grokking servers. */
+  tmpstr = umode_str(sptr, 0);
+  int ipv6andopername[] = {FLAG_IPV6,FLAG_OPERNAME};
+
+  /* Do not send oper name and send full IP address to IPv6-grokking servers. */
   sendcmdto_flag_serv_butone(user->server, CMD_NICK, cptr,
-                             FLAG_IPV6, FLAG_LAST_FLAG,
+                             FLAG_IPV6, FLAG_OPERNAME,
                              "%s %d %Tu %s %s %s%s%s%s %s%s :%s",
                              cli_name(sptr), cli_hopcount(sptr) + 1,
                              cli_lastnick(sptr),
@@ -490,9 +494,31 @@ int register_user(struct Client *cptr, struct Client *sptr)
                              *tmpstr ? "+" : "", tmpstr, *tmpstr ? " " : "",
                              iptobase64(ip_base64, &cli_ip(sptr), sizeof(ip_base64), 1),
                              NumNick(sptr), cli_info(sptr));
-  /* Send fake IPv6 addresses to pre-IPv6 servers. */
+  /* Do not send oper name and send fake IPv6 addresses to pre-IPv6 servers. */
+  sendcmdto_flagarray_serv_butone(user->server, CMD_NICK, cptr,
+                             NULL, 0, ipv6andopername, 2,
+                             "%s %d %Tu %s %s %s%s%s%s %s%s :%s",
+                             cli_name(sptr), cli_hopcount(sptr) + 1,
+                             cli_lastnick(sptr),
+                             user->realusername, user->realhost,
+                             *tmpstr ? "+" : "", tmpstr, *tmpstr ? " " : "",
+                             iptobase64(ip_base64, &cli_ip(sptr), sizeof(ip_base64), 0),
+                             NumNick(sptr), cli_info(sptr));
+
+  tmpstr = umode_str(sptr, 1);
+  /* Send oper name and full IP address to IPv6-grokking servers. */
+  sendcmdto_flagarray_serv_butone(user->server, CMD_NICK, cptr,
+                             ipv6andopername, 2, NULL, 0,
+                             "%s %d %Tu %s %s %s%s%s%s %s%s :%s",
+                             cli_name(sptr), cli_hopcount(sptr) + 1,
+                             cli_lastnick(sptr),
+                             user->realusername, user->realhost,
+                             *tmpstr ? "+" : "", tmpstr, *tmpstr ? " " : "",
+                             iptobase64(ip_base64, &cli_ip(sptr), sizeof(ip_base64), 1),
+                             NumNick(sptr), cli_info(sptr));
+  /* Send oper name and fake IPv6 addresses to pre-IPv6 servers. */
   sendcmdto_flag_serv_butone(user->server, CMD_NICK, cptr,
-                             FLAG_LAST_FLAG, FLAG_IPV6,
+                             FLAG_OPERNAME, FLAG_IPV6,
                              "%s %d %Tu %s %s %s%s%s%s %s%s :%s",
                              cli_name(sptr), cli_hopcount(sptr) + 1,
                              cli_lastnick(sptr),
@@ -512,7 +538,7 @@ int register_user(struct Client *cptr, struct Client *sptr)
       FlagSet(&flags, FLAG_ACCOUNT);
     else
       FlagClr(&flags, FLAG_ACCOUNT);
-    send_umode(cptr, sptr, &flags, ALL_UMODES);
+    send_umode(cptr, sptr, &flags, ALL_UMODES, 0);
     if ((cli_snomask(sptr) != SNO_DEFAULT) && HasFlag(sptr, FLAG_SERVNOTICE))
       send_reply(sptr, RPL_SNOMASK, cli_snomask(sptr), cli_snomask(sptr));
   }
@@ -569,6 +595,9 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     char* hostmask = 0;
     char* host = 0;
     const char* p, *pp;
+    char *opername = 0;
+    size_t opernamelen = 0;
+    unsigned int nextparam = 7;
 
     /*
      * A server introducing a new client, change source
@@ -587,10 +616,12 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
           if (userModeList[i].c == *p)
           {
             SetFlag(new_client, userModeList[i].flag);
-	    if (userModeList[i].flag == FLAG_ACCOUNT)
-	      account = parv[7];
-            if (userModeList[i].flag == FLAG_SETHOST)
-              hostmask = parv[parc - 4];
+            if (userModeList[i].flag == FLAG_OPER && IsSendOperName(cptr))
+              opername = parv[nextparam++];
+            else if (userModeList[i].flag == FLAG_ACCOUNT)
+              account = parv[nextparam++];
+            else if (userModeList[i].flag == FLAG_SETHOST)
+              hostmask = parv[nextparam++];
             break;
           }
         }
@@ -618,6 +649,23 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     ircd_strncpy(cli_user(new_client)->host, parv[5], HOSTLEN);
     ircd_strncpy(cli_user(new_client)->realhost, parv[5], HOSTLEN);
     ircd_strncpy(cli_info(new_client), parv[parc - 1], REALLEN);
+    if (opername) {
+      if (cli_user(new_client)->opername)
+        MyFree(cli_user(new_client)->opername);
+      if ((opername[0] == NOOPERNAMECHARACTER) && (opername[1] == '\0')) {
+        cli_user(new_client)->opername = NULL;
+      } else {
+        opernamelen = strlen(opername);
+        if (opernamelen > ACCOUNTLEN) {
+          protocol_violation(cptr, "Received opername (%s) longer than %d for %s; ignoring.", opername, ACCOUNTLEN, cli_name(new_client));
+          cli_user(new_client)->opername = NULL;
+        } else {
+          cli_user(new_client)->opername = (char*) MyMalloc(opernamelen + 1);
+          assert(0 != cli_user(new_client)->opername);
+          ircd_strncpy(cli_user(new_client)->opername,opername,ACCOUNTLEN);
+        }
+      }
+    }
     if (account) {
       int len = ACCOUNTLEN;
       if ((p = strchr(account, ':'))) {
@@ -907,16 +955,26 @@ void send_umode_out(struct Client *cptr, struct Client *sptr,
   int i;
   struct Client *acptr;
 
-  send_umode(NULL, sptr, old, prop ? SEND_UMODES : SEND_UMODES_BUT_OPER);
+  send_umode(NULL, sptr, old, prop ? SEND_UMODES : SEND_UMODES_BUT_OPER, 0);
 
   for (i = HighestFd; i >= 0; i--)
   {
     if ((acptr = LocalClientArray[i]) && IsServer(acptr) &&
-        (acptr != cptr) && (acptr != sptr) && *umodeBuf)
-      sendcmdto_one(sptr, CMD_MODE, acptr, "%s %s", cli_name(sptr), umodeBuf);
+        (acptr != cptr) && (acptr != sptr) && !IsSendOperName(acptr) && *umodeBuf)
+        sendcmdto_one(sptr, CMD_MODE, acptr, "%s %s", cli_name(sptr), umodeBuf);
   }
+
+  send_umode(NULL, sptr, old, prop ? SEND_UMODES : SEND_UMODES_BUT_OPER, 1);
+
+  for (i = HighestFd; i >= 0; i--)
+  {
+    if ((acptr = LocalClientArray[i]) && IsServer(acptr) &&
+        (acptr != cptr) && (acptr != sptr) && IsSendOperName(acptr) && *umodeBuf)
+        sendcmdto_one(sptr, CMD_MODE, acptr, "%s %s", cli_name(sptr), umodeBuf);
+  }
+
   if (cptr && MyUser(cptr))
-    send_umode(cptr, sptr, old, ALL_UMODES);
+    send_umode(cptr, sptr, old, ALL_UMODES, 0);
 }
 
 
@@ -1221,10 +1279,11 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
   unsigned int tmpmask = 0;
   int snomask_given = 0;
   char buf[BUFSIZE];
-  char *hostmask, *password;
+  char *hostmask, *password, *opername;
   int prop = 0;
   int do_host_hiding = 0;
   int do_set_host = 0;
+  size_t opernamelen;
 
   hostmask = password = NULL;
   what = MODE_ADD;
@@ -1312,9 +1371,29 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
           ClearWallops(sptr);
         break;
       case 'o':
-        if (what == MODE_ADD)
+        if (what == MODE_ADD) {
           SetOper(sptr);
-        else {
+          if (IsServer(cptr) && IsSendOperName(cptr)) {
+            if (*(p + 1)) {
+              opername = *++p;
+              if (cli_user(sptr)->opername)
+                MyFree(cli_user(sptr)->opername);
+              if ((opername[0] == NOOPERNAMECHARACTER) && (opername[1] == '\0')) {
+                cli_user(sptr)->opername = NULL;
+              } else {
+                opernamelen = strlen(opername);
+                if (opernamelen > ACCOUNTLEN) {
+                  protocol_violation(cptr, "Received opername (%s) longer than %d for %s; ignoring.", opername, ACCOUNTLEN, cli_name(sptr));
+                  cli_user(sptr)->opername = NULL;
+                } else {
+                  cli_user(sptr)->opername = (char*) MyMalloc(opernamelen + 1);
+                  assert(0 != cli_user(sptr)->opername);
+                  ircd_strncpy(cli_user(sptr)->opername,opername,ACCOUNTLEN);
+                }
+              }
+            }
+          }
+        } else {
           ClrFlag(sptr, FLAG_OPER);
           ClrFlag(sptr, FLAG_LOCOP);
           if (MyConnect(sptr))
@@ -1524,7 +1603,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
  * @param[in] cptr Some user.
  * @return Pointer to a static buffer.
  */
-char *umode_str(struct Client *cptr)
+char *umode_str(struct Client *cptr, int opernames)
 {
   /* Maximum string size: "owidgrx\0" */
   char *m = umodeBuf;
@@ -1539,6 +1618,18 @@ char *umode_str(struct Client *cptr)
     if (FlagHas(&c_flags, userModeList[i].flag) &&
         userModeList[i].flag >= FLAG_GLOBAL_UMODES)
       *m++ = userModeList[i].c;
+  }
+
+  if (opernames && IsOper(cptr))
+  {
+    *m++ = ' ';
+    if (cli_user(cptr)->opername) {
+      char* t = cli_user(cptr)->opername;
+      while ((*m++ = *t++))
+        ; /* Empty loop */
+    } else {
+      *m++ = NOOPERNAMECHARACTER;
+    }
   }
 
   if (IsAccount(cptr))
@@ -1586,11 +1677,12 @@ char *umode_str(struct Client *cptr)
  * SEND_UMODES, to select which changed user modes to send.
  */
 void send_umode(struct Client *cptr, struct Client *sptr, struct Flags *old,
-                int sendset)
+                int sendset, int opernames)
 {
   int i;
   int flag;
   int needhost = 0;
+  int needoper = 0;
   char *m;
   int what = MODE_NULL;
 
@@ -1619,6 +1711,12 @@ void send_umode(struct Client *cptr, struct Client *sptr, struct Flags *old,
       if (flag < FLAG_GLOBAL_UMODES)
         continue;
       break;      
+    }
+    /* Special case for OPER.. */
+    if (flag == FLAG_OPER) {
+      /* If we're setting +o, add the opername later */
+      if (!FlagHas(old, flag))
+      	needoper++;
     }
     /* Special case for SETHOST.. */
     if (flag == FLAG_SETHOST) {
@@ -1651,6 +1749,16 @@ void send_umode(struct Client *cptr, struct Client *sptr, struct Flags *old,
         *m++ = '+';
         *m++ = userModeList[i].c;
       }
+    }
+  }
+  if (opernames && needoper) {
+    *m++ = ' ';
+    if (cli_user(sptr)->opername) {
+      char* t = cli_user(sptr)->opername;
+      while ((*m++ = *t++))
+        ; /* Empty loop */
+    } else {
+      *m++ = NOOPERNAMECHARACTER;
     }
   }
   if (needhost) {

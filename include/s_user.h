@@ -90,9 +90,9 @@ extern int hunt_server_prio_cmd(struct Client *from, const char *cmd,
 				int MustBeOper, const char *pattern,
 				int server, int parc, char *parv[]);
 extern struct Client* next_client(struct Client* next, const char* ch);
-extern char *umode_str(struct Client *cptr);
+extern char *umode_str(struct Client *cptr, int opernames);
 extern void send_umode(struct Client *cptr, struct Client *sptr,
-                       struct Flags *old, int sendset);
+                       struct Flags *old, int sendset, int opernames);
 extern void set_snomask(struct Client *, unsigned int, int);
 extern int is_snomask(char *);
 extern int check_target_limit(struct Client *sptr, void *target, const char *name,

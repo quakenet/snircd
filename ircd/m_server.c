@@ -490,6 +490,7 @@ void set_server_flags(struct Client *cptr, const char *flags)
     case 'h': SetHub(cptr); break;
     case 's': SetService(cptr); break;
     case '6': SetIPv6(cptr); break;
+    case 'n': SetOperName(cptr); break;
     }
 }
 

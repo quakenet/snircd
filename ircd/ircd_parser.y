@@ -534,6 +534,10 @@ operblock: OPER '{' operitems '}' ';'
   struct ConfItem *aconf = NULL;
   if (name == NULL)
     parse_error("Missing name in operator block");
+  else if (strlen(name) > ACCOUNTLEN)
+    parse_error("Operator name in operator block is too long");
+  else if ((name[0] == NOOPERNAMECHARACTER) && (name[1] == '\0'))
+    parse_error("Operator name can not be '%c'",NOOPERNAMECHARACTER);
   else if (pass == NULL)
     parse_error("Missing password in operator block");
   /* Do not check password length because it may be crypted. */

@@ -351,6 +351,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   struct Membership *lp;
   struct irc_sockaddr sin;
   char outbuf[BUFSIZE];
+  char *umodes;
   time_t nowr;
 
   /* Header */
@@ -395,10 +396,11 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
    * (and breaks if the user is +r) so we won't do that either.
    */
 
-  if (strlen(umode_str(acptr)) < 1)
+  umodes = umode_str(acptr, 1);
+  if (umodes[0] == '+')
     strcpy(outbuf, "       Umode(s):: <none>");
   else
-    ircd_snprintf(0, outbuf, sizeof(outbuf), "       Umode(s):: +%s", umode_str(acptr));
+    ircd_snprintf(0, outbuf, sizeof(outbuf), "       Umode(s):: +%s", umodes);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   if (cli_user(acptr)->joined == 0)

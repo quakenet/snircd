@@ -405,6 +405,70 @@ void sendcmdto_flag_serv_butone(struct Client *from, const char *cmd,
 }
 
 /**
+ * Send a (prefixed) command to all servers matching or not matching a
+ * flag but one.
+ * @param[in] from Client sending the command.
+ * @param[in] cmd Long name of command (ignored).
+ * @param[in] tok Short name of command.
+ * @param[in] one Client direction to skip (or NULL).
+ * @param[in] require Only send to servers with all Flag bits in the array set.
+ * @param[in] requiresize Size of require flag array
+ * @param[in] forbid Do not send to servers with any Flag bits in the array set.
+ * @param[in] forbidsize Size of forbid flag array
+ * @param[in] pattern Format string for command arguments.
+ */
+void sendcmdto_flagarray_serv_butone(struct Client *from, const char *cmd,
+                                const char *tok, struct Client *one,
+                                int *require, unsigned int requiresize,
+                                int *forbid, unsigned int forbidsize,
+                                const char *pattern, ...)
+{
+  struct VarData vd;
+  struct MsgBuf *mb;
+  struct DLink *lp;
+  unsigned int i, skip;
+
+  vd.vd_format = pattern; /* set up the struct VarData for %v */
+  va_start(vd.vd_args, pattern);
+
+  /* use token */
+  mb = msgq_make(&me, "%C %s %v", from, tok, &vd);
+  va_end(vd.vd_args);
+
+  /* send it to our downlinks */
+  for (lp = cli_serv(&me)->down; lp; lp = lp->next) {
+    if (one && lp->value.cptr == cli_from(one))
+      continue;
+
+    skip = 0;
+
+    for (i = 0; i < requiresize; i++) {
+      if ((require[i] < FLAG_LAST_FLAG) && !HasFlag(lp->value.cptr, require[i])) {
+        skip = 1;
+        break;
+      }
+    }
+
+    if (skip)
+      continue;
+
+    for (i = 0; i < forbidsize; i++) {
+      if ((forbid[i] < FLAG_LAST_FLAG) && HasFlag(lp->value.cptr, forbid[i])) {
+        skip = 1;
+        break;
+      }
+    }
+
+    if (skip)
+      continue;
+
+    send_buffer(lp->value.cptr, mb, 0);
+  }
+
+  msgq_clean(mb);
+}
+
+/**
  * Send a (prefixed) command to all servers but one.
  * @param[in] from Client sending the command.
  * @param[in] cmd Long name of command (ignored).
