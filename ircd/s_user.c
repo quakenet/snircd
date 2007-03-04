@@ -1581,6 +1581,10 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
     /* user no longer oper */
     --UserStats.opers;
     client_set_privs(sptr, NULL); /* will clear propagate privilege */
+    if (cli_user(sptr)->opername) {
+      MyFree(cli_user(sptr)->opername);
+      cli_user(sptr)->opername = NULL;
+    }
   }
   if (FlagHas(&setflags, FLAG_INVISIBLE) && !IsInvisible(sptr))
     --UserStats.inv_clients;
@@ -1642,7 +1646,7 @@ char *umode_str(struct Client *cptr, int opernames)
       ; /* Empty loop */
 
     if (cli_user(cptr)->acc_create) {
-      char nbuf[20];
+      char nbuf[30];
       Debug((DEBUG_DEBUG, "Sending timestamped account in user mode for "
 	     "account \"%s\"; timestamp %Tu", cli_user(cptr)->account,
 	     cli_user(cptr)->acc_create));
