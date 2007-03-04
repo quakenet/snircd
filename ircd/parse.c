@@ -622,7 +622,7 @@ struct Message msgtab[] = {
     TOK_SETHOST,
     0, MAXPARA, MFLG_SLOW, 0, NULL,
     /* UNREG, CLIENT, SERVER, OPER, SERVICE */
-    { m_unregistered, m_sethost, m_ignore, m_sethost, m_ignore }
+    { m_unregistered, m_sethost, ms_sethost, m_sethost, m_ignore }
   },
 #if WE_HAVE_A_REAL_CAPABILITY_NOW
   {
