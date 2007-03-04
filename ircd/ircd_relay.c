@@ -388,7 +388,7 @@ void relay_private_message(struct Client* sptr, const char* name, const char* te
    */
 
   if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr)) {
-    send_reply(sptr, ERR_ACCOUNTONLY, cli_name(acptr));
+    send_reply(sptr, ERR_ACCOUNTONLY, cli_name(acptr), feature_str(FEAT_URLREG));
     return;
   }
 

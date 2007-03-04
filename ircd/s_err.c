@@ -1004,7 +1004,7 @@ static Numeric replyTable[] = {
 /* 485 */
   { ERR_ISREALSERVICE, "%s %s :Cannot kill, kick or deop a network service", "485" },
 /* 486 */
-  { ERR_ACCOUNTONLY, "%s :You must be authed in order to message this user", "486" },
+  { ERR_ACCOUNTONLY, "%s :You must be authed in order to message this user -- For details of how to obtain an account visit %s", "486" },
 /* 487 */
   { 0 },
 /* 488 */
