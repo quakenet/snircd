@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Public interfaces and declarations for dealing with configurable features.
- * @version $Id: ircd_features.h,v 1.38.2.5 2006/02/16 03:49:54 entrope Exp $
+ * @version $Id: ircd_features.h,v 1.38.2.6 2007/02/25 14:32:41 entrope Exp $
  */
 
 struct Client;
@@ -169,6 +169,7 @@ enum Feature {
   /* Misc. random stuff */
   FEAT_NETWORK,
   FEAT_URL_CLIENTS,
+  FEAT_URLREG,
 
   FEAT_LAST_F
 };

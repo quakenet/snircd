@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50.2.5 2006/02/16 03:49:54 entrope Exp $
+ * @version $Id: ircd_features.c,v 1.50.2.6 2007/02/25 14:32:41 entrope Exp $
  */
 #include "config.h"
 
@@ -422,6 +422,7 @@ static struct FeatureDesc {
   /* Misc. random stuff */
   F_S(NETWORK, 0, "UnderNet", 0),
   F_S(URL_CLIENTS, 0, "ftp://ftp.undernet.org/pub/irc/clients", 0),
+  F_S(URLREG, 0, "http://cservice.undernet.org/live/", 0),
 
 #undef F_S
 #undef F_B

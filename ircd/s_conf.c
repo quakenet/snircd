@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.3 2006/02/16 03:49:54 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.4 2007/02/25 15:41:49 entrope Exp $
  */
 #include "config.h"
 
@@ -828,6 +828,7 @@ int read_configuration_file(void)
 {
   conf_error = 0;
   feature_unmark(); /* unmark all features for resetting later */
+  clear_nameservers(); /* clear previous list of DNS servers */
   /* Now just open an fd. The buffering isn't really needed... */
   init_lexer();
   yyparse();
