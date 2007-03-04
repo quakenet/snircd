@@ -1762,6 +1762,7 @@ void send_umode(struct Client *cptr, struct Client *sptr, struct Flags *old,
       char* t = cli_user(sptr)->opername;
       while ((*m++ = *t++))
         ; /* Empty loop */
+      m--; /* Step back over the '\0' */
     } else {
       *m++ = NOOPERNAMECHARACTER;
     }
