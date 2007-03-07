@@ -204,13 +204,13 @@ int ms_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   if (!is_hostmask(hostmask))
     return protocol_violation(cptr, "Bad Host mask %s for user %s", hostmask, cli_name(target));
 
+  sendcmdto_common_channels_butone(target, CMD_QUIT, target, ":Host change");
+
   /* Assign and propagate the fakehost */
   SetSetHost(target);
   ircd_strncpy(cli_user(target)->username, parv[2], USERLEN);
   ircd_strncpy(cli_user(target)->host, parv[3], HOSTLEN);
   
-  sendcmdto_common_channels_butone(target, CMD_QUIT, target, ":Host change");
-
   if (MyConnect(target)) {
     send_reply(target, RPL_HOSTHIDDEN, hostmask);
   }
