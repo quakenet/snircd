@@ -139,7 +139,7 @@ int m_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       if (IsSetHost(sptr) || IsAccount(sptr)) {
         ircd_snprintf(0, curhostmask, USERLEN + HOSTLEN + 2, "%s@%s", sptr->cli_user->username, sptr->cli_user->host);
         if (0 == strcmp(hostmask, curhostmask)) {
-          send_reply(cptr, RPL_HOSTHIDDEN, curhostmask);
+          send_reply(sptr, RPL_HOSTHIDDEN, curhostmask);
           return 0; 
         }
       }
@@ -152,7 +152,7 @@ int m_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       }
       if (IsSetHost(sptr) || IsAccount(sptr)) {
         if (0 == strcmp(parv[1], sptr->cli_user->host)) {
-          send_reply(cptr, RPL_HOSTHIDDEN, parv[1]);
+          send_reply(sptr, RPL_HOSTHIDDEN, parv[1]);
           return 0;
         }
       }
@@ -179,6 +179,7 @@ int ms_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   struct Client *target;
   char hostmask[USERLEN + HOSTLEN + 2];
   struct Membership *chan;
+  struct Flags setflags;
 
   if (parc < 4)
     return need_more_params(sptr, "SETHOST");
@@ -194,6 +195,16 @@ int ms_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /* Fake host assignments must be from services */
   if (!find_conf_byhost(cli_confs(sptr), cli_name(sptr), CONF_UWORLD))
     return protocol_violation(cptr, "Non-U:lined server %s set fake host on user %s", cli_name(sptr), cli_name(target));
+
+  if (!MyConnect(target)) {
+    sendcmdto_one(sptr, CMD_SETHOST, cli_user(target)->server, "%C %s %s", target,
+                 parv[2], parv[3]);
+    return 0;
+  }
+
+  /* Back up the flags first */
+  setflags = cli_flags(target);
+  FlagClr(&setflags, FLAG_SETHOST);
 
   if (IsSetHost(target) || IsAccount(target)) { 
     if ((0 == strcmp(parv[2], target->cli_user->username)) && (0 == strcmp(parv[3], target->cli_user->host))) 
@@ -211,9 +222,7 @@ int ms_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   ircd_strncpy(cli_user(target)->username, parv[2], USERLEN);
   ircd_strncpy(cli_user(target)->host, parv[3], HOSTLEN);
   
-  if (MyConnect(target)) {
-    send_reply(target, RPL_HOSTHIDDEN, hostmask);
-  }
+  send_reply(target, RPL_HOSTHIDDEN, hostmask);
 
   /*
    * Go through all channels the client was on, rejoin him
@@ -241,9 +250,6 @@ int ms_sethost(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     }
   }
 
-
-  sendcmdto_serv_butone(sptr, CMD_SETHOST, cptr, "%C %s %s", target,
-                        target->cli_user->username, target->cli_user->host);
- return 0;
+  send_umode_out(target, target, &setflags, 0);
+  return 0;
 }
-
