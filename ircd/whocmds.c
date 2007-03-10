@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Support functions for /WHO-like commands.
- * @version $Id: whocmds.c,v 1.25.2.1 2006/11/04 21:35:28 entrope Exp $
+ * @version $Id: whocmds.c,v 1.25.2.2 2007/03/04 14:55:31 entrope Exp $
  */
 #include "config.h"
 

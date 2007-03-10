@@ -1,3 +1,29 @@
+2007-03-09  Michael Poole <mdpoole@troilus.org>
+
+	* include/patchlevel.h (PATCHLEVEL): Bump for u2.10.12.10 release.
+
+2007-03-05  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_privs.c (ms_privs): Use the correct source when
+	forwarding the PRIVS request.
+
+	* tests/bug-1674539.cmd: New file to test for this.
+
+	* tests/test-driver.pl: Recognize "oper" command from scripts.
+
+2007-03-05  Michael Poole <mdpoole@troilus.org>
+
+	* tests/ircd.conf: Make into a hub.
+
+	* tests/ircd-2.conf: New file, for a second server.
+
+	* tests/ircd-3.conf: Configuration for a third server.
+
+2007-03-04  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/whocmds.c (count_users): Fix length of ipbuf.  (Spotted by
+	paulr.)
+
 2007-02-28  Michael Poole <mdpoole@troilus.org>
 
 	* ircd/os_generic.c (sockaddr_from_irc): Zero out socket address
