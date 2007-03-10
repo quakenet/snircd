@@ -15,10 +15,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: patchlevel.h,v 1.23.2.20 2007/01/21 02:13:51 entrope Exp $
+ * $Id: patchlevel.h,v 1.23.2.22 2007/03/09 23:49:31 entrope Exp $
  *
  */
-#define PATCHLEVEL "09"
+#define PATCHLEVEL "10"
 
 #define RELEASE ".12."
 

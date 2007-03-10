@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Report operators' privileges to others
- * @version $Id: m_privs.c,v 1.6 2005/04/02 02:50:14 entrope Exp $
+ * @version $Id: m_privs.c,v 1.6.2.1 2007/03/06 02:35:24 entrope Exp $
  */
 
 #include "config.h"
@@ -94,7 +94,7 @@ int ms_privs(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       else if (MyUser(acptr))
 	client_report_privs(sptr, acptr);
       else
-        sendcmdto_one(cptr, CMD_PRIVS, acptr, "%s%s", NumNick(acptr));
+        sendcmdto_one(sptr, CMD_PRIVS, acptr, "%s%s", NumNick(acptr));
     }
   }
 
