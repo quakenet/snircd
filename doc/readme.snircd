@@ -1,0 +1,302 @@
+- SNIRCD ----------------------------------------------------------------------
+
+Snircd is a collection of modifications to the Undernet IRC server known as
+ircu. This version is based on version 2.10.12 released by Undernet's
+Coder Committee. The original code can be obtained from their webpage,
+http://coder-com.undernet.org and the latest release of Snircd can be obtained
+from QuakeNet's Development Team webpage, http://development.quakenet.org.
+
+- version history ------------------------------------------------------------
+
+v1.3.0,   SVN  upstream patches/migration to u2.10.12.10
+               Port of 'asuka' extensions for ircu 2.10.11 to 2.10.12
+               Development moved to SVN from CVS
+               chanmode +M, chanmode +T, ACcount token changes, Oper ID, 
+               /check updated, other fixes/updates
+v1.2.3,   SVN, bug fixes, not released
+v1.2.2,   SVN, not released
+v1.2.1,   CVS, bug fixes
+          WWW, 20/02/2005
+v1.2,     CVS, upstream patches for u2.10.11.07, bug fixes, added CIDR support
+               for O:lines, I:lines and bans, added AUTOCHANMODES, added ability
+               to disable /USERIP, added timestamped invites, added new /CHECK
+               flags, improved behaviour of chanmodes +c/+N and usermode +R,
+               enhanced /check server output, added more friendly error messages
+               when trying to join channels
+          WWW, 09/02/2005
+v1.1,     CVS, upstream patches for u2.10.11.06, bug fixes, added HIS_USERGLINE,
+               added AUTOINVISIBLE, added ability to restart resolver (never released)
+v1.0.6,   CVS, bug fixes, chanmode +N, added USER_HIDECHANS
+          WWW, 18/09/2003
+v1.0.5,   CVS, bug fixes
+          WWW, 03/09/2003
+v1.0.4,   CVS, bug fixes
+          WWW, 28/06/2003
+v1.0.3,   CVS, bug fixes
+          WWW, 31/05/2003
+v1.0.2,   CVS, bug fixes, dropped dlmalloc
+          WWW, 22/04/2003
+v1.0.1,   CVS, minor conf/code fixes
+          WWW, 11/04/2003
+v1.0,     CVS, 1.0 release, misc. fixes
+          WWW, 09/04/2003
+v0.7.0,   CVS, sethost, chanmode +u, misc. fixes
+          WWW, 15/02/2003
+v0.5.1.4, CVS, upstream patches for u2.10.11.04, +R fix
+v0.5.1.3, CVS, gline_find fix
+v0.5.1.2, CVS, upstream patches
+v0.5.1.1, CVS, upstream patches
+v0.5.1.0, CVS, added user mode +R
+v0.5.0.1, CVS, upstream patches
+v0.5.0.0, CVS, updated patches for u2.10.11.03.(dev).5ish, added showing of
+               full details of /stats C|H to opers
+v0.4.7.1, CVS, revert default NETWORK to 'UnderNet'
+v0.4.7.0, CVS, removing netrideprot diff, updated patches for u2.10.11.02
+          WWW, 18/10/2002
+v0.4.6.0, CVS, badchans now allow wildcards, 'auditorium' mode added
+v0.4.5.6, CVS, bugfixes in kX, add +I
+v0.4.5.5, CVS, cC support and crunch warnings in check
+v0.4.5.4, CVS, small bugfix in kX
+v0.4.5.3, CVS, nick glines check on /nick
+v0.4.5.2, CVS, updated patches for u2.10.11.01
+v0.4.5.1, CVS, added beta NICK Glines
+v0.4.5.0, CVS
+
+- contributors ---------------------------------------------------------------
+
+Project Manager:        Joe Cise   <pilsner@quakenet.org>
+Developers:          Rasmus Have   <bigfoot@quakenet.org>
+                 Gregory Bristol   <qoreq@quakenet.org>
+                    Darren Smith   <data@quakenet.org>
+                   David Mansell   <splidge@quakenet.org> 
+               Fredrik Söderblom    <froo@quakenet.org>
+                    Chris Porter   <slug@quakenet.org>
+                   Iain Sheppard   <magpie@quakenet.org>
+                 Mike Cartwright   <mike@quakenet.org>
+                   Paul Richards   <paul@quakenet.org>
+                         Cruicky   <cruicky@quakenet.org
+Thanks To:            Reed Loden   <reed@reedloden.com>
+                      Alex Badea   <vampire@p16.pub.ro>
+                    Perry Lorier   <isomer@coders.net>
+               Kevin L. Mitchell   <klmitch@mit.edu>
+Special Thanks To:  Tero Nybacka   <sivis@sivis.org>
+                  Darren Coleman   <durzel@quakenet.org>
+  For their contributions to Lain (http://dev-com.b2irc.net) and therefore
+  the basis for most of the ideas in Asuka. Thanks Guys.
+
+- features ------------------------------------------------------------------
+
+ * Oper mode +X
+     Allows opers to:
+       - Join invite only (+i) channels
+       - Join keyed (+k) channels
+       - Join channels if banned
+       - Join full channels
+       - Override user mode +k
+
+ * Oper mode +k
+     Allows opers to set user mode +k, network service, which prohibits
+     kicks, deops and kills.
+
+ * Oper mode +n
+     Allows opers to hide the channels they are in.
+
+ * Oper mode +I
+     Allows opers to hide their idle time.
+
+ * User mode +R
+     Allows users to only accept privmsg/notice/invite from authed users.
+
+ * Channel mode +c
+     Prohibits mIRC & ANSI colour codes as well as other control codes from
+     being sent to a channel.
+
+ * Channel mode +C
+     Prohibits CTCPs from being sent to a channel.
+
+ * Channel mode +N
+     Prohibits channel notices from being sent to a channel.
+
+ * Channel mode +D and +d
+     'Delayed join' mode, when set on a channel joins and parts for that
+     channel are squelched. A user will be 'invisible' in the channel
+     from other users until they speak, are opped/voiced or change the
+     topic. When the +D mode is cleared, 'invisible' users will not be
+     revealed, instead the +d mode will automatically be set by the ircd
+     if invisible users remain in the channel. +d will be automatically
+     removed when the last 'invisible' user either becomes visible or
+     leaves the channel. It is possible to see the 'invisible' users
+     on a channel by doing /NAMES -d.
+
+ * Channel mode +u
+     Hides your quit and part messages from channels with +u set. If a user
+     is in any +u channel, then their quit message is removed.
+
+ * Channel mode +M
+     Disallows unauthed users to speak or change nick in a channel when they 
+     are not voiced or opped in a channel
+
+ * Channel mode +T 
+    Blocks multi-target messages to a channel
+
+ * Command /check
+     Allows opers to see information about a channel, user or server.
+     Syntax: Check Channel: /check <#channel> [-i|-o|-u]
+             Check Server:  /check <server>
+             Check User:    /check <nick|hostmask|CIDR> [-c]
+
+     Performing a /check on a server returns its status:
+       *  bursting
+       !  awaiting burst acknowledgement
+       =  network service
+       +  network hub
+
+ * Sethost allows opers (and users w/ passwords) to set their hostname,
+   also known as spoofing. Sethost is configured from the config file via
+   S: lines and several F: lines. Sethost is done through the /sethost
+   command or by setting user mode +h. Available Sethosts are visible by
+   using the /stats s command.
+   Syntax: Oper Sethost: /sethost <new ident> <new hostname>
+                         /mode <nick> +h <new ident>@<new hostname>
+           User Sethost: /sethost <new hostname> <password>
+                         /mode <nick> +h <new hostname> <password>
+
+ * Single letter nicks are protected for use by network services only.
+
+ * Protection from net rider's joining +i/+k channels after a net.join.
+
+ * Topics can by sent during bursts to keep them synced throughout a network.
+
+ * Ability to Gline a nick, new format now nick!ident@host.
+
+ * /stats C & H show full details for Opers.
+
+ * Ability to restart the resolver via /rehash and /DNS r.
+
+ * Ability for services to send BURST outside of net.burst.
+
+- configuration file options ------------------------------------------------
+
+S: Sethost Lines 
+ Syntax:  S:<spoof host>:<password>:<*.host.cc|a.b.c.*|CIDR>:<ident>
+ Example: S:moo.fish.moo:elitepassword:host.example.com:user
+
+ This adds the sethost 'moo.fish.moo' that can be activated by a user by using
+ the password 'elitepassword' and will automatically be applied to anyone
+ connecting from 'host.example.com' with the ident 'user'.
+
+ More Examples:
+   Oper sethost for 'moo.fish.moo'
+          S:moo.fish.moo:::
+   User & Oper sethost for 'moo.fish.moo'
+          S:moo.fish.moo:elitepassword::
+   Oper sethost for 'moo.fish.moo' with auto on 'ident@*.example.com"
+          S:moo.fish.moo::*.example.com:ident
+
+F:SETHOST
+ * Type: boolean
+ * Default: FALSE
+
+ This enables the /sethost command and user mode +h for opers activating Sethosts.
+
+F:SETHOST_USER
+ * Type: boolean
+ * Default: FALSE
+
+ This enabled the /sethost command and user mode +h for users activating Sethosts
+ with passwords.
+
+F:SETHOST_AUTO
+ * Type: boolean
+ * Default: FALSE
+
+ This enables the automatic application of Sethosts on matching idents and hosts.
+
+F:SETHOST_FREEFORM
+ * Type: boolean
+ * Default: FALSE
+
+ This enables opers to set new hostnames that do not have a corresponding S: line
+ in the configuration file, as long as the hostname supplied is reasonably valid.
+ The usage if this is logged via SNOTICE.
+
+F:HIS_STATS_s
+ * Type: boolean
+ * Default: TRUE
+
+ As per QuakeNet Security, this removes the /stats s from users.
+
+F:TOPIC_BURST
+ * Type: boolean
+ * Default: FALSE
+
+ This selects whether topics are *sent* to other servers during a burst.
+ Note that receiving topics from servers is always enabled.
+
+F:HIS_GLINE
+ * Type: boolean
+ * Default: TRUE
+
+ As per QuakeNet Security, this removes the reason for GLINE from quit messages.
+
+F:SOCKSENDBUF
+ * Type: integer
+ * Default: 61440
+
+ Sets the socket buffer for sending. Advanced feature, do not change unless you
+ known what you are doing.
+
+F:SOCKRECVBUF
+ * Type: integer
+ * Default: 61440
+
+ Sets the socket buffer for recieving. Advanced feature, do not change unless you
+ known what you are doing.
+
+F:USER_HIDECHANS
+ * Type: boolean
+ * Default: FALSE
+
+ This allows normal users to set the +n usermode (hide channels from whois/who),
+ this is only recommended in special circumstances.
+
+F:HIS_USERGLINE
+ * Type: boolean
+ * Default: TRUE
+
+ This enables / disables the ability for users to use the /GLINE command for
+ listing active glines. It's turned on by default, which is the opposite
+ behaviour of vanilla ircu.
+
+F:AUTOINVISIBLE
+ * Type: boolean
+ * Default: TRUE
+
+ As per QuakeNet Security, this option sets user mode +i on all connecting clients
+ automatically.
+
+F:HIS_USERIP
+ * Type: boolean
+ * Default: TRUE
+
+ As per QuakeNet Security, add the ability to disable the /USERIP command for users.
+
+F:AUTOCHANMODES
+ * Type: boolean
+ * Default: TRUE
+
+ Enable or disable auto (default) channel modes for new channels.
+
+F:AUTOCHANMODES_LIST
+ * Type: string
+ * Default: "ntCN"
+
+ AUTOCHANMODES_LIST should contain the default channelmodes (e.g. "ntCN") which will 
+ be set by default on new channels.
+
+- disclaimer ----------------------------------------------------------------
+
+This software is provided "as is" with absolutely no warranties, either express
+or implied. It's use is done so totally at the user's own risk.
+
+------------------------ 11.03.2007 -----------------------------------------
