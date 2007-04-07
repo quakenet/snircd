@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.4 2007/02/25 15:41:49 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.7 2007/03/18 01:46:58 entrope Exp $
  */
 #include "config.h"
 
@@ -221,7 +221,6 @@ void conf_parse_userhost(struct ConfItem *aconf, char *host)
     aconf->addrbits = addrbits;
   else
     aconf->addrbits = -1;
-  MyFree(host);
 }
 
 /** Copies a completed DNS query into its ConfItem.
@@ -656,6 +655,7 @@ struct ConfItem* find_conf_exact(const char* name, struct Client *cptr, int stat
     else if (!ipmask_check(&cli_ip(cptr), &tmp->address.addr, tmp->addrbits))
       continue;
     if ((tmp->status & CONF_OPERATOR)
+        && (MaxLinks(tmp->conn_class) > 0)
         && (tmp->clients >= MaxLinks(tmp->conn_class)))
       continue;
     return tmp;
@@ -1085,7 +1085,7 @@ int find_kill(struct Client *cptr)
     return -1;
   }
 
-  if ((agline = gline_lookup(cptr, 0))) {
+  if (!feature_bool(FEAT_DISABLE_GLINES) && (agline = gline_lookup(cptr, 0))) {
     /*
      * find active glines
      * added a check against the user's IP address to find_gline() -Kev

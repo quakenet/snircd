@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Error handling support.
- * @version $Id: s_err.c,v 1.72.2.4 2007/02/25 14:32:41 entrope Exp $
+ * @version $Id: s_err.c,v 1.72.2.5 2007/03/17 22:45:35 klmitch Exp $
  */
 #include "config.h"
 
@@ -526,7 +526,7 @@ static Numeric replyTable[] = {
 /* 246 */
   { RPL_STATSTLINE, "%c %s %s", "246" },
 /* 247 */
-  { RPL_STATSGLINE, "%c %s%s%s %Tu %c :%s", "247" },
+  { RPL_STATSGLINE, "%c %s%s%s %Tu %Tu %Tu %s%c :%s", "247" },
 /* 248 */
   { RPL_STATSULINE, "U %s", "248" },
 /* 249 */
@@ -592,7 +592,7 @@ static Numeric replyTable[] = {
 /* 279 */
   { 0 },
 /* 280 */
-  { RPL_GLIST, "%s%s%s %Tu %s %c :%s", "280" },
+  { RPL_GLIST, "%s%s%s %Tu %Tu %Tu %s %s%c :%s", "280" },
 /* 281 */
   { RPL_ENDOFGLIST, ":End of G-line List", "281" },
 /* 282 */

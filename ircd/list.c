@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Singly and doubly linked list manipulation implementation.
- * @version $Id: list.c,v 1.34.2.3 2006/05/08 01:30:24 entrope Exp $
+ * @version $Id: list.c,v 1.34.2.4 2007/03/18 01:33:02 entrope Exp $
  */
 #include "config.h"
 
@@ -448,8 +448,8 @@ void free_link(struct SLink* lp)
   if (lp) {
     lp->next = slinkFreeList;
     slinkFreeList = lp;
+    links.inuse--;
   }
-  links.inuse--;
 }
 
 /** Add an element to a doubly linked list.

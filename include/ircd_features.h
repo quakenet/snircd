@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Public interfaces and declarations for dealing with configurable features.
- * @version $Id: ircd_features.h,v 1.38.2.6 2007/02/25 14:32:41 entrope Exp $
+ * @version $Id: ircd_features.h,v 1.38.2.7 2007/03/17 03:48:48 klmitch Exp $
  */
 
 struct Client;
@@ -59,6 +59,7 @@ enum Feature {
   FEAT_ZANNELS,
   FEAT_LOCAL_CHANNELS,
   FEAT_TOPIC_BURST,
+  FEAT_DISABLE_GLINES,
 
   /* features that probably should not be touched */
   FEAT_KILLCHASETIMELIMIT,

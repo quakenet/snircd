@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c,v 1.37.2.21 2007/01/16 01:21:37 entrope Exp $
+ * @version $Id: s_auth.c,v 1.37.2.22 2007/03/27 03:37:39 entrope Exp $
  */
 #include "config.h"
 
@@ -1990,7 +1990,9 @@ static void iauth_parse(struct IAuth *iauth, char *message)
   } else {
     /* Try to find the client associated with the request. */
     id = strtol(params[0], NULL, 10);
-    if (id < 0 || id > HighestFd || !(cli = LocalClientArray[id]))
+    if (parc < 3)
+      sendto_iauth(NULL, "E Missing :Need <id> <ip> <port>");
+    else if (id < 0 || id > HighestFd || !(cli = LocalClientArray[id]))
       /* Client no longer exists (or never existed). */
       sendto_iauth(NULL, "E Gone :[%s %s %s]", params[0], params[1],
 		   params[2]);

@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50.2.6 2007/02/25 14:32:41 entrope Exp $
+ * @version $Id: ircd_features.c,v 1.50.2.7 2007/03/17 03:48:49 klmitch Exp $
  */
 #include "config.h"
 
@@ -312,6 +312,7 @@ static struct FeatureDesc {
   F_B(ZANNELS, 0, 1, 0),
   F_B(LOCAL_CHANNELS, 0, 1, 0),
   F_B(TOPIC_BURST, 0, 0, 0),
+  F_B(DISABLE_GLINES, 0, 0, 0),
 
   /* features that probably should not be touched */
   F_I(KILLCHASETIMELIMIT, 0, 30, 0),
