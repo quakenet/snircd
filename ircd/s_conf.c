@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.7 2007/03/18 01:46:58 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.8 2007/04/05 01:52:39 entrope Exp $
  */
 #include "config.h"
 
@@ -945,15 +945,15 @@ int rehash(struct Client *cptr, int sig)
 
   clear_quarantines();
 
-  if (sig != 2)
-    restart_resolver();
-
   class_mark_delete();
   mark_listeners_closing();
   auth_mark_closing();
   close_mappings();
 
   read_configuration_file();
+
+  if (sig != 2)
+    restart_resolver();
 
   log_reopen(); /* reopen log files */
 
