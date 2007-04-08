@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c,v 1.99.2.3 2007/01/13 18:43:41 entrope Exp $
+ * @version $Id: s_user.c,v 1.99.2.6 2007/04/05 01:39:38 entrope Exp $
  */
 #include "config.h"
 
@@ -480,6 +480,12 @@ int register_user(struct Client *cptr, struct Client *sptr)
     ++UserStats.inv_clients;
   if (IsOper(sptr))
     ++UserStats.opers;
+  /* If they get both +x and an account during registration, hide
+   * their hostmask here.  Calling hide_hostmask() from IAuth's
+   * account assignment causes a numeric reply during registration.
+   */
+  if (HasHiddenHost(sptr))
+    hide_hostmask(sptr, FLAG_HIDDENHOST);
 
   tmpstr = umode_str(sptr, 0);
   int ipv6andopername[] = {FLAG_IPV6,FLAG_OPERNAME};
@@ -1272,7 +1278,6 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
 {
   char** p;
   char*  m;
-  struct Client *acptr;
   int what;
   int i;
   struct Flags setflags;
@@ -1287,27 +1292,6 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
 
   hostmask = password = NULL;
   what = MODE_ADD;
-
-  if (parc < 2)
-    return need_more_params(sptr, "MODE");
-
-  if (!(acptr = FindUser(parv[1])))
-  {
-    if (MyConnect(sptr))
-      send_reply(sptr, ERR_NOSUCHCHANNEL, parv[1]);
-    return 0;
-  }
-
-  if (IsServer(sptr) || sptr != acptr)
-  {
-    if (IsServer(cptr))
-      sendwallto_group_butone(&me, WALL_WALLOPS, 0, 
-	  		    "MODE for User %s from %s!%s", parv[1],
-                            cli_name(cptr), cli_name(sptr));
-    else
-      send_reply(sptr, ERR_USERSDONTMATCH);
-    return 0;
-  }
 
   if (parc < 3)
   {
@@ -1598,7 +1582,8 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
     if (set_hostmask(sptr, hostmask, password) && hostmask)
       FlagClr(&setflags, FLAG_SETHOST);
   }
-  send_umode_out(cptr, sptr, &setflags, prop);
+  if (IsRegistered(sptr))
+    send_umode_out(cptr, sptr, &setflags, prop);
 
   return 0;
 }
