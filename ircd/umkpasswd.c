@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: umkpasswd.c,v 1.8 2005/05/11 04:15:04 entrope Exp $
+ * $Id: umkpasswd.c,v 1.8.2.1 2007/03/17 14:31:39 entrope Exp $
 */
 #include "config.h"
 #include <unistd.h>
@@ -400,7 +400,7 @@ const char* options = "a:d:lm:u:y:5:";
    default:
     /* unknown option - spit out syntax and b0rk */
     show_help();
-    abort();
+    exit(1);
    break;
   }
  }
