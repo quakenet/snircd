@@ -232,11 +232,6 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return gline_destroy(cptr, sptr, agline);
     }
 
-<<<<<<< .working
-    /* For asuka we don't want glines sent this way treated as local
-     * flags |= GLINE_LOCAL;
-     */
-=======
     /* OK, we've converted arguments; if it's not for us, forward */
     /* UPDATE NOTE: Once all servers are updated to u2.10.12.11, the
      * format string in this sendcmdto_one() may be updated to omit
@@ -258,7 +253,6 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		  CurrentTime, reason);
 
     return 0; /* all done */
->>>>>>> .merge-right.r147
   }
 
   /* can't modify a G-line that doesn't exist, so remap to activate */
