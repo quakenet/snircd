@@ -938,13 +938,20 @@ int whisper(struct Client* source, const char* nick, const char* channel,
   }
   if (is_silenced(source, dest))
     return 0;
+
+  if (IsAccountOnly(dest) && !IsAccount(source) && !IsOper(source)) {
+    if(!is_notice)
+      send_reply(source, ERR_ACCOUNTONLY, cli_name(source), feature_str(FEAT_URLREG));
+    return 0;
+  }
           
-  if (cli_user(dest)->away)
-    send_reply(source, RPL_AWAY, cli_name(dest), cli_user(dest)->away);
   if (is_notice)
     sendcmdto_one(source, CMD_NOTICE, dest, "%C :%s", dest, text);
-  else
+  else {
+    if (cli_user(dest)->away)
+      send_reply(source, RPL_AWAY, cli_name(dest), cli_user(dest)->away);
     sendcmdto_one(source, CMD_PRIVATE, dest, "%C :%s", dest, text);
+  }
   return 0;
 }
 
@@ -1128,10 +1135,23 @@ int set_hostmask(struct Client *cptr, char *hostmask, char *password)
   /* MODE_ADD: set a new hostmask */
   } else {
     /* chop up ident and host.cc */
-    if ((host = strrchr(hostmask, '@'))) /* oper can specifiy ident@host.cc */
+    if ((host = strrchr(hostmask, '@'))) { /* oper can specifiy ident@host.cc */
       *host++ = '\0';
-    else /* user can only specifiy host.cc [password] */
+      if ( MyConnect(cptr) && (0 == strcmp(host, cli_user(cptr)->host)) && (0 == strcmp(hostmask, cli_user(cptr)->username))) {
+        ircd_snprintf(0, hiddenhost, HOSTLEN + USERLEN + 2, "%s@%s",
+            cli_user(cptr)->username, cli_user(cptr)->host);
+        send_reply(cptr, RPL_HOSTHIDDEN, hiddenhost);
+        return 0;
+      }
+    } else { /* user can only specifiy host.cc [password] */
       host = hostmask;
+      if ( MyConnect(cptr) && (0 == strcmp(host, cli_user(cptr)->host))) {
+        ircd_snprintf(0, hiddenhost, HOSTLEN + USERLEN + 2, "%s@%s",
+            cli_user(cptr)->username, cli_user(cptr)->host);
+        send_reply(cptr, RPL_HOSTHIDDEN, hiddenhost);
+        return 0;
+      }
+    }
     /*
      * Oper sethost
      */
