@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_connect.c,v 1.17 2004/12/11 05:13:46 klmitch Exp $
+ * $Id: m_connect.c,v 1.17.2.1 2007/05/20 13:55:59 entrope Exp $
  */
 
 /*
@@ -247,15 +247,14 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       /*
        * Only allow LocOps to make local CONNECTS --SRB
        */
-      return 0;
+      return send_reply(cptr, ERR_NOPRIVILEGES);
     }
     else {
       struct Client* acptr2;
       struct Client* acptr3;
 
       if (!(acptr3 = find_match_server(parv[3]))) {
-        send_reply(sptr, ERR_NOSUCHSERVER, parv[3]);
-        return 0;
+        return send_reply(sptr, ERR_NOSUCHSERVER, parv[3]);
       }
 
       /*

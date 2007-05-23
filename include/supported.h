@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: supported.h,v 1.20.2.1 2007/01/23 01:57:56 entrope Exp $
+ * $Id: supported.h,v 1.20.2.2 2007/05/20 13:02:51 entrope Exp $
  *
  * Description: This file has the featureset that ircu announces on connecting
  *              a client.  It's in this .h because it's likely to be appended
@@ -45,7 +45,7 @@
                 " NICKLEN=%i"
                 
 
-#define FEATURES2 " MAXNICKLEN=%i" \
+#define FEATURES2 "MAXNICKLEN=%i" \
                 " TOPICLEN=%i" \
                 " AWAYLEN=%i" \
                 " KICKLEN=%i" \

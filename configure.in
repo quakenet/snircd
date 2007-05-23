@@ -19,7 +19,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 dnl
-dnl $Id: configure.in,v 1.34.2.1 2005/12/14 03:01:38 entrope Exp $
+dnl $Id: configure.in,v 1.34.2.2 2007/05/20 13:25:47 entrope Exp $
 
 dnl Make sure we are in the correct directory (someone could have run
 dnl 'configure' with a wrong '--srcdir').
@@ -710,7 +710,12 @@ AC_ARG_WITH([maxcon],
 [unet_cv_with_maxcon=$unet_maxcon])])
 
 if test x"$unet_cv_with_maxcon" = xyes -o x"$unet_cv_with_maxcon" = xno; then
+    if test "$unet_maxcon" -lt 32; then
+      AC_MSG_ERROR([Maximum connections (number of open files minus 4) must be at least 32.])
+    fi
     unet_cv_with_maxcon=$unet_maxcon
+elif test "$unet_cv_with_maxcon" -lt 32; then
+    AC_MSG_ERROR([Maximum connections (--with-maxcon) must be at least 32.])
 fi
 
 AC_MSG_RESULT([$unet_cv_with_maxcon])

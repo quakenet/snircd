@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Error handling support.
- * @version $Id: s_err.c,v 1.72.2.5 2007/03/17 22:45:35 klmitch Exp $
+ * @version $Id: s_err.c,v 1.72.2.6 2007/05/20 14:01:07 entrope Exp $
  */
 #include "config.h"
 
@@ -1064,7 +1064,7 @@ static Numeric replyTable[] = {
 /* 515 */
   { ERR_BADEXPIRE, "%Tu :Bad expire time", "515" },
 /* 516 */
-  { ERR_DONTCHEAT, " :Don't Cheat.", "516" },
+  { ERR_DONTCHEAT, "%s :Don't Cheat.", "516" },
 /* 517 */
   { ERR_DISABLED, "%s :Command disabled.", "517" },
 /* 518 */

@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Parse input from IRC clients and other servers.
- * @version $Id: parse.c,v 1.54 2005/09/27 03:54:46 entrope Exp $
+ * @version $Id: parse.c,v 1.54.2.1 2007/05/20 13:50:38 entrope Exp $
  */
 #include "config.h"
 
@@ -391,7 +391,7 @@ struct Message msgtab[] = {
     TOK_SETTIME,
     0, MAXPARA, MFLG_SLOW, 0, NULL,
     /* UNREG, CLIENT, SERVER, OPER, SERVICE */
-    { m_unregistered, m_ignore, ms_settime, mo_settime, m_ignore }
+    { m_unregistered, m_not_oper, ms_settime, mo_settime, m_ignore }
   },
   {
     MSG_RPING,
