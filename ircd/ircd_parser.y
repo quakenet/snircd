@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  *  USA.
- * $Id: ircd_parser.y,v 1.56.2.14 2007/04/11 03:25:21 entrope Exp $
+ * $Id: ircd_parser.y,v 1.56.2.15 2007/05/20 13:42:27 entrope Exp $
  */
 %{
 
@@ -1104,6 +1104,8 @@ pseudoitems '}' ';'
     parse_error("Missing name in pseudo %s block", smap->command);
   else if (!smap->services)
     parse_error("Missing nick in pseudo %s block", smap->command);
+  else if (!strIsAlpha(smap->command))
+    parse_error("Pseudo command %s invalid: must all be letters", smap->command);
   else
     valid = 1;
   if (valid && register_mapping(smap))

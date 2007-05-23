@@ -1,3 +1,64 @@
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_burst.c (ms_burst): Do not let bursting servers join a
+	user to a channel more than once.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/ircd_features.c (feature_set): Report new value of feature
+	for /set.
+	(feature_reset): Likewise, for /reset.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_burst.c (netride_modes): Return -1 if someone tries to
+	remove modes in the burst.
+	(ms_burst): Check for, and handle, that protocol violation.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_privs.c (mo_privs): Report "no such nickname" for unknown
+	nicks in the list.  (Unfortunately, the nick is lost before ms_privs.)
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/listener.c (show_ports): Actually hide hidden ports from
+	clients that should not see them.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_err.c (ERR_DONTCHEAT): Add apparently missing %s.
+	
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_connect.c (mo_connect): Return an error to a locop who
+	tries to do a remote connect.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/parse.c (msgtab): Make SETTIME consistent with other
+	oper commands, in using m_not_oper for non-opered clients.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/ircd_parser.y (pseudoblock): Forbid pseudo commands that
+	are not all alphabetic characters.
+
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* configure.in (maxcon): Check that maximum connections is
+	sufficiently large to avoid underflow in MAXCLIENTS.
+	
+2007-05-20  Michael Poole <mdpoole@troilus.org>
+
+	* include/supported.h (FEATURES2): Remove extra space.
+
+	* ircd/m_admin.c (m_admin): Only check server mask against our
+	name, so that it cannot leak information about other linked
+	servers.
+
+	* ircd/m_version.c (m_version): Likewise.
+	
 2007-04-15  Kevin L. Mitchell  <klmitch@mit.edu>
 
 	* ircd/m_gline.c: fix minor typo in code that forwards remote

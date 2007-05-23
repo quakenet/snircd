@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50.2.7 2007/03/17 03:48:49 klmitch Exp $
+ * @version $Id: ircd_features.c,v 1.50.2.8 2007/05/20 14:50:27 entrope Exp $
  */
 #include "config.h"
 
@@ -605,6 +605,9 @@ feature_set(struct Client* from, const char* const* fields, int count)
 
     if (change && feat->notify) /* call change notify function */
       (*feat->notify)();
+
+    if (from)
+      return feature_get(from, fields, count);
   }
 
   return 0;
@@ -668,6 +671,9 @@ feature_reset(struct Client* from, const char* const* fields, int count)
 
     if (change && feat->notify) /* call change notify function */
       (*feat->notify)();
+
+    if (from)
+      return feature_get(from, fields, count);
   }
 
   return 0;

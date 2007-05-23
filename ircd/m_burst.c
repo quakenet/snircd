@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_burst.c,v 1.40.2.3 2007/01/13 18:47:19 entrope Exp $
+ * $Id: m_burst.c,v 1.40.2.5 2007/05/20 15:01:19 entrope Exp $
  */
 
 /*
@@ -115,6 +115,8 @@ netride_modes(int parc, char **parv, const char *curr_key)
   assert(modes && modes[0] == '+');
   while (*modes) {
     switch (*modes++) {
+    case '-':
+      return -1;
     case 'i':
       result |= MODE_INVITEONLY;
       break;
@@ -282,7 +284,13 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (parv[param][0] != '+')
         continue;
       check_modes = netride_modes(parc - param, parv + param, chptr->mode.key);
-      if (check_modes)
+      if (check_modes < 0)
+      {
+        if (chptr->users == 0)
+          sub1_from_channel(chptr);
+        return protocol_violation(sptr, "Invalid mode string in BURST");
+      }
+      else if (check_modes)
       {
         /* Clear any outstanding rogue invites */
         mode_invite_clear(chptr);
@@ -537,7 +545,7 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             last_oplevel = oplevel;
 	  }
 
-	  if (IsBurst(sptr) || !(member = find_member_link(chptr, acptr)))
+	  if (!(member = find_member_link(chptr, acptr)))
 	  {
 	    add_user_to_channel(chptr, acptr, current_mode, oplevel);
             if (!(current_mode & CHFL_DELAYED))
