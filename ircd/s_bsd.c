@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Functions that now (or in the past) relied on BSD APIs.
- * @version $Id: s_bsd.c,v 1.80.2.3 2007/01/15 03:08:23 entrope Exp $
+ * @version $Id: s_bsd.c,v 1.80.2.4 2007/05/29 03:08:33 entrope Exp $
  */
 #include "config.h"
 
@@ -635,7 +635,13 @@ static int read_packet(struct Client *cptr, int socket_ready)
         if (DBufLength(&(cli_recvQ(cptr))) < 510)
           SetFlag(cptr, FLAG_NONL);
         else
+        {
+          /* More than 512 bytes in the line - drop the input and yell
+           * at the client.
+           */
           DBufClear(&(cli_recvQ(cptr)));
+          send_reply(cptr, ERR_INPUTTOOLONG);
+        }
       }
       else if (client_dopacket(cptr, dolen) == CPTR_KILLED)
         return CPTR_KILLED;

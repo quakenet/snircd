@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Declarations of numeric replies and supporting functions.
- * @version $Id: numeric.h,v 1.41 2005/08/29 21:39:26 entrope Exp $
+ * @version $Id: numeric.h,v 1.41.2.1 2007/05/29 03:08:33 entrope Exp $
  */
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
@@ -336,6 +336,7 @@ extern const struct Numeric* get_error_numeric(int err);
      /* ERR_BADMASK          415           IRCnet extension */
 #define ERR_QUERYTOOLONG     416        /* Undernet extension */
      /* ERR_TOOMANYMATCHES   416           IRCnet extension */
+#define ERR_INPUTTOOLONG     417
 /*      ERR_LENGTHTRUNCATED  419           aircd */
 
 #define ERR_UNKNOWNCOMMAND   421
