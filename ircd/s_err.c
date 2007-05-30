@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Error handling support.
- * @version $Id: s_err.c,v 1.72.2.6 2007/05/20 14:01:07 entrope Exp $
+ * @version $Id: s_err.c,v 1.72.2.7 2007/05/29 03:08:33 entrope Exp $
  */
 #include "config.h"
 
@@ -866,7 +866,7 @@ static Numeric replyTable[] = {
 /* 416 */
   { ERR_QUERYTOOLONG, "%s :Too many lines in the output, restrict your query", "416" },
 /* 417 */
-  { 0 },
+  { ERR_INPUTTOOLONG, ":Input line was too long", "417" },
 /* 418 */
   { 0 },
 /* 419 */
