@@ -171,7 +171,7 @@ static void dump_map(struct Client *cptr, struct Client *server, char *mask, int
  */
 int m_map(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  if (feature_bool(FEAT_HIS_MAP) && !IsAnOper(sptr))
+  if (feature_bool(FEAT_HIS_MAP) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO))))
   {
     sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :%s %s", sptr,
                   "/MAP has been disabled, from CFV-165.  "
@@ -180,17 +180,6 @@ int m_map(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   }
   if (parc < 2)
     parv[1] = "*";
-  dump_map(sptr, &me, parv[1], 0);
-  send_reply(sptr, RPL_MAPEND);
-
-  return 0;
-}
-
-int mo_map(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
-{
-  if (parc < 2)
-    parv[1] = "*";
-
   dump_map(sptr, &me, parv[1], 0);
   send_reply(sptr, RPL_MAPEND);
 

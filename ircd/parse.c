@@ -545,7 +545,7 @@ struct Message msgtab[] = {
     TOK_HASH,
     0, MAXPARA, MFLG_SLOW, 0, NULL,
     /* UNREG, CLIENT, SERVER, OPER, SERVICE */
-    { m_unregistered, m_hash, m_hash, m_hash, m_ignore }
+    { m_unregistered, m_not_oper, m_hash, m_hash, m_ignore }
   },
   {
     MSG_REHASH,

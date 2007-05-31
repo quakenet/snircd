@@ -181,6 +181,9 @@ int mo_uping(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   assert(IsAnOper(sptr));
 
+  if (!HasPriv(sptr, PRIV_ROUTEINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   if (parc < 2) {
     send_reply(sptr, ERR_NEEDMOREPARAMS, "UPING");
     return 0;

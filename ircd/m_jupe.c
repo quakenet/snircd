@@ -195,8 +195,11 @@ int mo_jupe(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   time_t expire_off;
   char *server = parv[1], *target = 0, *reason;
 
-  if (parc < 2)
+  if (parc < 2) {
+    if (!HasPriv(sptr, PRIV_ROUTEINFO))
+      return send_reply(sptr, ERR_NOPRIVILEGES);
     return jupe_list(sptr, 0);
+  }
 
   if (*server == '+') {
     flags |= JUPE_ACTIVE;

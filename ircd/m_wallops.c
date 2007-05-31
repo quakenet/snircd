@@ -115,6 +115,9 @@ int mo_wallops(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   char *message;
 
+  if (!HasPriv(sptr, PRIV_WALL))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   message = parc > 1 ? parv[1] : 0;
 
   if (EmptyString(message))

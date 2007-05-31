@@ -101,6 +101,9 @@ int mo_close(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   assert(cptr == sptr);
   assert(IsAnOper(sptr));
 
+  if (!HasPriv(sptr, PRIV_CLOSE))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   return send_reply(sptr, RPL_CLOSEEND,
 		    net_close_unregistered_connections(sptr));
 }

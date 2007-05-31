@@ -207,7 +207,7 @@ int mo_settime(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   static char tbuf[11];
 
   /* Must be a global oper */
-  if (!IsOper(sptr))
+  if (!IsOper(sptr) || !HasPriv(sptr, PRIV_ROUTE))
     return send_reply(sptr, ERR_NOPRIVILEGES);
 
   if (parc < 2) /* verify argument count */

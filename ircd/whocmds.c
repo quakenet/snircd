@@ -129,7 +129,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
 
   if (fields & WHO_FIELD_NIP)
   {
-    const char* p2 = (HasHiddenHost(acptr) || HasSetHost(acptr)) && !IsAnOper(sptr) ?
+    const char* p2 = (HasHiddenHost(acptr) || HasSetHost(acptr) || feature_bool(FEAT_HIS_USERIP)) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_BYPASS_PRIVACY))) ?
       feature_str(FEAT_HIDDEN_IP) :
       ircd_ntoa(&cli_ip(acptr));
     *(p1++) = ' ';
@@ -145,7 +145,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
 
   if (!fields || (fields & WHO_FIELD_SER))
   {
-    const char *p2 = (feature_bool(FEAT_HIS_WHO_SERVERNAME) && !IsAnOper(sptr)) ?
+    const char *p2 = (feature_bool(FEAT_HIS_WHO_SERVERNAME) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO)))) ?
                        feature_str(FEAT_HIS_SERVERNAME) :
                        cli_name(cli_user(acptr)->server);
     *(p1++) = ' ';
@@ -197,7 +197,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
     }
     if (IsDeaf(acptr))
       *(p1++) = 'd';
-    if (IsAnOper(sptr))
+    if (IsAnOper(sptr) && HasPriv(sptr, PRIV_BYPASS_PRIVACY))
     {
       if (IsInvisible(acptr))
         *(p1++) = 'i';
@@ -217,7 +217,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
     *p1++ = ' ';
     if (!fields)
       *p1++ = ':';              /* Place colon here for default reply */
-    if (feature_bool(FEAT_HIS_WHO_HOPCOUNT) && !IsAnOper(sptr))
+    if (feature_bool(FEAT_HIS_WHO_HOPCOUNT) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO))))
       *p1++ = (sptr == acptr) ? '0' : '3';
     else
       /* three digit hopcount maximum */
@@ -228,7 +228,7 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
   {
     *p1++ = ' ';
     if (MyUser(acptr) &&
-	(IsAnOper(sptr) || !feature_bool(FEAT_HIS_WHO_SERVERNAME) ||
+	((IsAnOper(sptr) && HasPriv(sptr, PRIV_ROUTEINFO)) || !feature_bool(FEAT_HIS_WHO_SERVERNAME) ||
 	 acptr == sptr))
       p1 += ircd_snprintf(0, p1, 11, "%d",
                           CurrentTime - cli_user(acptr)->last);

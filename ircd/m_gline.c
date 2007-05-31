@@ -357,8 +357,12 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   time_t expire_off = 0;
   char *mask = parv[1], *target = 0, *reason = 0;
 
-  if (parc < 2)
-    return gline_list(sptr, 0);
+  if (parc < 2) {
+    if (!HasPriv(sptr, PRIV_SERVERINFO)) 
+      return send_reply(sptr, ERR_NOPRIVILEGES);
+    else
+      return gline_list(sptr, 0);
+  }
 
   if (*mask == '!') {
     mask++;

@@ -55,6 +55,9 @@ int mo_privs(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   if (parc < 2)
     return client_report_privs(sptr, sptr);
 
+  if (!HasPriv(sptr, PRIV_SERVERINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   for (i = 1; i < parc; i++) {
     for (name = ircd_strtok(&p, parv[i], " "); name;
 	 name = ircd_strtok(&p, 0, " ")) {

@@ -562,8 +562,9 @@ stats_help(struct Client* to, const struct StatDesc* sd, char* param)
   if (MyUser(to))
     for (asd = statsinfo; asd->sd_name; asd++)
       if (asd != sd) /* don't send the help for us */
-        sendcmdto_one(&me, CMD_NOTICE, to, "%C :%c (%s) - %s", to, asd->sd_c,
-                      asd->sd_name, asd->sd_desc);
+        if (((asd->sd_flags & STAT_FLAG_OPERFEAT) && !feature_bool(asd->sd_control)) || IsServer(to) || (IsAnOper(to) && HasPriv(to, PRIV_SERVERINFO)))
+          sendcmdto_one(&me, CMD_NOTICE, to, "%C :%c (%s) - %s", to, asd->sd_c,
+                        asd->sd_name, asd->sd_desc);
 }
 
 /** Contains information about all statistics. */

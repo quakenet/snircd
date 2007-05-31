@@ -117,6 +117,9 @@ int mo_squit(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   struct Client *acptr;
   struct Client *acptr2;
   char *comment;
+
+  if (!HasPriv(sptr, PRIV_ROUTE))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
       
   if (parc < 2) 
     return need_more_params(sptr, "SQUIT");

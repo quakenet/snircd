@@ -135,6 +135,12 @@ enum Priv
     PRIV_FREEFORM,       /* oper can use freeform sethost */
     PRIV_PARANOID,       /* oper can set paranoid */
     PRIV_CHECK,          /* oper can use /check */
+    PRIV_WALL,           /* oper can use /wallusers, /wallops */
+    PRIV_CLOSE,          /* oper can use /close */
+    PRIV_ROUTE,          /* oper can use /connect/squit NOTE: you need serverinfo priv to do remote connect */
+    PRIV_ROUTEINFO,      /* oper can use /map, /trace, /asll, /links and view jupe list */
+    PRIV_BYPASS_PRIVACY,  /* oper can bypass user privacy +x etc gives i.e. see real ip's */
+    PRIV_SERVERINFO,     /* oper can use /get, /stats, /hash, retrieve remote information */
     PRIV_LAST_PRIV /**< number of privileges */
   };
 

@@ -288,10 +288,10 @@ int m_who(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   if (!fields)
     counter = 7;
 
-  if (feature_bool(FEAT_HIS_WHO_SERVERNAME) && !IsAnOper(sptr))
+  if (feature_bool(FEAT_HIS_WHO_SERVERNAME) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO))))
     matchsel &= ~WHO_FIELD_SER;
 
-  if (feature_bool(FEAT_HIS_WHO_FILTERIP) && !IsAnOper(sptr))
+  if (feature_bool(FEAT_HIS_WHO_FILTERIP) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_BYPASS_PRIVACY))))
     matchsel &= ~WHO_FIELD_NIP;
 
   if (qrt && (fields & WHO_FIELD_QTY))

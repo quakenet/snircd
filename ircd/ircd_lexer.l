@@ -158,6 +158,12 @@ static struct lexer_token {
   { "freeform", TPRIV_FREEFORM },
   { "paranoid", TPRIV_PARANOID },
   { "check", TPRIV_CHECK },
+  { "wall", TPRIV_WALL },
+  { "close", TPRIV_CLOSE },
+  { "route", TPRIV_ROUTE },
+  { "routeinfo", TPRIV_ROUTEINFO },
+  { "serverinfo", TPRIV_SERVERINFO },
+  { "bypass_privacy", TPRIV_BYPASS_PRIVACY },
   { NULL, 0 }
 };
 static int ntokens;

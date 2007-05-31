@@ -99,5 +99,8 @@
  */
 int mo_get(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
+  if (!HasPriv(sptr, PRIV_SERVERINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   return feature_get(sptr, (const char* const*)parv + 1, parc - 1);
 }

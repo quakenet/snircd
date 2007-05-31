@@ -419,6 +419,7 @@ static struct FeatureDesc {
   F_S(HIS_URLSERVERS, 0, "http://www.undernet.org/servers.php", 0),
   F_B(HIS_USERGLINE, 0, 1, 0),
   F_B(HIS_LUSERS_ME, 0, 0, 0),
+  F_B(HIS_USERIP, 0, 1, 0),
 
   /* Misc. random stuff */
   F_S(NETWORK, 0, "UnderNet", 0),

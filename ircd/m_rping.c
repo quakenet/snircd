@@ -206,6 +206,9 @@ int mo_rping(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   assert(cptr == sptr);
   assert(IsAnOper(sptr));
 
+  if (!HasPriv(sptr, PRIV_ROUTEINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   if (parc < 2)
     return need_more_params(sptr, "RPING");
 

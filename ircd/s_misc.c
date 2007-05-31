@@ -485,7 +485,11 @@ int exit_client(struct Client *cptr,
   /* Then remove the client structures */
   if (IsServer(victim))
     exit_downlinks(victim, killer, comment1);
-  exit_one_client(victim, comment);
+
+  if (strncmp(comment, "G-lined", 7))  
+    exit_one_client(victim, comment); 
+  else 
+    exit_one_client(victim, "G-lined");
 
   /*
    *  cptr can only have been killed if it was cptr itself that got killed here,

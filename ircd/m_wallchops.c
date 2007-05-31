@@ -102,6 +102,7 @@
 int m_wallchops(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct Channel *chptr;
+  const char *ch;
 
   assert(0 != cptr);
   assert(cptr == sptr);
@@ -119,6 +120,20 @@ int m_wallchops(struct Client* cptr, struct Client* sptr, int parc, char* parv[]
       if ((chptr->mode.mode & MODE_NOPRIVMSGS) &&
           check_target_limit(sptr, chptr, chptr->chname, 0))
         return 0;
+
+      /* +cC checks */
+      if (chptr->mode.mode & MODE_NOCOLOUR)
+        for (ch=parv[parc - 1];*ch;ch++)
+          if (*ch==2 || *ch==3 || *ch==22 || *ch==27 || *ch==31) {
+            return 0;
+          }
+
+      if ((chptr->mode.mode & MODE_NOCTCP) && ircd_strncmp(parv[parc - 1],"\001ACTION ",8))
+        for (ch=parv[parc - 1];*ch;)
+          if (*ch++==1) {
+            return 0;
+          }
+
       sendcmdto_channel_butone(sptr, CMD_WALLCHOPS, chptr, cptr,
 			       SKIP_DEAF | SKIP_BURST | SKIP_NONOPS,
 			       "%H :@ %s", chptr, parv[parc - 1]);

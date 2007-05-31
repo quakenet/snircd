@@ -284,6 +284,9 @@ int m_hash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client*  cl;
   struct Channel* ch;
   int i;
+
+  if (!HasPriv(sptr, PRIV_SERVERINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
   
   sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :Hash Table Statistics", sptr);
 

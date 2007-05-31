@@ -187,8 +187,8 @@ static void free_slist(struct SLink **link) {
 %token TPRIV_UNLIMIT_QUERY TPRIV_DISPLAY TPRIV_SEE_OPERS TPRIV_WIDE_GLINE
 %token TPRIV_FORCE_OPMODE TPRIV_FORCE_LOCAL_OPMODE TPRIV_APASS_OPMODE
 %token TPRIV_CHANSERV TPRIV_XTRA_OPER TPRIV_NOIDLE TPRIV_FREEFORM TPRIV_PARANOID
-%token TPRIV_CHECK
-%token TPRIV_LIST_CHAN 
+%token TPRIV_CHECK TPRIV_WALL TPRIV_CLOSE TPRIV_ROUTE TPRIV_ROUTEINFO TPRIV_SERVERINFO
+%token TPRIV_BYPASS_PRIVACY TPRIV_LIST_CHAN 
 /* and some types... */
 %type <num> sizespec
 %type <num> timespec timefactor factoredtimes factoredtime
@@ -694,6 +694,12 @@ privtype: TPRIV_CHAN_LIMIT { $$ = PRIV_CHAN_LIMIT; } |
           TPRIV_NOIDLE { $$ = PRIV_NOIDLE; } |
           TPRIV_FREEFORM { $$ = PRIV_FREEFORM; } |
           TPRIV_CHECK { $$ = PRIV_CHECK; } |
+          TPRIV_WALL { $$ = PRIV_WALL; } |
+          TPRIV_CLOSE { $$ = PRIV_CLOSE ; } |
+          TPRIV_ROUTE { $$ = PRIV_ROUTE ; } |
+          TPRIV_ROUTEINFO { $$ = PRIV_ROUTEINFO ; } |
+          TPRIV_SERVERINFO { $$ = PRIV_SERVERINFO ; } |
+          TPRIV_BYPASS_PRIVACY { $$ = PRIV_BYPASS_PRIVACY ; } |
           TPRIV_PARANOID { $$ = PRIV_PARANOID; } ;
 yesorno: YES { $$ = 1; } | NO { $$ = 0; };
 

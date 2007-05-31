@@ -115,7 +115,7 @@ int m_links(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   char *mask;
   struct Client *acptr;
 
-  if (feature_bool(FEAT_HIS_LINKS) && !IsAnOper(sptr))
+  if (feature_bool(FEAT_HIS_LINKS) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO))))
   {
     send_reply(sptr, RPL_ENDOFLINKS, parc < 2 ? "*" : parv[1]);
     sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :%s %s", sptr,

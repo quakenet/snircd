@@ -196,7 +196,7 @@ int hunt_server_cmd(struct Client *from, const char *cmd, const char *tok,
   if (parc <= server || EmptyString((to = parv[server])) || IsUnknown(from))
     return (HUNTED_ISME);
 
-  if (MustBeOper && !IsPrivileged(from))
+  if (MustBeOper && (!IsPrivileged(from) || (IsAnOper(from) && !HasPriv(from, PRIV_SERVERINFO))))
   {
     send_reply(from, ERR_NOPRIVILEGES);
     return HUNTED_NOSUCH;

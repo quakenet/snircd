@@ -159,6 +159,9 @@ int mo_asll(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   int hits;
   int i;
 
+  if (!HasPriv(sptr, PRIV_ROUTEINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   if (parc < 2)
     return need_more_params(sptr, "ASLL");
 

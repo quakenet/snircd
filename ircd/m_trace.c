@@ -337,8 +337,8 @@ int ms_trace(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  */
 int mo_trace(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  if (feature_bool(FEAT_HIS_TRACE) && !IsAnOper(sptr))
-    return send_reply(cptr, ERR_NOPRIVILEGES);
+  if (!HasPriv(sptr, PRIV_ROUTEINFO))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
   do_trace(cptr, sptr, parc, parv);
   return 0;
 }

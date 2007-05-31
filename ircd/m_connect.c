@@ -235,6 +235,9 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   assert(cptr == sptr);
   assert(IsAnOper(sptr));
 
+  if (!HasPriv(sptr, PRIV_ROUTE))
+    return send_reply(sptr, ERR_NOPRIVILEGES);
+
   if (parc < 2)
     return need_more_params(sptr, "CONNECT");
 
