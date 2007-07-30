@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_mode.c,v 1.15.2.5 2007/04/01 02:14:59 entrope Exp $
+ * $Id: m_mode.c,v 1.15.2.6 2007/07/14 02:40:01 isomer Exp $
  */
 
 /*
@@ -127,7 +127,7 @@ m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       send_reply(sptr, ERR_USERSDONTMATCH);
       return 0;
     }
-    return set_user_mode(cptr, sptr, parc, parv);
+    return set_user_mode(cptr, sptr, parc, parv, ALLOWMODES_ANY);
   }
 
   ClrFlag(sptr, FLAG_TS8);
@@ -198,7 +198,7 @@ ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                               cli_name(cptr), cli_name(sptr));
       return 0;
     }
-    return set_user_mode(cptr, sptr, parc, parv);
+    return set_user_mode(cptr, sptr, parc, parv, ALLOWMODES_ANY);
   }
 
   ClrFlag(sptr, FLAG_TS8);

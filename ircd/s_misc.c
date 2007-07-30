@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous support functions.
- * @version $Id: s_misc.c,v 1.50.2.1 2006/02/16 03:49:54 entrope Exp $
+ * @version $Id: s_misc.c,v 1.50.2.2 2007/07/14 02:40:01 isomer Exp $
  */
 #include "config.h"
 
@@ -223,10 +223,14 @@ static void exit_one_client(struct Client* bcptr, const char* comment)
     if (MyUser(bcptr))
       set_snomask(bcptr, ~0, SNO_DEL);
 
-    if (IsInvisible(bcptr))
+    if (IsInvisible(bcptr)) {
+      assert(UserStats.inv_clients > 0);
       --UserStats.inv_clients;
-    if (IsOper(bcptr))
+    }
+    if (IsOper(bcptr)) {
+      assert(UserStats.opers > 0);
       --UserStats.opers;
+    }
     if (MyConnect(bcptr))
       Count_clientdisconnects(bcptr, UserStats);
     else

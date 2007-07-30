@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c,v 1.99.2.6 2007/04/05 01:39:38 entrope Exp $
+ * @version $Id: s_user.c,v 1.99.2.8 2007/07/21 04:52:03 isomer Exp $
  */
 #include "config.h"
 
@@ -118,6 +118,7 @@ void free_user(struct User* user)
     assert(0 == user->channel);
 
     MyFree(user);
+    assert(userCount>0);
     --userCount;
   }
 }
@@ -388,35 +389,14 @@ int register_user(struct Client *cptr, struct Client *sptr)
      * Set user's initial modes
      */
     tmpstr = (char*)client_get_default_umode(sptr);
-    if (tmpstr) for (; *tmpstr; ++tmpstr) {
-      switch (*tmpstr) {
-      case 's':
-        if (!feature_bool(FEAT_HIS_SNOTICES_OPER_ONLY)) {
-          SetServNotice(sptr);
-          set_snomask(sptr, SNO_DEFAULT, SNO_SET);
-        }
-        break;
-      case 'w':
-        if (!feature_bool(FEAT_WALLOPS_OPER_ONLY))
-          SetWallops(sptr);
-        break;
-      case 'i':
-        SetInvisible(sptr);
-        break;
-      case 'd':
-        SetDeaf(sptr);
-        break;
-      case 'g':
-        if (!feature_bool(FEAT_HIS_DEBUG_OPER_ONLY))
-          SetDebug(sptr);
-        break;
-      }
+    if (tmpstr) {
+      char *umodev[] = { NULL, NULL, tmpstr, NULL };
+      set_user_mode(cptr, sptr, 1, umodev, ALLOWMODES_ANY);
     }
+
   }
   else {
     struct Client *acptr = user->server;
-
-    Count_newremoteclient(UserStats, acptr);
 
     if (cli_from(acptr) != cli_from(sptr))
     {
@@ -452,10 +432,6 @@ int register_user(struct Client *cptr, struct Client *sptr)
     SetUser(sptr);
   }
 
-  if (IsInvisible(sptr))
-    ++UserStats.inv_clients;
-  if (IsOper(sptr))
-    ++UserStats.opers;
   /* If they get both +x and an account during registration, hide
    * their hostmask here.  Calling hide_hostmask() from IAuth's
    * account assignment causes a numeric reply during registration.
@@ -542,9 +518,6 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
                   const char* nick, int parc, char* parv[])
 {
   if (IsServer(sptr)) {
-    int   i;
-    const char* account = 0;
-    const char* p;
 
     /*
      * A server introducing a new client, change source
@@ -554,22 +527,7 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
 
     cli_hopcount(new_client) = atoi(parv[2]);
     cli_lastnick(new_client) = atoi(parv[3]);
-    if (Protocol(cptr) > 9 && parc > 7 && *parv[6] == '+')
-    {
-      for (p = parv[6] + 1; *p; p++)
-      {
-        for (i = 0; i < USERMODELIST_SIZE; ++i)
-        {
-          if (userModeList[i].c == *p)
-          {
-            SetFlag(new_client, userModeList[i].flag);
-	    if (userModeList[i].flag == FLAG_ACCOUNT)
-	      account = parv[7];
-            break;
-          }
-        }
-      }
-    }
+
     client_set_privs(new_client, NULL); /* set privs on user */
     /*
      * Set new nick name.
@@ -592,21 +550,13 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     ircd_strncpy(cli_user(new_client)->host, parv[5], HOSTLEN);
     ircd_strncpy(cli_user(new_client)->realhost, parv[5], HOSTLEN);
     ircd_strncpy(cli_info(new_client), parv[parc - 1], REALLEN);
-    if (account) {
-      int len = ACCOUNTLEN;
-      if ((p = strchr(account, ':'))) {
-	len = (p++) - account;
-	cli_user(new_client)->acc_create = atoi(p);
-	Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
-	       "account \"%s\", timestamp %Tu", account,
-	       cli_user(new_client)->acc_create));
-      }
-      ircd_strncpy(cli_user(new_client)->account, account, len);
+
+    Count_newremoteclient(UserStats, sptr);
+
+    if (parc > 7 && *parv[6] == '+') {
+      /* (parc-4) -3 for the ip, numeric nick, realname */
+      set_user_mode(cptr, new_client, parc-7, parv+4, ALLOWMODES_ANY);
     }
-    if (HasHiddenHost(new_client))
-      ircd_snprintf(0, cli_user(new_client)->host, HOSTLEN, "%s.%s",
-                    cli_user(new_client)->account,
-                    feature_str(FEAT_HIDDEN_HOST));
 
     return register_user(cptr, new_client);
   }
@@ -984,9 +934,12 @@ hide_hostmask(struct Client *cptr, unsigned int flag)
  * @param[in] sptr Client who sent the mode change message.
  * @param[in] parc Number of parameters in \a parv.
  * @param[in] parv Parameters to MODE.
+ * @param[in] allow_modes ALLOWMODES_ANY for any mode, ALLOWMODES_DEFAULT for 
+ *                        only permitting legitimate default user modes.
  * @return Zero.
  */
-int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, 
+		char *parv[], int allow_modes)
 {
   char** p;
   char*  m;
@@ -998,6 +951,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
   char buf[BUFSIZE];
   int prop = 0;
   int do_host_hiding = 0;
+  char* account = NULL;
 
   what = MODE_ADD;
 
@@ -1032,7 +986,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
   /*
    * parse mode change string(s)
    */
-  for (p = &parv[2]; *p; p++) {       /* p is changed in loop too */
+  for (p = &parv[2]; *p && p<&parv[parc]; p++) {       /* p is changed in loop too */
     for (m = *p; *m; m++) {
       switch (*m) {
       case '+':
@@ -1116,6 +1070,13 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
         if (what == MODE_ADD)
 	  do_host_hiding = 1;
 	break;
+      case 'r':
+	if (what == MODE_ADD) {
+	  account = *(++p);
+	  SetAccount(sptr);
+	}
+	/* There is no -r */
+	break;
       default:
         send_reply(sptr, ERR_UMODEUNKNOWNFLAG, *m);
         break;
@@ -1132,6 +1093,8 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
       ClearOper(sptr);
     if (!FlagHas(&setflags, FLAG_LOCOP) && IsLocOp(sptr))
       ClearLocOp(sptr);
+    if (!FlagHas(&setflags, FLAG_ACCOUNT) && IsAccount(sptr))
+      ClrFlag(sptr, FLAG_ACCOUNT);
     /*
      * new umode; servers can set it, local users cannot;
      * prevents users from /kick'ing or /mode -o'ing
@@ -1186,18 +1149,35 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv
   if (FlagHas(&setflags, FLAG_OPER) && !IsOper(sptr))
   {
     /* user no longer oper */
+    assert(UserStats.opers > 0);
     --UserStats.opers;
     client_set_privs(sptr, NULL); /* will clear propagate privilege */
   }
-  if (FlagHas(&setflags, FLAG_INVISIBLE) && !IsInvisible(sptr))
+  if (FlagHas(&setflags, FLAG_INVISIBLE) && !IsInvisible(sptr)) {
+    assert(UserStats.inv_clients > 0);
     --UserStats.inv_clients;
+  }
   if (!FlagHas(&setflags, FLAG_INVISIBLE) && IsInvisible(sptr))
     ++UserStats.inv_clients;
-  if (!FlagHas(&setflags, FLAG_HIDDENHOST) && do_host_hiding)
+  if (!FlagHas(&setflags, FLAG_ACCOUNT) && IsAccount(sptr)) {
+      int len = ACCOUNTLEN;
+      char *ts;
+      if ((ts = strchr(account, ':'))) {
+	len = (ts++) - account;
+	cli_user(sptr)->acc_create = atoi(ts);
+	Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
+	      "account \"%s\", timestamp %Tu", account,
+	      cli_user(sptr)->acc_create));
+      }
+      ircd_strncpy(cli_user(sptr)->account, account, len);
+  }
+  if (!FlagHas(&setflags, FLAG_HIDDENHOST) && do_host_hiding && allow_modes != ALLOWMODES_DEFAULT)
     hide_hostmask(sptr, FLAG_HIDDENHOST);
   if (IsRegistered(sptr))
     send_umode_out(cptr, sptr, &setflags, prop);
 
+  assert(UserStats.opers <= UserStats.clients + UserStats.unknowns);
+  assert(UserStats.inv_clients <= UserStats.clients + UserStats.unknowns);
   return 0;
 }
 
@@ -1505,3 +1485,6 @@ send_supported(struct Client *cptr)
 
   return 0; /* convenience return, if it's ever needed */
 }
+
+/* vim: shiftwidth=2 
+ */ 
