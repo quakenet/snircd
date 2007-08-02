@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c,v 1.37.2.23 2007/04/01 03:01:16 entrope Exp $
+ * @version $Id: s_auth.c,v 1.37.2.24 2007/07/14 02:40:01 isomer Exp $
  */
 #include "config.h"
 
@@ -1895,7 +1895,7 @@ static int iauth_cmd_usermode(struct IAuth *iauth, struct Client *cli,
 {
   if (params[0][0] == '+')
   {
-    set_user_mode(cli, cli, parc + 2, params - 2);
+    set_user_mode(cli, cli, parc + 2, params - 2, ALLOWMODES_ANY);
   }
   return 0;
 }

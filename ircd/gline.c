@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c,v 1.61.2.3 2007/03/17 22:45:35 klmitch Exp $
+ * @version $Id: gline.c,v 1.61.2.4 2007/07/20 23:32:19 klmitch Exp $
  */
 #include "config.h"
 
@@ -418,7 +418,7 @@ gline_propagate(struct Client *cptr, struct Client *sptr, struct Gline *gline)
 			gline->gl_host ? "@" : "",
 			gline->gl_host ? gline->gl_host : "",
 			gline->gl_expire - CurrentTime, gline->gl_lastmod,
-			gline->gl_lifetime - CurrentTime, gline->gl_reason);
+			gline->gl_lifetime, gline->gl_reason);
 
   return 0;
 }
@@ -434,7 +434,7 @@ gline_propagate(struct Client *cptr, struct Client *sptr, struct Gline *gline)
  * @param[in] sptr Client that originated the G-line.
  * @param[in] userhost Text mask for the G-line.
  * @param[in] reason Reason for G-line.
- * @param[in] expire Duration of G-line in seconds.
+ * @param[in] expire Expiration time of G-line.
  * @param[in] lastmod Last modification time of G-line.
  * @param[in] lifetime Lifetime of G-line.
  * @param[in] flags Bitwise combination of GLINE_* flags.
@@ -507,18 +507,17 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
    * You cannot set a negative (or zero) expire time, nor can you set an
    * expiration time for greater than GLINE_MAX_EXPIRE.
    */
-  if (!(flags & GLINE_FORCE) && (expire <= 0 || expire > GLINE_MAX_EXPIRE)) {
+  if (!(flags & GLINE_FORCE) &&
+      (expire <= CurrentTime || expire > CurrentTime + GLINE_MAX_EXPIRE)) {
     if (!IsServer(sptr) && MyConnect(sptr))
       send_reply(sptr, ERR_BADEXPIRE, expire);
     return 0;
   }
 
-  expire += CurrentTime; /* convert from lifetime to timestamp */
-
   if (!lifetime) /* no lifetime set, use expiration time */
     lifetime = expire;
-  else /* convert lifetime into timestamp */
-    lifetime += CurrentTime;
+
+  /* lifetime is already an absolute timestamp */
 
   /* Inform ops... */
   sendto_opmask_butone(0, ircd_strncmp(reason, "AUTO", 4) ? SNO_GLINE :
@@ -709,7 +708,7 @@ gline_deactivate(struct Client *cptr, struct Client *sptr, struct Gline *gline,
  * @param[in] gline G-line being modified.
  * @param[in] action Resultant status of the G-line.
  * @param[in] reason Reason for G-line.
- * @param[in] expire Duration of G-line in seconds.
+ * @param[in] expire Expiration time of G-line.
  * @param[in] lastmod Last modification time of G-line.
  * @param[in] lifetime Lifetime of G-line.
  * @param[in] flags Bitwise combination of GLINE_* flags.
@@ -752,14 +751,12 @@ gline_modify(struct Client *cptr, struct Client *sptr, struct Gline *gline,
   /* All right, we know that there's a change of some sort.  What is it? */
   /* first, check out the expiration time... */
   if ((flags & GLINE_EXPIRE) && expire) {
-    if (!(flags & GLINE_FORCE) && (expire <= 0 || expire > GLINE_MAX_EXPIRE)) {
+    if (!(flags & GLINE_FORCE) &&
+	(expire <= CurrentTime || expire > CurrentTime + GLINE_MAX_EXPIRE)) {
       if (!IsServer(sptr) && MyConnect(sptr)) /* bad expiration time */
 	send_reply(sptr, ERR_BADEXPIRE, expire);
       return 0;
     }
-
-    /* convert to a timestamp... */
-    expire += CurrentTime;
   } else
     flags &= ~GLINE_EXPIRE;
 
@@ -770,9 +767,7 @@ gline_modify(struct Client *cptr, struct Client *sptr, struct Gline *gline,
   }
 
   /* Next, check out lifetime--this one's a bit trickier... */
-  if ((flags & GLINE_LIFETIME) && lifetime)
-    lifetime += CurrentTime; /* convert to a timestamp */
-  else
+  if (!(flags & GLINE_LIFETIME) || !lifetime)
     lifetime = gline->gl_lifetime; /* use G-line lifetime */
 
   lifetime = IRCD_MAX(lifetime, expire); /* set lifetime to the max */
@@ -908,7 +903,7 @@ gline_modify(struct Client *cptr, struct Client *sptr, struct Gline *gline,
 			  gline->gl_user, gline->gl_host ? "@" : "",
 			  gline->gl_host ? gline->gl_host : "",
 			  gline->gl_expire - CurrentTime, gline->gl_lastmod,
-			  gline->gl_lifetime - CurrentTime, gline->gl_reason);
+			  gline->gl_lifetime, gline->gl_reason);
 
   /* OK, let's do the G-line... */
   return do_gline(cptr, sptr, gline);
@@ -1127,7 +1122,7 @@ gline_burst(struct Client *cptr)
                     gline->gl_host ? "@" : "",
                     gline->gl_host ? gline->gl_host : "",
 		    gline->gl_expire - CurrentTime, gline->gl_lastmod,
-                    gline->gl_lifetime - CurrentTime, gline->gl_reason);
+                    gline->gl_lifetime, gline->gl_reason);
   }
 
   gliter(BadChanGlineList, gline, sgline) {
@@ -1135,7 +1130,7 @@ gline_burst(struct Client *cptr)
       sendcmdto_one(&me, CMD_GLINE, cptr, "* %c%s %Tu %Tu %Tu :%s",
 		    GlineIsRemActive(gline) ? '+' : '-', gline->gl_user,
 		    gline->gl_expire - CurrentTime, gline->gl_lastmod,
-		    gline->gl_lifetime - CurrentTime, gline->gl_reason);
+		    gline->gl_lifetime, gline->gl_reason);
   }
 }
 
@@ -1158,7 +1153,7 @@ gline_resend(struct Client *cptr, struct Gline *gline)
 		gline->gl_host ? "@" : "",
                 gline->gl_host ? gline->gl_host : "",
 		gline->gl_expire - CurrentTime, gline->gl_lastmod,
-		gline->gl_lifetime - CurrentTime, gline->gl_reason);
+		gline->gl_lifetime, gline->gl_reason);
 
   return 0;
 }

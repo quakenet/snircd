@@ -1,3 +1,54 @@
+2007-07-21  Perry Lorier <isomer@undernet.org>
+
+	* ircd/s_user.c: Move set_nick_name() to use set_user_mode(),
+	set_user_mode() now interprets +r usermodes properly (and ignores
+	them from non servers).  This fixes a problem where remote users
+	weren't being counted properly anymore.
+
+2007-07-20  Kevin L. Mitchell  <klmitch@mit.edu>
+
+	* ircd/m_gline.c: create abs_expire() macro to convert an expire
+	timestamp from the network into an absolute time, if needed;
+	rename expire_off to expire globally, since it now represents an
+	absolute expiration time; use expire - CurrentTime in gline
+	forwarding statements; in ms_gline(), use abs_expire() to convert
+	network expiration timestamp into absolute timestamp; in
+	mo_gline(), add CurrentTime to oper-provided expiration offset to
+	convert to absolute timestamp
+
+	* ircd/gline.c: assume expire and lifetime arguments to
+	gline_add() and gline_modify() are already absolute timestamps;
+	send lifetime parameter as an absolute timestamp, but leave expire
+	timestamp as relative as first part of a 2-phase update
+
+2007-07-12  Perry Lorier <isomer@undernet.org>
+	Reconsider how we manage modes before registration, to avoid stats
+	getting out of sync.
+
+	* ircd/s_user.c (set_user_mode): Add new parameter to set_user_mode to
+	ignore some modes.
+	(register_user): Use set_user_mode to parse default usermode for
+	users.
+
+	* ircd/m_user.c: Add extra parameter to set_user_mode call
+
+	* ircd/s_auth.c: Add extra parameter to set_user_mode call
+
+	* ircd/m_mode.c: Add extra parameter to set_user_mode call
+
+	* ircd/s_misc.c: Verify stats are consistant.
+
+	* include/s_user.h: Change prototype, add flag definitions.
+
+	* ircd/m_lusers.c (m_users): Assert that we're generating sane stats,
+	include "unknowns" in the total user connections to avoid negative
+	wrap arounds.
+
+2007-07-12  Perry Lorier <isomer@undernet.org>
+	
+	* ircd/m_user.c (m_luser): Fix broken RFC 2812 on connect user mode 
+	setting
+
 2007-05-28  Michael Poole <mdpoole@troilus.org>
 
 	* include/numeric.h (ERR_INPUTTOOLONG): New numeric.
