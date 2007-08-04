@@ -1221,7 +1221,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
   unsigned int tmpmask = 0;
   int snomask_given = 0;
   char buf[BUFSIZE];
-  char *hostmask, *password, *opername;
+  char *hostmask, *password;
   int prop = 0;
   int do_host_hiding = 0;
   int do_set_host = 0;
@@ -1532,11 +1532,11 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
 	len = (ts++) - account;
 	cli_user(sptr)->acc_create = atoi(ts);
         if ((pts = strchr(ts, ':')))
-	  cli_user(new_client)->acc_id = strtoul(pp + 1, NULL, 10);
+	  cli_user(sptr)->acc_id = strtoul(pts + 1, NULL, 10);
         Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
 	      "account \"%s\", timestamp %Tu, id %lu", account,
 	      cli_user(sptr)->acc_create,
-	      cli_user(new_client)->acc_id));
+	      cli_user(sptr)->acc_id));
       }
       ircd_strncpy(cli_user(sptr)->account, account, len);
   }
