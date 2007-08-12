@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c,v 1.37.2.24 2007/07/14 02:40:01 isomer Exp $
+ * @version $Id: s_auth.c,v 1.37.2.25 2007/08/09 03:46:20 entrope Exp $
  */
 #include "config.h"
 
@@ -2201,7 +2201,6 @@ void report_iauth_conf(struct Client *cptr, const struct StatDesc *sd, char *par
         send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":%s",
                    link->value.cp);
     }
-    send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":End of IAuth configuration.");
 }
 
 /** Report active iauth's statistics to \a cptr.
@@ -2218,5 +2217,4 @@ void report_iauth_conf(struct Client *cptr, const struct StatDesc *sd, char *par
         send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":%s",
                    link->value.cp);
     }
-    send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":End of IAuth statistics.");
 }
