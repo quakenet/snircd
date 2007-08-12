@@ -413,8 +413,6 @@ int register_user(struct Client *cptr, struct Client *sptr)
   else {
     struct Client *acptr = user->server;
 
-    ircd_strncpy(user->username, cli_username(sptr), USERLEN);
-
     if (cli_from(acptr) != cli_from(sptr))
     {
       sendcmdto_one(&me, CMD_KILL, cptr, "%C :%s (%s != %s[%s])",
@@ -600,6 +598,7 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
 
     cli_serv(sptr)->ghost = 0;        /* :server NICK means end of net.burst */
     ircd_strncpy(cli_username(new_client), parv[4], USERLEN);
+    ircd_strncpy(cli_user(new_client)->username, parv[4], USERLEN);
     ircd_strncpy(cli_user(new_client)->realusername, parv[4], USERLEN);
     ircd_strncpy(cli_user(new_client)->host, parv[5], HOSTLEN);
     ircd_strncpy(cli_user(new_client)->realhost, parv[5], HOSTLEN);
