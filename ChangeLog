@@ -1,3 +1,27 @@
+2007-08-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_user.c (whipser): CNOTICEs should not trigger away
+	messages, only CPRIVMSGs.
+
+2007-08-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_who.c (m_who): Reorder responses and change the
+	ERR_QUERYTOOLONG parameter to be consistent with m_whois().
+	
+2007-08-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_user.c (register_user): Initialize umodev[] in a
+	C89-compatible way.  (gcc 4.1.2 warned about it.)
+
+2007-08-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_names.c (do_names): Add NAMES_DEL to comment.  Avoid use
+	of strcat().  Get rid of ms_names(), which was basically a copy of
+	m_names(), and merge the "showingdelayed" changes into m_names().
+	Replace the recursion with iteration.
+
+	* ircd/parse.c (msgtab): Use m_names(), not ms_names().
+
 2007-08-08  Michael Poole <mdpoole@troilus.org>
 
 	* ircd/s_auth.c (report_iauth_conf): Remove end-of-stats message;

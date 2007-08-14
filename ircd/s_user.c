@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c,v 1.99.2.8 2007/07/21 04:52:03 isomer Exp $
+ * @version $Id: s_user.c,v 1.99.2.10 2007/08/14 03:56:46 entrope Exp $
  */
 #include "config.h"
 
@@ -390,7 +390,8 @@ int register_user(struct Client *cptr, struct Client *sptr)
      */
     tmpstr = (char*)client_get_default_umode(sptr);
     if (tmpstr) {
-      char *umodev[] = { NULL, NULL, tmpstr, NULL };
+      char *umodev[] = { NULL, NULL, NULL, NULL };
+      umodev[2] = tmpstr;
       set_user_mode(cptr, sptr, 1, umodev, ALLOWMODES_ANY);
     }
 
@@ -795,12 +796,14 @@ int whisper(struct Client* source, const char* nick, const char* channel,
   if (is_silenced(source, dest))
     return 0;
           
-  if (cli_user(dest)->away)
-    send_reply(source, RPL_AWAY, cli_name(dest), cli_user(dest)->away);
   if (is_notice)
     sendcmdto_one(source, CMD_NOTICE, dest, "%C :%s", dest, text);
   else
+  {
+    if (cli_user(dest)->away)
+      send_reply(source, RPL_AWAY, cli_name(dest), cli_user(dest)->away);
     sendcmdto_one(source, CMD_PRIVATE, dest, "%C :%s", dest, text);
+  }
   return 0;
 }
 
