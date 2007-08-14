@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_who.c,v 1.22.2.2 2006/11/04 21:35:28 entrope Exp $
+ * $Id: m_who.c,v 1.22.2.3 2007/08/14 03:54:48 entrope Exp $
  */
 
 /*
@@ -471,11 +471,10 @@ int m_who(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /* Make a clean mask suitable to be sent in the "end of" */
   if (mask && (p = strchr(mask, ' ')))
     *p = '\0';
-  send_reply(sptr, RPL_ENDOFWHO, BadPtr(mask) ? "*" : mask);
-
   /* Notify the user if we decided that his query was too long */
   if (counter < 0)
-    send_reply(sptr, ERR_QUERYTOOLONG, "WHO");
+    send_reply(sptr, ERR_QUERYTOOLONG, BadPtr(mask) ? "*" : mask);
+  send_reply(sptr, RPL_ENDOFWHO, BadPtr(mask) ? "*" : mask);
 
   return 0;
 }
