@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of string operations.
- * @version $Id: ircd_string.c,v 1.24.2.1 2007/01/15 03:08:23 entrope Exp $
+ * @version $Id: ircd_string.c,v 1.24.2.2 2007/08/21 02:02:10 entrope Exp $
  */
 #include "config.h"
 
@@ -486,7 +486,7 @@ ircd_aton_ip4(const char *input, unsigned int *output, unsigned char *pbits)
     ip |= part << (24 - 8 * dots++);
     part = 0;
     if (input[pos] == '*') {
-      while (input[++pos] == '*') ;
+      while (input[++pos] == '*' || input[pos] == '.') ;
       if (input[pos] != '\0')
         return 0;
       if (pbits)
@@ -604,7 +604,7 @@ ipmask_parse(const char *input, struct irc_in_addr *ip, unsigned char *pbits)
       *pbits = part;
       goto finish;
     case '*':
-      while (input[++pos] == '*') ;
+      while (input[++pos] == '*' || input[pos] == ':') ;
       if (input[pos] != '\0' || colon < 8)
         return 0;
       if (pbits)
