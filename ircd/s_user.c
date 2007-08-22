@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c,v 1.99.2.10 2007/08/14 03:56:46 entrope Exp $
+ * @version $Id: s_user.c,v 1.99.2.11 2007/08/21 01:13:15 entrope Exp $
  */
 #include "config.h"
 
@@ -462,6 +462,10 @@ int register_user(struct Client *cptr, struct Client *sptr)
    */
   if (HasHiddenHost(sptr))
     hide_hostmask(sptr, FLAG_HIDDENHOST);
+  if (IsInvisible(sptr))
+    ++UserStats.inv_clients;
+  if (IsOper(sptr))
+    ++UserStats.opers;
 
   tmpstr = umode_str(sptr, 0);
   int ipv6andopername[] = {FLAG_IPV6,FLAG_OPERNAME};
@@ -520,6 +524,7 @@ int register_user(struct Client *cptr, struct Client *sptr)
       FlagSet(&flags, FLAG_ACCOUNT);
     else
       FlagClr(&flags, FLAG_ACCOUNT);
+    client_set_privs(sptr, NULL);
     send_umode(cptr, sptr, &flags, ALL_UMODES, 0);
     if ((cli_snomask(sptr) != SNO_DEFAULT) && HasFlag(sptr, FLAG_SERVNOTICE))
       send_reply(sptr, RPL_SNOMASK, cli_snomask(sptr), cli_snomask(sptr));
@@ -581,7 +586,6 @@ int set_nick_name(struct Client* cptr, struct Client* sptr,
     cli_hopcount(new_client) = atoi(parv[2]);
     cli_lastnick(new_client) = atoi(parv[3]);
 
-    client_set_privs(new_client, NULL); /* set privs on user */
     /*
      * Set new nick name.
      */
@@ -1500,32 +1504,6 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
    * Compare new flags with old flags and send string which
    * will cause servers to update correctly.
    */
-  if (!FlagHas(&setflags, FLAG_OPER) && IsOper(sptr))
-  {
-    /* user now oper */
-    ++UserStats.opers;
-    client_set_privs(sptr, NULL); /* may set propagate privilege */
-  }
-  /* remember propagate privilege setting */
-  if (HasPriv(sptr, PRIV_PROPAGATE))
-    prop = 1;
-  if (FlagHas(&setflags, FLAG_OPER) && !IsOper(sptr))
-  {
-    /* user no longer oper */
-    assert(UserStats.opers > 0);
-    --UserStats.opers;
-    client_set_privs(sptr, NULL); /* will clear propagate privilege */
-    if (cli_user(sptr)->opername) {
-      MyFree(cli_user(sptr)->opername);
-      cli_user(sptr)->opername = NULL;
-    }
-  }
-  if (FlagHas(&setflags, FLAG_INVISIBLE) && !IsInvisible(sptr)) {
-    assert(UserStats.inv_clients > 0);
-    --UserStats.inv_clients;
-  }
-  if (!FlagHas(&setflags, FLAG_INVISIBLE) && IsInvisible(sptr))
-    ++UserStats.inv_clients;
   if (!FlagHas(&setflags, FLAG_ACCOUNT) && IsAccount(sptr)) {
       int len = ACCOUNTLEN;
       char *pts, *ts;
@@ -1549,11 +1527,39 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
     if (set_hostmask(sptr, hostmask, password) && hostmask)
       FlagClr(&setflags, FLAG_SETHOST);
   }
-  if (IsRegistered(sptr))
-    send_umode_out(cptr, sptr, &setflags, prop);
 
-  assert(UserStats.opers <= UserStats.clients + UserStats.unknowns);
-  assert(UserStats.inv_clients <= UserStats.clients + UserStats.unknowns);
+  if (IsRegistered(sptr)) {
+    if (!FlagHas(&setflags, FLAG_OPER) && IsOper(sptr)) {
+      /* user now oper */
+      ++UserStats.opers;
+      client_set_privs(sptr, NULL); /* may set propagate privilege */
+    }
+    /* remember propagate privilege setting */
+    if (HasPriv(sptr, PRIV_PROPAGATE)) {
+      prop = 1;
+    }
+    if (FlagHas(&setflags, FLAG_OPER) && !IsOper(sptr)) {
+      /* user no longer oper */
+      assert(UserStats.opers > 0);
+      --UserStats.opers;
+      client_set_privs(sptr, NULL); /* will clear propagate privilege */
+      if (cli_user(sptr)->opername) {
+        MyFree(cli_user(sptr)->opername);
+        cli_user(sptr)->opername = NULL;
+      }
+    }
+    if (FlagHas(&setflags, FLAG_INVISIBLE) && !IsInvisible(sptr)) {
+      assert(UserStats.inv_clients > 0);
+      --UserStats.inv_clients;
+    }
+    if (!FlagHas(&setflags, FLAG_INVISIBLE) && IsInvisible(sptr)) {
+      ++UserStats.inv_clients;
+    }
+    assert(UserStats.opers <= UserStats.clients + UserStats.unknowns);
+    assert(UserStats.inv_clients <= UserStats.clients + UserStats.unknowns);
+    send_umode_out(cptr, sptr, &setflags, prop);
+  }
+
   return 0;
 }
 
