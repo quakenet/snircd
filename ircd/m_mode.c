@@ -134,6 +134,11 @@ m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   member = find_member_link(chptr, sptr);
 
+  if (!member) {
+    send_reply(sptr, ERR_NOTONCHANNEL, chptr->chname);
+    return 0;
+  }
+
   if (parc < 3) {
     char modebuf[MODEBUFLEN];
     char parabuf[MODEBUFLEN];
