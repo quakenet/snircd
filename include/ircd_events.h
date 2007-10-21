@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Interface and public definitions for event loop.
- * @version $Id: ircd_events.h,v 1.5 2004/10/05 04:14:44 entrope Exp $
+ * @version $Id: ircd_events.h,v 1.5.2.1 2007/04/01 02:11:41 entrope Exp $
  */
 
 #ifndef INCLUDED_config_h
@@ -202,9 +202,9 @@ struct Event {
 
 /** List of all event generators. */
 struct Generators {
-  struct Socket* g_socket;	/**< list of socket generators */
-  struct Signal* g_signal;	/**< list of signal generators */
-  struct Timer*	 g_timer;	/**< list of timer generators */
+  struct GenHeader* g_socket;	/**< list of socket generators */
+  struct GenHeader* g_signal;	/**< list of signal generators */
+  struct GenHeader* g_timer;	/**< list of timer generators */
 };
 
 /** Returns 1 if successfully initialized, 0 if not.
@@ -284,7 +284,7 @@ void timer_del(struct Timer* timer);
 void timer_chg(struct Timer* timer, enum TimerType type, time_t value);
 void timer_run(void);
 /** Retrieve the next timer's expiration time from Generators \a gen. */
-#define timer_next(gen)	((gen)->g_timer ? (gen)->g_timer->t_expire : 0)
+#define timer_next(gen)	((gen)->g_timer ? ((struct Timer*)(gen)->g_timer)->t_expire : 0)
 
 void signal_add(struct Signal* signal, EventCallBack call, void* data,
 		int sig);
