@@ -3218,7 +3218,7 @@ mode_process_clients(struct ParseState *state)
        * Otherwise, get state->member's oplevel+1.
        */
       if (state->cli_change[i].oplevel <= MAXOPLEVEL) {
-        if (IsService(cli_user(state->cli_change[i].client)->server)) {
+        if ((IsChannelService(state->sptr) && IsService(cli_user(state->sptr)->server)) || (IsService(state->sptr))) {
           SetOpLevel(member, state->cli_change[i].oplevel);
         } else {
           SetOpLevel(member, state->cli_change[i].oplevel > MINOPLEVEL ? state->cli_change[i].oplevel : MINOPLEVEL);
