@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation for handling listening sockets.
- * @version $Id: listener.c,v 1.28.2.5 2007/03/18 02:33:01 entrope Exp $
+ * @version $Id: listener.c,v 1.28.2.6 2007/05/20 14:10:30 entrope Exp $
  */
 #include "config.h"
 
@@ -147,8 +147,12 @@ void show_ports(struct Client* sptr, const struct StatDesc* sd,
       continue;
     len = 0;
     flags[len++] = listener_server(listener) ? 'S' : 'C';
-    if (show_hidden && FlagHas(&listener->flags, LISTEN_HIDDEN))
+    if (FlagHas(&listener->flags, LISTEN_HIDDEN))
+    {
+      if (!show_hidden)
+        continue;
       flags[len++] = 'H';
+    }
     if (FlagHas(&listener->flags, LISTEN_IPV4))
     {
       flags[len++] = '4';

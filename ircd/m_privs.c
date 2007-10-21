@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Report operators' privileges to others
- * @version $Id: m_privs.c,v 1.6.2.1 2007/03/06 02:35:24 entrope Exp $
+ * @version $Id: m_privs.c,v 1.6.2.2 2007/05/20 14:15:58 entrope Exp $
  */
 
 #include "config.h"
@@ -59,7 +59,7 @@ int mo_privs(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     for (name = ircd_strtok(&p, parv[i], " "); name;
 	 name = ircd_strtok(&p, 0, " ")) {
       if (!(acptr = FindUser(name)))
-        continue;
+        send_reply(sptr, ERR_NOSUCHNICK, name);
       else if (MyUser(acptr))
 	client_report_privs(sptr, acptr);
       else
