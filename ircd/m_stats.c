@@ -137,10 +137,7 @@ m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
    */
   if (!IsPrivileged(cptr) &&
       ((sd->sd_flags & STAT_FLAG_OPERONLY) ||
-       ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control)))) ||
-     (!IsPrivileged(cptr) &&
-      ((sd->sd_flags & STAT_FLAG_OPERONLY) ||
-       ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control)))))
+       ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control))))
     return send_reply(sptr, ERR_NOPRIVILEGES);
 
   /* Ok, track down who's supposed to get this... */
