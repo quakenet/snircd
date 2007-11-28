@@ -1,3 +1,95 @@
+2007-11-28  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/channel.c (mode_ban_invalidate): Clarify Doxygen comments.
+	(apply_ban): Only block narrower bans if the wider ban is active.
+
+2007-11-24  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_names.c (do_names): Don't try to re-initialize the start
+	of buf[] for each line.  It's done the first time around and that
+	can be reused safely.
+
+2007-11-17  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_stats.c (m_stats): Properly assign param before it is
+	used in the hunt_server_cmd() call.
+	
+2007-11-17  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_auth.c (iauth_disconnect): Avoid destroying invalid
+	sockets.
+	(iauth_stderr_callback): Disconnect iauth child if stderr has
+	EOF (in case stdin notification is delayed somehow).
+	
+2007-11-04  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/umkpasswd.c (sum): Typecast buffer to avoid a warning about
+	the parameter type being passed to strlen().
+	
+2007-11-04  Michael Poole <mdpoole@troilus.org>
+
+	* doc/example.conf: Document /LIST M as controlled by list_chan.
+
+	* include/channel.h (LISTARG_SHOWMODES): Define.
+
+	* ircd/hash.c (list_next_channels): Handle it.
+
+	* ircd/m_list.c (show_usage): Document 'M' flag.
+	(param_parse): Recognize 'M' as LISTARGS_SHOWMODES.
+
+2007-11-04  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_list.c (param_parse): Reverse comparison direction when
+	converting from minutes to time_t, and which bound is set (so that
+	T<time_t works correctly).  Also switch is_time cases so that 'T'
+	and 'C' work as documented.  Remove a "break" after a "return".
+
+	(m_list): Remove a "break" after a "return".
+
+2007-10-29  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/ircd_lexer.l (YY_INPUT): Redefine to use fbgets().
+	(init_lexer): Return a value to indicate failure.  Use fbopen().
+	(deinit_lexer): New function.
+
+	* ircd/s_conf.c (read_configuration_file): Update extern
+	declarations.  Bail if init_lexer() fails.  Call deinit_lexer()
+	rather than directly munging yyin.
+
+2007-10-29  Michael Poole <mdpoole@troilus.org>
+
+	* include/gline.h: Delete declaration of gline_propagate().
+
+	* include/whocmds.h: Delete declaration of count_users().
+
+	* ircd/whocmds.c (count_users): Move to gline.c as a static.
+
+	* ircd/gline.c (whocmds.h): Remove #include.
+	(gliter): Document boolean trickiness.  Add missing trickiness
+	when gl_flags has bits set besides GLINE_ACTIVE.
+	(make_gline): Get rid of now-unused "after" variable and the
+	comments related to overlapping G-lines.
+	(gline_propagate): Make static.
+	(count_users): Move from whocmds.c as a static function.
+	(count_realnames): New function.
+	(gline_add): Require a force to hit lots of users with a realname
+	G-line.
+
+2007-09-05  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_gline.c (ms_gline): Remove dead branch when 4 < parc < 5.
+	(mo_gline): Consistently use the last argument as the reason.
+
+2007-09-05  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/Makefile.in: Fix dependencies for version.h generation.
+
+2007-08-20  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/send.c (sendwallto_group_butone): Move a feature_bool()
+	call out of a loop.  Convert HasFlag() uses to appropriate macros
+	from client.h.
+
 2007-08-20  Michael Poole <mdpoole@troilus.org>
 
 	* ircd/ircd_string.c (ircd_aton_ip4): Allow a sequence of *.* at

@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Structures and APIs for G-line manipulation.
- * @version $Id: gline.h,v 1.17.2.2 2007/03/17 22:45:35 klmitch Exp $
+ * @version $Id: gline.h,v 1.17.2.3 2007/10/30 01:53:33 entrope Exp $
  */
 #ifndef INCLUDED_sys_types_h
 #include <sys/types.h>
@@ -119,8 +119,6 @@ enum GlineAction {
 /** Return last modification time of a G-line. */
 #define GlineLastMod(g)		((g)->gl_lastmod)
 
-extern int gline_propagate(struct Client *cptr, struct Client *sptr,
-			   struct Gline *gline);
 extern int gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
 		     char *reason, time_t expire, time_t lastmod,
 		     time_t lifetime, unsigned int flags);

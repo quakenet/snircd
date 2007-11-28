@@ -1,6 +1,6 @@
 /** @file whocmds.h
  * @brief Support functions for /WHO-like commands.
- * @version $Id: whocmds.h,v 1.10.2.1 2006/11/04 21:35:28 entrope Exp $
+ * @version $Id: whocmds.h,v 1.10.2.2 2007/10/30 01:53:33 entrope Exp $
  */
 #ifndef INCLUDED_whocmds_h
 #define INCLUDED_whocmds_h
@@ -88,6 +88,5 @@ struct Channel;
  */
 extern void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
                    int fields, char* qrt);
-extern int count_users(char* mask);
 
 #endif /* INCLUDED_whocmds_h */

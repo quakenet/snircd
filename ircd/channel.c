@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c,v 1.155.2.18 2007/08/15 02:49:54 entrope Exp $
+ * @version $Id: channel.c,v 1.155.2.19 2007/11/28 05:47:11 entrope Exp $
  */
 #include "config.h"
 
@@ -2172,9 +2172,10 @@ modebuf_extract(struct ModeBuf *mbuf, char *buf)
   return;
 }
 
-/** Simple function to invalidate bans
+/** Simple function to invalidate a channel's ban cache.
  *
- * This function sets all bans as being valid.
+ * This function marks all members of the channel as being neither
+ * banned nor banned.
  *
  * @param chan	The channel to operate on.
  */
@@ -2766,9 +2767,9 @@ int apply_ban(struct Ban **banlist, struct Ban *newban, int do_free)
   assert(newban->flags & (BAN_ADD|BAN_DEL));
   if (newban->flags & BAN_ADD) {
     size_t totlen = 0;
-    /* If a less specific entry is found, fail.  */
+    /* If a less specific *active* entry is found, fail.  */
     for (ban = *banlist; ban; ban = ban->next) {
-      if (!bmatch(ban, newban)) {
+      if (!bmatch(ban, newban) && !(ban->flags & BAN_DEL)) {
         if (do_free)
           free_ban(newban);
         return 1;

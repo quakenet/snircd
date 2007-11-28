@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_names.c,v 1.22.2.3 2007/08/14 03:02:24 entrope Exp $
+ * $Id: m_names.c,v 1.22.2.4 2007/11/25 02:42:54 entrope Exp $
  */
 
 /*
@@ -179,14 +179,6 @@ void do_names(struct Client* sptr, struct Channel* chptr, int filter)
       /* space, modifier, nick, \r \n \0 */
     {
       send_reply(sptr, (filter & NAMES_DEL) ? RPL_DELNAMREPLY : RPL_NAMREPLY, buf);
-      strcpy(buf, "* ");
-      ircd_strncpy(buf + 2, chptr->chname, len + 1);
-      buf[len + 2] = ':';
-      buf[len + 3] = '\0';
-      if (PubChannel(chptr))
-        *buf = '=';
-      else if (SecretChannel(chptr))
-        *buf = '@';
       idx = len + 4;
       flag = 0;
       needs_space=0;

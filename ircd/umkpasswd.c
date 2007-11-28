@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: umkpasswd.c,v 1.8.2.2 2007/08/15 01:15:53 entrope Exp $
+ * $Id: umkpasswd.c,v 1.8.2.3 2007/11/17 13:48:15 entrope Exp $
 */
 #include "config.h"
 #include <unistd.h>
@@ -201,7 +201,7 @@ vstr[0] = '\0';
  MD5Init(&context);
  while ((fgets((char*)buffer, sizeof(buffer), file)) != NULL)
  {
-  MD5Update(&context, buffer, strlen(buffer));
+  MD5Update(&context, buffer, strlen((char*)buffer));
   str = strstr((char*)buffer, "$Id: ");
   if (str != NULL)
   {

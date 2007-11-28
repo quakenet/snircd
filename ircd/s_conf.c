@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.8 2007/04/05 01:52:39 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.9 2007/10/30 02:13:09 entrope Exp $
  */
 #include "config.h"
 
@@ -816,9 +816,9 @@ void clear_quarantines(void)
 static int conf_error;
 /** When non-zero, indicates that the configuration file was loaded at least once. */
 static int conf_already_read;
-extern FILE *yyin;
 extern void yyparse(void);
-extern void init_lexer(void);
+extern int init_lexer(void);
+extern void deinit_lexer(void);
 
 /** Read configuration file.
  * @return Zero on failure, non-zero on success. */
@@ -827,11 +827,10 @@ int read_configuration_file(void)
   conf_error = 0;
   feature_unmark(); /* unmark all features for resetting later */
   clear_nameservers(); /* clear previous list of DNS servers */
-  /* Now just open an fd. The buffering isn't really needed... */
-  init_lexer();
+  if (!init_lexer())
+    return 0;
   yyparse();
-  fclose(yyin);
-  yyin = NULL;
+  deinit_lexer();
   feature_mark(); /* reset unmarked features */
   conf_already_read = 1;
   return 1;
