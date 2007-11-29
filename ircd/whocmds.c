@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Support functions for /WHO-like commands.
- * @version $Id: whocmds.c,v 1.25.2.2 2007/03/04 14:55:31 entrope Exp $
+ * @version $Id: whocmds.c,v 1.25.2.3 2007/10/30 01:53:33 entrope Exp $
  */
 #include "config.h"
 
@@ -277,32 +277,4 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
   *p1 = '\0';
   p1 = buf1;
   send_reply(sptr, fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, ++p1);
-}
-
-/** Count number of users who match \a mask.
- * @param[in] mask user\@host or user\@ip mask to check.
- * @return Count of matching users.
- */
-int
-count_users(char *mask)
-{
-  struct Client *acptr;
-  int count = 0;
-  char namebuf[NICKLEN + USERLEN + HOSTLEN + 3];
-  char ipbuf[NICKLEN + USERLEN + SOCKIPLEN + 3];
-
-  for (acptr = GlobalClientList; acptr; acptr = cli_next(acptr)) {
-    if (!IsUser(acptr))
-      continue;
-
-    ircd_snprintf(0, namebuf, sizeof(namebuf), "%s!%s@%s", cli_name(acptr),
-		  cli_user(acptr)->username, cli_user(acptr)->host);
-    ircd_snprintf(0, ipbuf, sizeof(ipbuf), "%s!%s@%s", cli_name(acptr),
-                  cli_user(acptr)->username, ircd_ntoa(&(cli_ip(acptr))));
-
-    if (!match(mask, namebuf) || !match(mask, ipbuf))
-      count++;
-  }
-
-  return count;
 }

@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h,v 1.55.2.2 2006/08/03 03:01:50 entrope Exp $
+ * @version $Id: channel.h,v 1.55.2.3 2007/11/05 03:01:34 entrope Exp $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
@@ -157,6 +157,7 @@ typedef enum ChannelGetType {
 #define LISTARG_TOPICLIMITS     0x0001
 #define LISTARG_SHOWSECRET      0x0002
 #define LISTARG_NEGATEWILDCARD  0x0004
+#define LISTARG_SHOWMODES       0x0008
 
 /**
  * Maximum acceptable lag time in seconds: A channel younger than

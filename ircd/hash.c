@@ -46,7 +46,7 @@
 
 /** @file
  * @brief Hash table management.
- * @version $Id: hash.c,v 1.18 2005/06/27 13:25:51 entrope Exp $
+ * @version $Id: hash.c,v 1.18.2.1 2007/11/05 03:01:34 entrope Exp $
  *
  * This file used to use some very complicated hash function.  Now it
  * uses CRC-32, but effectively remaps each input byte according to a
@@ -455,7 +455,17 @@ void list_next_channels(struct Client *cptr)
           && ((args->flags & LISTARG_SHOWSECRET)
               || ShowChannel(cptr, chptr)))
       {
-        send_reply(cptr, RPL_LIST, chptr->chname, chptr->users, chptr->topic);
+        if (args->flags & LISTARG_SHOWMODES) {
+          char modebuf[MODEBUFLEN];
+          char parabuf[MODEBUFLEN];
+
+          modebuf[0] = modebuf[1] = parabuf[0] = '\0';
+          channel_modes(cptr, modebuf, parabuf, sizeof(parabuf), chptr, NULL);
+          send_reply(cptr, RPL_LIST | SND_EXPLICIT, "%s %u %s %s :%s",
+                     chptr->chname, chptr->users, modebuf, parabuf, chptr->topic);
+        } else {
+          send_reply(cptr, RPL_LIST, chptr->chname, chptr->users, chptr->topic);
+        }
       }
     }
     /* If, at the end of the bucket, client sendq is more than half

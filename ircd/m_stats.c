@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_stats.c,v 1.31.2.3 2007/03/27 03:44:41 entrope Exp $
+ * $Id: m_stats.c,v 1.31.2.4 2007/11/17 14:21:02 entrope Exp $
  */
 
 /*
@@ -119,7 +119,7 @@ int
 m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   const struct StatDesc *sd;
-  char *param = 0;
+  char *param;
 
   /* If we didn't find a descriptor, send them help */
   if ((parc < 2) || !(sd = stats_find(parv[1])))
@@ -143,6 +143,12 @@ m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
        ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control)))))
     return send_reply(sptr, ERR_NOPRIVILEGES);
 
+  /* Check for extra parameter */
+  if ((sd->sd_flags & STAT_FLAG_VARPARAM) && parc > 3 && !EmptyString(parv[3]))
+    param = parv[3];
+  else
+    param = NULL;
+
   /* Ok, track down who's supposed to get this... */
   if (hunt_server_cmd(sptr, CMD_STATS, cptr, feature_int(FEAT_HIS_REMOTE),
 		      param ? "%s %C :%s" : "%s :%C", 2, parc, parv) !=
@@ -152,10 +158,6 @@ m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /* Check if they are a local user */
   if ((sd->sd_flags & STAT_FLAG_LOCONLY) && !MyUser(sptr))
     return send_reply(sptr, ERR_NOPRIVILEGES);
-
-  /* Check for extra parameter */
-  if ((sd->sd_flags & STAT_FLAG_VARPARAM) && parc > 3 && !EmptyString(parv[3]))
-    param = parv[3];
 
   assert(sd->sd_func != 0);
 
