@@ -19,7 +19,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 dnl
-dnl $Id: configure.in,v 1.34.2.2 2007/05/20 13:25:47 entrope Exp $
+dnl $Id: configure.in,v 1.34.2.3 2007/11/30 22:10:04 klmitch Exp $
 
 dnl Make sure we are in the correct directory (someone could have run
 dnl 'configure' with a wrong '--srcdir').
@@ -131,14 +131,6 @@ elif echo "" | $LEX -V -v --version > /dev/null 2>&1 ; then
 else
   AC_MSG_ERROR([Cannot use $LEX as flex.])
 fi
-
-if test -z "$LEXLIB" ; then
-  AC_MSG_FAILURE([Cannot find a library with yywrap() in, but flex was found.
-  It's possible the compiler you're using ($CC) is incompatible with the
-  installed library.])
-fi
-
-LIBS="$LEXLIB $LIBS"
 
 dnl YACC - ditto
 AC_PROG_YACC
