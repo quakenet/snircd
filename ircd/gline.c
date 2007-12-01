@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c,v 1.61.2.5 2007/10/30 01:53:33 entrope Exp $
+ * @version $Id: gline.c,v 1.61.2.6 2007/11/30 22:10:04 klmitch Exp $
  */
 #include "config.h"
 
@@ -453,10 +453,12 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
     }
     user = userhost;
     host = NULL;
-    tmp = count_realnames(userhost + 2);
-    if ((tmp >= feature_int(FEAT_GLINEMAXUSERCOUNT))
-        && !(flags & GLINE_OPERFORCE))
-      return send_reply(sptr, ERR_TOOMANYUSERS, tmp);
+    if (MyUser(sptr) || (IsUser(sptr) && flags & GLINE_LOCAL)) {
+      tmp = count_realnames(userhost + 2);
+      if ((tmp >= feature_int(FEAT_GLINEMAXUSERCOUNT))
+	  && !(flags & GLINE_OPERFORCE))
+	return send_reply(sptr, ERR_TOOMANYUSERS, tmp);
+    }
   } else {
     canon_userhost(userhost, &user, &host, "*");
     if (sizeof(uhmask) <

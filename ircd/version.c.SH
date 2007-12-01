@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: version.c.SH,v 1.7.2.4 2007/08/15 01:15:53 entrope Exp $
+# $Id: version.c.SH,v 1.7.2.5 2007/11/30 23:50:04 klmitch Exp $
 
 echo "Extracting ircd/version.c ..."
 
@@ -87,8 +87,8 @@ const char *infotext[] = {
 
 ( for file in ${srcdir}/ircd/*.[cly] ${srcdir}/ircd/version.c.SH ; do
     case `basename $file` in
-      ( version.c | y.tab.c | lex.yy.c | chattr.tab.c ) ;;
-      ( * ) echo $file ;;
+      version.c | y.tab.c | lex.yy.c | chattr.tab.c ) ;;
+      * ) echo $file ;;
     esac done ) | ./umkpasswd -5 >> version.c
 
 echo "    \"\"," >> version.c
