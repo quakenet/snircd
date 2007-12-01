@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Entry point and other initialization functions for the daemon.
- * @version $Id: ircd.c,v 1.91.2.4 2007/01/15 03:08:23 entrope Exp $
+ * @version $Id: ircd.c,v 1.91.2.5 2007/03/17 14:17:27 entrope Exp $
  */
 #include "config.h"
 
@@ -508,6 +508,9 @@ static void parse_command_line(int argc, char** argv) {
 	debuglevel = 0;
       debugmode = optarg;
       thisServer.bootopt |= BOOT_DEBUG;
+#ifndef DEBUGMODE
+      printf("WARNING: DEBUGMODE disabled; -x has no effect.\n");
+#endif
       break;
 
     default:

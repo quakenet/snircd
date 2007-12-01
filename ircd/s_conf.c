@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.4 2007/02/25 15:41:49 entrope Exp $
+ * @version $Id: s_conf.c,v 1.81.2.8 2007/04/05 01:52:39 entrope Exp $
  */
 #include "config.h"
 
@@ -223,7 +223,6 @@ void conf_parse_userhost(struct ConfItem *aconf, char *host)
     aconf->addrbits = addrbits;
   else
     aconf->addrbits = -1;
-  MyFree(host);
 }
 
 /** Copies a completed DNS query into its ConfItem.
@@ -658,6 +657,7 @@ struct ConfItem* find_conf_exact(const char* name, struct Client *cptr, int stat
     else if (!ipmask_check(&cli_ip(cptr), &tmp->address.addr, tmp->addrbits))
       continue;
     if ((tmp->status & CONF_OPERATOR)
+        && (MaxLinks(tmp->conn_class) > 0)
         && (tmp->clients >= MaxLinks(tmp->conn_class)))
       continue;
     return tmp;

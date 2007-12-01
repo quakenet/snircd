@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c,v 1.155.2.17 2007/01/23 02:23:34 entrope Exp $
+ * @version $Id: channel.c,v 1.155.2.18 2007/08/15 02:49:54 entrope Exp $
  */
 #include "config.h"
 
@@ -2278,12 +2278,15 @@ mode_invite_clear(struct Channel *chan)
 
 /* What we've done for mode_parse so far... */
 #define DONE_LIMIT	0x01	/**< We've set the limit */
-#define DONE_KEY	0x02	/**< We've set the key */
+#define DONE_KEY_ADD	0x02	/**< We've set the key */
 #define DONE_BANLIST	0x04	/**< We've sent the ban list */
 #define DONE_NOTOPER	0x08	/**< We've sent a "Not oper" error */
 #define DONE_BANCLEAN	0x10	/**< We've cleaned bans... */
-#define DONE_UPASS	0x20	/**< We've set user pass */
-#define DONE_APASS	0x40	/**< We've set admin pass */
+#define DONE_UPASS_ADD	0x20	/**< We've set user pass */
+#define DONE_APASS_ADD	0x40	/**< We've set admin pass */
+#define DONE_KEY_DEL    0x80    /**< We've removed the key */
+#define DONE_UPASS_DEL  0x100   /**< We've removed the user pass */
+#define DONE_APASS_DEL  0x200   /**< We've removed the admin pass */
 
 struct ParseState {
   struct ModeBuf *mbuf;
@@ -2436,9 +2439,19 @@ mode_parse_key(struct ParseState *state, int *flag_p)
     return;
   }
 
-  if (state->done & DONE_KEY) /* allow key to be set only once */
-    return;
-  state->done |= DONE_KEY;
+  /* allow removing and then adding key, but not adding and then removing */
+  if (state->dir == MODE_ADD)
+  {
+    if (state->done & DONE_KEY_ADD)
+      return;
+    state->done |= DONE_KEY_ADD;
+  }
+  else
+  {
+    if (state->done & (DONE_KEY_ADD | DONE_KEY_DEL))
+      return;
+    state->done |= DONE_KEY_DEL;
+  }
 
   /* clean up the key string */
   clean_key(t_str);
@@ -2538,9 +2551,19 @@ mode_parse_upass(struct ParseState *state, int *flag_p)
     return;
   }
 
-  if (state->done & DONE_UPASS) /* allow upass to be set only once */
-    return;
-  state->done |= DONE_UPASS;
+  /* allow removing and then adding upass, but not adding and then removing */
+  if (state->dir == MODE_ADD)
+  {
+    if (state->done & DONE_UPASS_ADD)
+      return;
+    state->done |= DONE_UPASS_ADD;
+  }
+  else
+  {
+    if (state->done & (DONE_UPASS_ADD | DONE_UPASS_DEL))
+      return;
+    state->done |= DONE_UPASS_DEL;
+  }
 
   /* clean up the upass string */
   clean_key(t_str);
@@ -2675,9 +2698,19 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
     }
   }
 
-  if (state->done & DONE_APASS) /* allow apass to be set only once */
-    return;
-  state->done |= DONE_APASS;
+  /* allow removing and then adding apass, but not adding and then removing */
+  if (state->dir == MODE_ADD)
+  {
+    if (state->done & DONE_APASS_ADD)
+      return;
+    state->done |= DONE_APASS_ADD;
+  }
+  else
+  {
+    if (state->done & (DONE_APASS_ADD | DONE_APASS_DEL))
+      return;
+    state->done |= DONE_APASS_DEL;
+  }
 
   /* clean up the apass string */
   clean_key(t_str);
@@ -3186,7 +3219,7 @@ mode_process_clients(struct ParseState *state)
        * Otherwise, get state->member's oplevel+1.
        */
       if (state->cli_change[i].oplevel <= MAXOPLEVEL) {
-        if (IsService(cli_user(state->cli_change[i].client)->server)) {
+        if ((IsChannelService(state->sptr) && IsService(cli_user(state->sptr)->server)) || (IsService(state->sptr))) {
           SetOpLevel(member, state->cli_change[i].oplevel);
         } else {
           SetOpLevel(member, state->cli_change[i].oplevel > MINOPLEVEL ? state->cli_change[i].oplevel : MINOPLEVEL);
@@ -3474,13 +3507,13 @@ mode_parse(struct ModeBuf *mbuf, struct Client *cptr, struct Client *sptr,
     if (state.chptr->mode.limit && !(state.done & DONE_LIMIT))
       modebuf_mode_uint(state.mbuf, MODE_DEL | MODE_LIMIT,
 			state.chptr->mode.limit);
-    if (*state.chptr->mode.key && !(state.done & DONE_KEY))
+    if (*state.chptr->mode.key && !(state.done & DONE_KEY_DEL))
       modebuf_mode_string(state.mbuf, MODE_DEL | MODE_KEY,
 			  state.chptr->mode.key, 0);
-    if (*state.chptr->mode.upass && !(state.done & DONE_UPASS))
+    if (*state.chptr->mode.upass && !(state.done & DONE_UPASS_DEL))
       modebuf_mode_string(state.mbuf, MODE_DEL | MODE_UPASS,
 			  state.chptr->mode.upass, 0);
-    if (*state.chptr->mode.apass && !(state.done & DONE_APASS))
+    if (*state.chptr->mode.apass && !(state.done & DONE_APASS_DEL))
       modebuf_mode_string(state.mbuf, MODE_DEL | MODE_APASS,
 			  state.chptr->mode.apass, 0);
   }

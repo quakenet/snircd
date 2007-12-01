@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c,v 1.37.2.21 2007/01/16 01:21:37 entrope Exp $
+ * @version $Id: s_auth.c,v 1.37.2.25 2007/08/09 03:46:20 entrope Exp $
  */
 #include "config.h"
 
@@ -1882,6 +1882,25 @@ static int iauth_cmd_kill(struct IAuth *iauth, struct Client *cli,
   return 0;
 }
 
+/** Change a client's usermode.
+ * @param[in] iauth Active IAuth session.
+ * @param[in] cli Client referenced by command.
+ * @param[in] parc Number of parameters (at least one).
+ * @param[in] params Usermode arguments for client (with the first
+ *   starting with '+').
+ * @return Zero.
+ */
+static int iauth_cmd_usermode(struct IAuth *iauth, struct Client *cli,
+                              int parc, char **params)
+{
+  if (params[0][0] == '+')
+  {
+    set_user_mode(cli, cli, parc + 2, params - 2, ALLOWMODES_ANY);
+  }
+  return 0;
+}
+
+
 /** Send a challenge string to the client.
  * @param[in] iauth Active IAuth session.
  * @param[in] cli Client referenced by command.
@@ -1926,6 +1945,7 @@ static void iauth_parse(struct IAuth *iauth, char *message)
   case 'u': handler = iauth_cmd_username_bad; has_cli = 1; break;
   case 'N': handler = iauth_cmd_hostname; has_cli = 1; break;
   case 'I': handler = iauth_cmd_ip_address; has_cli = 1; break;
+  case 'M': handler = iauth_cmd_usermode; has_cli = 1; break;
   case 'C': handler = iauth_cmd_challenge; has_cli = 1; break;
   case 'D': handler = iauth_cmd_done_client; has_cli = 1; break;
   case 'R': handler = iauth_cmd_done_account; has_cli = 1; break;
@@ -1968,7 +1988,9 @@ static void iauth_parse(struct IAuth *iauth, char *message)
   } else {
     /* Try to find the client associated with the request. */
     id = strtol(params[0], NULL, 10);
-    if (id < 0 || id > HighestFd || !(cli = LocalClientArray[id]))
+    if (parc < 3)
+      sendto_iauth(NULL, "E Missing :Need <id> <ip> <port>");
+    else if (id < 0 || id > HighestFd || !(cli = LocalClientArray[id]))
       /* Client no longer exists (or never existed). */
       sendto_iauth(NULL, "E Gone :[%s %s %s]", params[0], params[1],
 		   params[2]);
@@ -2157,7 +2179,6 @@ void report_iauth_conf(struct Client *cptr, const struct StatDesc *sd, char *par
         send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":%s",
                    link->value.cp);
     }
-    send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":End of IAuth configuration.");
 }
 
 /** Report active iauth's statistics to \a cptr.
@@ -2174,5 +2195,4 @@ void report_iauth_conf(struct Client *cptr, const struct StatDesc *sd, char *par
         send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":%s",
                    link->value.cp);
     }
-    send_reply(cptr, SND_EXPLICIT | RPL_STATSDEBUG, ":End of IAuth statistics.");
 }

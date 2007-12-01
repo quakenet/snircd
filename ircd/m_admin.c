@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_admin.c,v 1.13 2004/12/11 05:13:46 klmitch Exp $
+ * $Id: m_admin.c,v 1.13.2.1 2007/05/20 13:02:51 entrope Exp $
  */
 
 /*
@@ -87,6 +87,7 @@
 #include "ircd_features.h"
 #include "ircd_log.h"
 #include "ircd_reply.h"
+#include "match.h"
 #include "msg.h"
 #include "numeric.h"
 #include "numnicks.h"
@@ -116,12 +117,10 @@ static int send_admin_info(struct Client* sptr)
  */
 int m_admin(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  struct Client *acptr;
-
   assert(0 != cptr);
   assert(cptr == sptr);
 
-  if (parc > 1  && (!(acptr = find_match_server(parv[1])) || !IsMe(acptr)))
+  if (parc > 1  && match(parv[1], cli_name(&me)))
     return send_reply(sptr, ERR_NOPRIVILEGES);
 
   return send_admin_info(sptr);

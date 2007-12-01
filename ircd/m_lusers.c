@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_lusers.c,v 1.9 2004/12/11 05:13:47 klmitch Exp $
+ * $Id: m_lusers.c,v 1.9.2.1 2007/07/14 02:40:01 isomer Exp $
  */
 
 /*
@@ -113,7 +113,10 @@ int m_lusers(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
                         "%s :%C", 2, parc, parv) != HUNTED_ISME)
       return 0;
 
-  send_reply(sptr, RPL_LUSERCLIENT, UserStats.clients - UserStats.inv_clients,
+  assert(UserStats.inv_clients <= UserStats.clients + UserStats.unknowns);
+
+  send_reply(sptr, RPL_LUSERCLIENT, 
+	     UserStats.clients - UserStats.inv_clients + UserStats.unknowns,
 	     UserStats.inv_clients, UserStats.servers);
   if (longoutput && UserStats.opers)
     send_reply(sptr, RPL_LUSEROP, UserStats.opers);
