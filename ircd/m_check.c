@@ -187,7 +187,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
   struct Client *acptr;
 
   char outbuf[BUFSIZE], ustat[64];
-  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, c = 0, authed = 0;
+  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0;
 
   if (flags & CHECK_SHOWUSERS) { 
     send_reply(sptr, RPL_DATASTR, "Users (@ = op, + = voice)");
