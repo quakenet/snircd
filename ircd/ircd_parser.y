@@ -1184,32 +1184,40 @@ spoofitems '}' ';'
 {
   struct irc_in_addr ip;
   char bits;
+  int valid = 0;
 
   if (spoof->username == NULL && spoof->realhost) {
     parse_error("Username missing in spoofhost.");
   } else if (spoof->realhost == NULL && spoof->username) {
     parse_error("Realhost missing in spoofhost.");
-  }
+  } else 
+    valid = 1;
 
-  if (spoof->realhost) {
-    if (!string_has_wildcards(spoof->realhost)) {
-      if (ipmask_parse(spoof->realhost, &ip, &bits) != 0) {
-        spoof->address = ip;
-        spoof->bits = bits;
-        spoof->flags = SLINE_FLAGS_IP;
-      } else {
-        Debug((DEBUG_DEBUG, "S-Line: \"%s\" appears not to be a valid IP address, might be wildcarded.", spoof->realhost));
+  if (valid) {
+    if (spoof->realhost) {
+      if (!string_has_wildcards(spoof->realhost)) {
+        if (ipmask_parse(spoof->realhost, &ip, &bits) != 0) {
+          spoof->address = ip;
+          spoof->bits = bits;
+          spoof->flags = SLINE_FLAGS_IP;
+        } else {
+          Debug((DEBUG_DEBUG, "S-Line: \"%s\" appears not to be a valid IP address, might be wildcarded.", spoof->realhost));
+          spoof->flags = SLINE_FLAGS_HOSTNAME;
+        }
+      } else
         spoof->flags = SLINE_FLAGS_HOSTNAME;
-      }
     } else
-      spoof->flags = SLINE_FLAGS_HOSTNAME;
-  } else
-    spoof->flags = 0;
+      spoof->flags = 0;
 
-
-  spoof->next = GlobalSList;
-  GlobalSList = spoof;
-
+    spoof->next = GlobalSList;
+    GlobalSList = spoof;
+  } else {
+    MyFree(spoof->spoofhost);
+    MyFree(spoof->passwd);
+    MyFree(spoof->realhost);
+    MyFree(spoof->username);
+    MyFree(spoof);
+  }
   spoof = NULL;
 };
 
