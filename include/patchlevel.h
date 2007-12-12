@@ -18,7 +18,7 @@
  * $Id: patchlevel.h,v 1.23.2.22 2007/03/09 23:49:31 entrope Exp $
  *
  */
-#define PATCHLEVEL "10+snircd(1.3.2)"
+#define PATCHLEVEL "10+snircd(1.3.3)"
 
 #define RELEASE ".12."
 
