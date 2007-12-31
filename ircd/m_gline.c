@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c,v 1.26.2.9 2007/10/30 01:19:52 entrope Exp $
+ * $Id: m_gline.c,v 1.26.2.10 2007/12/14 02:37:48 klmitch Exp $
  */
 
 /*
@@ -346,6 +346,18 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   assert(action != GLINE_LOCAL_ACTIVATE);
   assert(action != GLINE_LOCAL_DEACTIVATE);
   assert(action != GLINE_MODIFY);
+
+  if (!expire) { /* Cannot *add* a G-line we don't have, but try hard */
+    Debug((DEBUG_DEBUG, "Propagating G-line %s for G-line we don't have",
+	   action == GLINE_ACTIVATE ? "activation" : "deactivation"));
+
+    /* propagate the G-line, even though we don't have it */
+    sendcmdto_serv_butone(sptr, CMD_GLINE, cptr, "* %c%s %Tu",
+			  action == GLINE_ACTIVATE ? '+' : '-',
+			  mask, lastmod);
+
+    return 0;
+  }
 
   return gline_add(cptr, sptr, mask, reason, expire, lastmod, lifetime,
 		   flags | ((action == GLINE_ACTIVATE) ? GLINE_ACTIVE : 0));

@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: supported.h,v 1.20.2.2 2007/05/20 13:02:51 entrope Exp $
+ * $Id: supported.h,v 1.20.2.3 2007/12/28 15:52:43 klmitch Exp $
  *
  * Description: This file has the featureset that ircu announces on connecting
  *              a client.  It's in this .h because it's likely to be appended
@@ -65,7 +65,7 @@
 #define FEATURESVALUES2 NICKLEN, TOPICLEN, AWAYLEN, TOPICLEN, \
                         feature_int(FEAT_CHANNELLEN), CHANNELLEN, \
                         (feature_bool(FEAT_LOCAL_CHANNELS) ? "#&" : "#"), "(ov)@+", "@+", \
-                        (feature_bool(FEAT_OPLEVELS) ? "b,AkU,l,imnpstrDd" : "b,k,l,imnpstrDd"), \
+                        (feature_bool(FEAT_OPLEVELS) ? "b,AkU,l,imnpstrDdR" : "b,k,l,imnpstrDdR"), \
                         "rfc1459", feature_str(FEAT_NETWORK)
 
 #endif /* INCLUDED_supported_h */
