@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h,v 1.55.2.3 2007/11/05 03:01:34 entrope Exp $
+ * @version $Id: channel.h,v 1.55.2.4 2007/12/28 15:52:43 klmitch Exp $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
@@ -101,9 +101,11 @@ struct Client;
 #define MODE_LIMIT      0x0400		/**< +l Limit */
 #define MODE_REGONLY    0x0800  	/**< Only +r users may join */
 #define MODE_DELJOINS   0x1000  	/**< New join messages are delayed */
-#define MODE_NOCOLOUR   0x2000          /**< No mIRC/ANSI colors/bold */
-#define MODE_NOCTCP     0x4000          /**< No channel CTCPs */
-#define MODE_NONOTICE   0x8000          /**< No channel notices */
+#define MODE_REGISTERED 0x2000          /**< Channel marked as registered
+                                         * (for future semantic expansion) */
+#define MODE_NOCOLOUR   0x4000          /**< No mIRC/ANSI colors/bold */
+#define MODE_NOCTCP     0x8000          /**< No channel CTCPs */
+#define MODE_NONOTICE   0x10000          /**< No channel notices */
 #define MODE_SAVE	0x20000		/**< save this mode-with-arg 'til 
 					 * later */
 #define MODE_FREE	0x40000 	/**< string needs to be passed to 
@@ -123,7 +125,7 @@ struct Client;
 #define MODE_WPARAS     (MODE_CHANOP|MODE_VOICE|MODE_BAN|MODE_KEY|MODE_LIMIT|MODE_APASS|MODE_UPASS)
 
 /** Available Channel modes */
-#define infochanmodes feature_bool(FEAT_OPLEVELS) ? "AbiklmnopstUvrDcCNuMT" : "biklmnopstvrDcCNuMT"
+#define infochanmodes feature_bool(FEAT_OPLEVELS) ? "AbiklmnopstUvrDRcCNuMT" : "biklmnopstvrDRcCNuMT"
 /** Available Channel modes that take parameters */
 #define infochanmodeswithparams feature_bool(FEAT_OPLEVELS) ? "AbkloUv" : "bklov"
 

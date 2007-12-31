@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c,v 1.61.2.6 2007/11/30 22:10:04 klmitch Exp $
+ * @version $Id: gline.c,v 1.61.2.7 2007/12/14 02:37:48 klmitch Exp $
  */
 #include "config.h"
 
@@ -154,6 +154,8 @@ make_gline(char *nick, char *user, char *host, char *reason, time_t expire, time
 	   time_t lifetime, unsigned int flags)
 {
   struct Gline *gline;
+
+  assert(0 != expire);
 
   gline = (struct Gline *)MyMalloc(sizeof(struct Gline)); /* alloc memory */
   assert(0 != gline);
