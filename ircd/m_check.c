@@ -47,14 +47,15 @@
 
 #include <string.h>
 
-#define CHECK_CHECKCHAN 0x01 /* -c */
-#define CHECK_SHOWUSERS 0x02 /* ! -u */
-#define CHECK_OPSONLY   0x04 /* -o */
-#define CHECK_SHOWIPS   0x08 /* -i */
-#define CHECK_CIDRMASK  0x10 /* automatically detected when performing a hostmask /CHECK */
-#define CHECK_OPLEVELS  0x20 /* -l */
-#define CHECK_CLONES    0x40 /* -C */
-
+#define CHECK_CHECKCHAN  0x01 /* -c */
+#define CHECK_SHOWUSERS  0x02 /* ! -u */
+#define CHECK_OPSONLY    0x04 /* -o */
+#define CHECK_SHOWIPS    0x08 /* -i */
+#define CHECK_CIDRMASK   0x10 /* automatically detected when performing a hostmask /CHECK */
+#define CHECK_OPLEVELS   0x20 /* -l */
+#define CHECK_CLONES     0x40 /* -C */
+#define CHECK_SHOWSERVER 0x80 /* -s */
+#define CHECK_SHOWHOSTIP 0x100 /* -I */
 /*
  * - ASUKA ---------------------------------------------------------------------
  * This is the implimentation of the CHECK function for Asuka.
@@ -75,7 +76,8 @@
  * -u: Hide users when checking a channel.
  * -l: Show oplevels when checking a channel.
  * -C: Perform clone count when checking a channel.
- * 
+ * -s: show server user is on when checking a channel. 
+ *
  * <hostmask> can be of the form host, user@host, nick!user@host, 
  * with host being host.domain.cc, 127.0.0.1 or 127.0.0.0/24.
  * Wildcards are supported.
@@ -117,7 +119,12 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
       case 'C':
         flags |= CHECK_CLONES;
         break;
-      
+      case 's':
+        flags |= CHECK_SHOWSERVER;
+	break;
+      case 'I':
+        flags |= CHECK_SHOWHOSTIP;
+	break;
       default:
         /* might want to raise some sort of error here? */
         break;
@@ -186,7 +193,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
   struct Ban *ban;
   struct Client *acptr;
 
-  char outbuf[BUFSIZE], ustat[64];
+  char outbuf[BUFSIZE], outbuf2[BUFSIZE], ustat[64];
   int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0;
 
   if (flags & CHECK_SHOWUSERS) { 
@@ -219,9 +226,9 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     if (chptr && is_chan_op(acptr, chptr)) {
       if (flags & CHECK_OPLEVELS) {
         if (c) {
-          ircd_snprintf(0, ustat, sizeof(ustat), "%2d %hu@", c, OpLevel(lp));
+          ircd_snprintf(0, ustat, sizeof(ustat), "%2d %3hu@", c, OpLevel(lp));
         } else {
-          ircd_snprintf(0, ustat, sizeof(ustat), "%hu@", OpLevel(lp));
+	  ircd_snprintf(0, ustat, sizeof(ustat), "%3hu@", OpLevel(lp));
         }
       } else {
         if (c) {
@@ -235,17 +242,17 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     }
     else if (chptr && has_voice(acptr, chptr)) {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d +", c);
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s+", c, (flags & CHECK_OPLEVELS) ? "   " : "");
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), "+");
+        ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   +" : "+");
       }
       vcntr++;
     }
     else {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d ", c);
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s", c, (flags & CHECK_OPLEVELS) ? "   " : "" );
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), " ", c);
+        ircd_snprintf(0, ustat, sizeof(ustat), " %s", (flags & CHECK_OPLEVELS) ? "   " : "" );
       }
     }
 
@@ -255,8 +262,11 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
     if ((flags & CHECK_SHOWUSERS) || ((flags & CHECK_OPSONLY) && opped)) {
       ircd_snprintf(0, outbuf, sizeof(outbuf), "%s%c", acptr->cli_info, COLOR_OFF);
+      if (flags & CHECK_SHOWHOSTIP ) {
+        ircd_snprintf(0, outbuf2, sizeof(outbuf2), " [%s]", ircd_ntoa(&(cli_ip(acptr))));
+      }
       send_reply(sptr, RPL_CHANUSER, ustat, acptr->cli_name, cli_user(acptr)->realusername,
-            ((flags & CHECK_SHOWIPS) ? ircd_ntoa(&(cli_ip(acptr))) : cli_user(acptr)->realhost), outbuf,
+            ((flags & CHECK_SHOWIPS) ? ircd_ntoa(&(cli_ip(acptr))) : cli_user(acptr)->realhost), (flags & CHECK_SHOWHOSTIP) ? outbuf2 : "", (flags & CHECK_SHOWSERVER) ? cli_name(cli_user(acptr)->server) : outbuf,
             (c ? cli_user(acptr)->account : ""));
     }
 
