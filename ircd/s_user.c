@@ -1033,8 +1033,8 @@ int set_hostmask(struct Client *cptr, char *hostmask, char *password)
  
   /* MODE_DEL: restore original hostmask */
   if (EmptyString(hostmask)) {
-    /* is already sethost'ed? */
-    if (IsSetHost(cptr)) {
+    /* is already sethost'ed? and only opers can remove a sethost */
+    if (IsSetHost(cptr) && IsAnOper(cptr)) {
       restore = 1;
       sendcmdto_common_channels_butone(cptr, CMD_QUIT, cptr, ":Host change");
       /* If they are +rx, we need to return to their +x host, not their "real" host */
