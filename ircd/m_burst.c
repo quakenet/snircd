@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_burst.c,v 1.40.2.5 2007/05/20 15:01:19 entrope Exp $
+ * $Id: m_burst.c,v 1.40.2.6 2008/01/03 00:07:21 klmitch Exp $
  */
 
 /*
@@ -507,10 +507,13 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		  do {
 		    level_increment = 10 * level_increment + *ptr++ - '0';
 		  } while (IsDigit(*ptr));
+		  --ptr;
 		  oplevel += level_increment;
 		}
-		else /* I don't recognize that flag */
+		else { /* I don't recognize that flag */
+		  protocol_violation(sptr, "Invalid flag '%c' in nick part of burst", *ptr);
 		  break; /* so stop processing */
+		}
 	      }
 	    }
 	  }
