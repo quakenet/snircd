@@ -349,6 +349,7 @@ int register_user(struct Client *cptr, struct Client *sptr)
   char*            tmpstr;
   struct User*     user = cli_user(sptr);
   char             ip_base64[25];
+  int ipv6andopername[] = {FLAG_IPV6,FLAG_OPERNAME};
 
   user->last = CurrentTime;
   parv[0] = cli_name(sptr);
@@ -468,7 +469,6 @@ int register_user(struct Client *cptr, struct Client *sptr)
     ++UserStats.opers;
 
   tmpstr = umode_str(sptr, 0);
-  int ipv6andopername[] = {FLAG_IPV6,FLAG_OPERNAME};
 
   /* Do not send oper name and send full IP address to IPv6-grokking servers. */
   sendcmdto_flag_serv_butone(user->server, CMD_NICK, cptr,
