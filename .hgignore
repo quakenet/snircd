@@ -1,0 +1,22 @@
+syntax: glob
+Makefile
+*.o
+config.h
+config.log
+config.status
+configure.lineno
+ircd/chattr.tab.c
+ircd/convert-conf
+ircd/ircd
+ircd/lex.yy.c
+ircd/table_gen
+ircd/test/ircd_chattr_t
+ircd/test/ircd_in_addr_t
+ircd/test/ircd_match_t
+ircd/test/ircd_string_t
+ircd/umkpasswd
+ircd/version.c
+ircd/y.tab.c
+ircd/y.tab.h
+stamp-h
+
