@@ -160,7 +160,7 @@ int ms_wallchops(struct Client* cptr, struct Client* sptr, int parc, char* parv[
     return 0;
 
   if (!IsLocalChannel(parv[1]) && (chptr = FindChannel(parv[1]))) {
-    if (client_can_send_to_channel(sptr, chptr, 0) && !(chptr->mode.mode & MODE_NONOTICE)) {
+    if (client_can_send_to_channel(sptr, chptr, 0)) {
       sendcmdto_channel_butone(sptr, CMD_WALLCHOPS, chptr, cptr,
 			       SKIP_DEAF | SKIP_BURST | SKIP_NONOPS,
 			       "%H :%s", chptr, parv[parc - 1]);
