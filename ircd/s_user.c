@@ -1429,7 +1429,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
           ClearParanoid(sptr);
 	break;
       case 'r':
-	if (what == MODE_ADD) {
+	if ((what == MODE_ADD) && *(p + 1)) {
 	  account = *(++p);
 	  SetAccount(sptr);
 	}
