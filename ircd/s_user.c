@@ -361,10 +361,20 @@ int register_user(struct Client *cptr, struct Client *sptr)
 
     Count_unknownbecomesclient(sptr, UserStats);
 
-    if (MyConnect(sptr) && feature_bool(FEAT_AUTOINVISIBLE))
+    /*
+     * Set user's initial modes
+     */
+    tmpstr = (char*)client_get_default_umode(sptr);
+    if (tmpstr) {
+      char *umodev[] = { NULL, NULL, NULL, NULL };
+      umodev[2] = tmpstr;
+      set_user_mode(cptr, sptr, 3, umodev, ALLOWMODES_ANY);
+    }
+
+    if (feature_bool(FEAT_AUTOINVISIBLE))
       SetInvisible(sptr);
     
-    if(MyConnect(sptr) && feature_bool(FEAT_SETHOST_AUTO)) {
+    if(feature_bool(FEAT_SETHOST_AUTO)) {
       if (conf_check_slines(sptr)) {
         send_reply(sptr, RPL_USINGSLINE);
         SetSetHost(sptr);
@@ -401,16 +411,6 @@ int register_user(struct Client *cptr, struct Client *sptr)
                            cli_info(sptr), NumNick(cptr) /* two %s's */);
 
     IPcheck_connect_succeeded(sptr);
-    /*
-     * Set user's initial modes
-     */
-    tmpstr = (char*)client_get_default_umode(sptr);
-    if (tmpstr) {
-      char *umodev[] = { NULL, NULL, NULL, NULL };
-      umodev[2] = tmpstr;
-      set_user_mode(cptr, sptr, 1, umodev, ALLOWMODES_ANY);
-    }
-
   }
   else {
     struct Client *acptr = user->server;
@@ -445,13 +445,6 @@ int register_user(struct Client *cptr, struct Client *sptr)
       sendcmdto_one(&me, CMD_KILL, sptr, "%C :%s (Too many connections from your host -- Ghost)",
                     sptr, cli_name(&me));
       return exit_client(cptr, sptr, &me,"Too many connections from your host -- throttled");
-    }
-
-    if(MyConnect(sptr) && feature_bool(FEAT_SETHOST_AUTO)) {
-      if (conf_check_slines(sptr)) {
-        send_reply(sptr, RPL_USINGSLINE);
-        SetSetHost(sptr);
-      }
     }
 
     SetUser(sptr);
