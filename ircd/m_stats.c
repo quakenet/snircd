@@ -135,12 +135,9 @@ m_stats(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
    * This checks cptr rather than sptr so that a local oper may send
    * /stats queries to other servers.
    */
-  if ((IsAnOper(cptr) && !HasPriv(cptr, PRIV_SERVERINFO) &&
+  if (!(IsPrivileged(cptr) && HasPriv(cptr, PRIV_SERVERINFO)) && 
       ((sd->sd_flags & STAT_FLAG_OPERONLY) ||
-       ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control)))) ||
-     (!IsPrivileged(cptr) &&
-      ((sd->sd_flags & STAT_FLAG_OPERONLY) ||
-       ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control)))))
+       ((sd->sd_flags & STAT_FLAG_OPERFEAT) && feature_bool(sd->sd_control)))) 
     return send_reply(sptr, ERR_NOPRIVILEGES);
 
   /* Check for extra parameter */

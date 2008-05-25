@@ -214,7 +214,7 @@ static void do_whois(struct Client* sptr, struct Client *acptr, int parc)
     if (IsAccount(acptr))
       send_reply(sptr, RPL_WHOISACCOUNT, name, user->account);
 
-    if ((HasHiddenHost(acptr) || HasSetHost(acptr)) && ((IsAnOper(sptr) && HasPriv(sptr, PRIV_BYPASS_PRIVACY)) || acptr == sptr))
+    if ((HasHiddenHost(acptr) || HasSetHost(acptr)) && ((IsAnOper(sptr) && HasPriv(sptr, PRIV_USER_PRIVACY)) || acptr == sptr))
       send_reply(sptr, RPL_WHOISACTUALLY, name, user->realusername,
                  user->realhost, ircd_ntoa(&cli_ip(acptr)));
 
@@ -226,7 +226,7 @@ static void do_whois(struct Client* sptr, struct Client *acptr, int parc)
      */
 
     if (MyConnect(acptr) &&
-        ((IsAnOper(sptr) && HasPriv(sptr, PRIV_BYPASS_PRIVACY)) ||
+        ((IsAnOper(sptr) && HasPriv(sptr, PRIV_USER_PRIVACY)) ||
          (!IsNoIdle(acptr) && (!feature_bool(FEAT_HIS_WHOIS_IDLETIME) ||
                               sptr == acptr || parc >= 3))))
        send_reply(sptr, RPL_WHOISIDLE, name, CurrentTime - user->last,

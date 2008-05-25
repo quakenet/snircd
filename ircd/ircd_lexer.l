@@ -164,7 +164,8 @@ static struct lexer_token {
   { "route", TPRIV_ROUTE },
   { "routeinfo", TPRIV_ROUTEINFO },
   { "serverinfo", TPRIV_SERVERINFO },
-  { "bypass_privacy", TPRIV_BYPASS_PRIVACY },
+  { "user_privacy", TPRIV_USER_PRIVACY },
+  { "channel_privacy", TPRIV_CHANNEL_PRIVACY },
   { NULL, 0 }
 };
 static int ntokens;

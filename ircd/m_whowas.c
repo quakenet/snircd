@@ -138,7 +138,7 @@ int m_whowas(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       {
 	send_reply(sptr, RPL_WHOWASUSER, temp->name, temp->username,
 		   temp->hostname, temp->realname);
-        if ((IsAnOper(sptr) && HasPriv(sptr, PRIV_BYPASS_PRIVACY)) && temp->realhost)
+        if ((IsAnOper(sptr) && HasPriv(sptr, PRIV_USER_PRIVACY)) && temp->realhost)
           send_reply(sptr, RPL_WHOISACTUALLY, temp->name, temp->username, temp->realhost, "<untracked>");
         send_reply(sptr, RPL_WHOISSERVER, temp->name,
                    (feature_bool(FEAT_HIS_WHOIS_SERVERNAME) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO)))) ?

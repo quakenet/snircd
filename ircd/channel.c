@@ -856,7 +856,7 @@ void channel_modes(struct Client *cptr, char *mbuf, char *pbuf, int buflen,
     *mbuf++ = 'k';
     if (previous_parameter)
       strcat(pbuf, " ");
-    if (is_chan_op(cptr, chptr) || IsServer(cptr) || (IsOper(cptr) && HasPriv(cptr, PRIV_BYPASS_PRIVACY))) {
+    if (is_chan_op(cptr, chptr) || IsServer(cptr) || (IsOper(cptr) && HasPriv(cptr, PRIV_CHANNEL_PRIVACY))) {
       strcat(pbuf, chptr->mode.key);
     } else
       strcat(pbuf, "*");

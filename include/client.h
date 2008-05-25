@@ -139,7 +139,8 @@ enum Priv
     PRIV_CLOSE,          /* oper can use /close */
     PRIV_ROUTE,          /* oper can use /connect/squit NOTE: you need serverinfo priv to do remote connect */
     PRIV_ROUTEINFO,      /* oper can use /map, /trace, /asll, /links and view jupe list */
-    PRIV_BYPASS_PRIVACY,  /* oper can bypass user privacy +x etc gives i.e. see real ip's */
+    PRIV_USER_PRIVACY,  /* oper can bypass user privacy +x etc gives i.e. see real ip's */
+    PRIV_CHANNEL_PRIVACY, /* oper can bypass channel privacy i.e. can see modes on channels they are not on and channel keys */ 
     PRIV_SERVERINFO,     /* oper can use /get, /stats, /hash, retrieve remote information */
     PRIV_LAST_PRIV /**< number of privileges */
   };

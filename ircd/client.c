@@ -243,7 +243,8 @@ static struct {
   P(FORCE_OPMODE),   P(FORCE_LOCAL_OPMODE), P(APASS_OPMODE),
   P(CHANSERV),       P(XTRA_OPER),      P(NOIDLE),        P(FREEFORM),
   P(PARANOID),       P(CHECK),          P(WALL),          P(CLOSE),
-  P(ROUTE),          P(ROUTEINFO),      P(SERVERINFO),    P(BYPASS_PRIVACY),
+  P(ROUTE),          P(ROUTEINFO),      P(SERVERINFO),    P(CHANNEL_PRIVACY),
+  P(USER_PRIVACY),
 #undef P
   { 0, 0 }
 };
