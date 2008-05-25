@@ -37,6 +37,7 @@
 #include "list.h"
 #include "listener.h"
 #include "match.h"
+#include "msg.h"
 #include "numeric.h"
 #include "numnicks.h"
 #include "querycmds.h"
@@ -94,6 +95,14 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
   if (parc < 2) {
     send_reply(sptr, ERR_NEEDMOREPARAMS, "CHECK");
     return 0;
+  }
+
+  if ( parc>=4 ||
+      (parc==3 && parv[2][0] != '-')) {
+    /* remote query */
+    if (hunt_server_cmd(sptr, CMD_CHECK, cptr,  0, parc==4 ? "%C %s %s" : "%C %s", 1, parc, parv) != HUNTED_ISME)
+      return 0;
+    parv++; parc--;
   }
 
   /* This checks to see if any flags have been supplied */

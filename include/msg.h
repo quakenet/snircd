@@ -260,8 +260,9 @@ struct Client;
 #define TOK_SERVSET             "SERVSET"
 #define CMD_SERVSET		MSG_SERVSET, TOK_SERVSET
 
-#define MSG_CHECK       "CHECK"
-#define TOK_CHECK       "CC"
+#define MSG_CHECK               "CHECK"
+#define TOK_CHECK               "CC"
+#define CMD_CHECK               MSG_CHECK, TOK_CHECK
 
 #define MSG_REHASH              "REHASH"        /* REHA */
 #define TOK_REHASH              "REHASH"
