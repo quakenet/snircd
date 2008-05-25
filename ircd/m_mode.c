@@ -134,7 +134,8 @@ m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   member = find_member_link(chptr, sptr);
 
-  if (!member) {
+  /* We don't want mode requests from non-members, prolly to counter ban evasion. Allow channel-privacy opers and opers overriding a local chan */ 
+  if (! (member || HasPriv(sptr, PRIV_CHANNEL_PRIVACY) || (IsLocalChannel(chptr->channame) && HasPriv(sptr, PRIV_MODE_LCHAN))))
     send_reply(sptr, ERR_NOTONCHANNEL, chptr->chname);
     return 0;
   }
