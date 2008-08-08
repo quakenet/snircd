@@ -282,6 +282,9 @@ do_gline(struct Client *cptr, struct Client *sptr, struct Gline *gline)
                              get_client_name(acptr, SHOW_IP));
 
         /* and get rid of him */
+        /* WARNING: code in exit_client() relies on the quit message starting with
+         * G-lined or K-lined for HIS purposes
+         */
         if ((tval = exit_client_msg(cptr, acptr, &me, "G-lined (%s)", gline->gl_reason))) 
         retval = tval; /* retain killed status */
       }

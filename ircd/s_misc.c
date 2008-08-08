@@ -482,18 +482,20 @@ int exit_client(struct Client *cptr,
       if (IsServer(victim))
 	sendcmdto_one(killer, CMD_SQUIT, dlp->value.cptr, "%s %Tu :%s",
 		      cli_name(victim), cli_serv(victim)->timestamp, comment);
-      else if (IsUser(victim) && !HasFlag(victim, FLAG_KILLED))
-	sendcmdto_one(victim, CMD_QUIT, dlp->value.cptr, ":%s", comment);
+      else if (IsUser(victim) && !HasFlag(victim, FLAG_KILLED)) {
+        /* do not show G-line or K-line reasons to other users, so remove them - wiebe */
+        if (!strncmp(comment, "G-lined", 7))
+          comment = "G-lined";
+        else if (!strncmp(comment, "K-lined", 7))
+          comment = "K-lined";
+  sendcmdto_one(victim, CMD_QUIT, dlp->value.cptr, ":%s", comment);
+      }
     }
   }
   /* Then remove the client structures */
   if (IsServer(victim))
     exit_downlinks(victim, killer, comment1);
-
-  if (strncmp(comment, "G-lined", 7))  
-    exit_one_client(victim, comment); 
-  else 
-    exit_one_client(victim, "G-lined");
+  exit_one_client(victim, comment); 
 
   /*
    *  cptr can only have been killed if it was cptr itself that got killed here,

@@ -229,6 +229,7 @@ static int auth_set_username(struct AuthRequest *auth)
   short digits = 0;
   char  ch;
   char  last;
+  char *reason;
 
   if (FlagHas(&auth->flags, AR_IAUTH_USERNAME))
   {
@@ -266,11 +267,14 @@ static int auth_set_username(struct AuthRequest *auth)
   ircd_strncpy(user->realusername, user->username, USERLEN);
 
   /* Check for K- or G-line. */
-  killreason = find_kill(sptr, 1);
+  killreason = find_kill(sptr, 1, &reason);
   if (killreason) {
     ServerStats->is_ref++;
-    return exit_client(sptr, sptr, &me,
-                       (killreason == -1 ? "K-lined" : "G-lined"));
+   /* WARNING: code in exit_client() relies on the quit message starting with
+    * G-lined or K-lined for HIS purposes
+    */
+    return exit_client_msg(sptr, sptr, &me, "%s (%s)",
+                       (killreason == -1 ? "K-lined" : "G-lined"), reason);
   }
 
   if (!FlagHas(&auth->flags, AR_IAUTH_FUSERNAME))

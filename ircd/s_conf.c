@@ -909,6 +909,7 @@ int rehash(struct Client *cptr, int sig)
   int               i;
   int               ret = 0;
   int               found_g = 0;
+  char *reason;
 
   if (1 == sig)
     sendto_opmask_butone(0, SNO_OLDSNO,
@@ -986,14 +987,17 @@ int rehash(struct Client *cptr, int sig)
        * get past K/G's etc, we'll "fix" the bug by actually explaining
        * whats going on.
        */
-      if ((found_g = find_kill(acptr, 0))) {
+      if ((found_g = find_kill(acptr, 0, &reason))) {
         sendto_opmask_butone(0, found_g == -2 ? SNO_GLINE : SNO_OPERKILL,
                              found_g == -2 ? "G-line active for %s%s" :
                              "K-line active for %s%s",
                              IsUnknown(acptr) ? "Unregistered Client ":"",
                              get_client_name(acptr, SHOW_IP));
-        if (exit_client(cptr, acptr, &me, found_g == -2 ? "G-lined" :
-            "K-lined") == CPTR_KILLED)
+      /* WARNING: code in exit_client() relies on the quit message starting with
+       * G-lined or K-lined for HIS purposes
+       */
+        if (exit_client_msg(cptr, acptr, &me, "%s (%s)", found_g == -2 ? "G-lined" :
+            "K-lined", reason) == CPTR_KILLED)
           ret = CPTR_KILLED;
       }
     }
@@ -1038,10 +1042,11 @@ int init_conf(void)
  * user and disconnect them.
  * @param cptr Client to search for.
  * @param glinecheck Whether we check for glines.
+ * @param reason Where the reason is stored 
  * @return 0 if client is accepted; -1 if client was locally denied
  * (K-line); -2 if client was globally denied (G-line).
  */
-int find_kill(struct Client *cptr, int glinecheck)
+int find_kill(struct Client *cptr, int glinecheck, char **reason)
 {
   const char*      host;
   const char*      name;
@@ -1076,14 +1081,18 @@ int find_kill(struct Client *cptr, int glinecheck)
     } else if (deny->hostmask && match(deny->hostmask, host))
       continue;
 
-    if (EmptyString(deny->message))
+    if (EmptyString(deny->message)) {
       send_reply(cptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP,
                  ":Connection from your host is refused on this server.");
-    else {
-      if (deny->flags & DENY_FLAGS_FILE)
+      *reason = "Connection from your host is refused on this server.";
+    } else {
+      if (deny->flags & DENY_FLAGS_FILE) {
         killcomment(cptr, deny->message);
-      else
-        send_reply(cptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP, ":%s.", deny->message);
+        *reason = "Connection from your host is refused on this server.";
+      } else {
+        send_reply(cptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP, ":%s", deny->message);
+        *reason = deny->message;
+      }        
     }
     return -1;
   }
@@ -1099,7 +1108,8 @@ int find_kill(struct Client *cptr, int glinecheck)
      * find active glines
      * added a check against the user's IP address to find_gline() -Kev
      */
-    send_reply(cptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP, ":%s.", GlineReason(agline));
+    send_reply(cptr, SND_EXPLICIT | ERR_YOUREBANNEDCREEP, ":%s", GlineReason(agline));
+    *reason = GlineReason(agline);
     return -2;
   }
 
