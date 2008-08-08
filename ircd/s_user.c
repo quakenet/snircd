@@ -1505,10 +1505,6 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
 	cli_user(sptr)->acc_create = atoi(ts);
         if ((pts = strchr(ts, ':')))
 	  cli_user(sptr)->acc_id = strtoul(pts + 1, NULL, 10);
-        Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
-	      "account \"%s\", timestamp %Tu, id %lu", account,
-	      cli_user(sptr)->acc_create,
-	      cli_user(sptr)->acc_id));
       }
       ircd_strncpy(cli_user(sptr)->account, account, len);
   }
@@ -1592,28 +1588,15 @@ char *umode_str(struct Client *cptr, int opernames)
 
   if (IsAccount(cptr))
   {
-    char* t = cli_user(cptr)->account;
+    char *t, nbuf[64+ACCOUNTLEN];
 
-    *m++ = ' ';
+    ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu",
+                  cli_user(cptr)->account, cli_user(cptr)->acc_create,
+		  cli_user(cptr)->acc_id);
+
     while ((*m++ = *t++))
       ; /* Empty loop */
 
-    if (cli_user(cptr)->acc_create) {
-      char nbuf[30];
-      Debug((DEBUG_DEBUG, "Sending timestamped account in user mode for "
-	     "account \"%s\"; timestamp %Tu", cli_user(cptr)->account,
-	     cli_user(cptr)->acc_create));
-      if(cli_user(cptr)->acc_id) {
-        ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu:%lu",
-                      cli_user(cptr)->acc_create, cli_user(cptr)->acc_id);
-      } else {
-        ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu",
-                      cli_user(cptr)->acc_create);
-      }
-      m--; /* back up over previous nul-termination */
-      while ((*m++ = *t++))
-	; /* Empty loop */
-    }
     m--; /* Step back over the '\0' */
   }
 
