@@ -304,6 +304,10 @@ void relay_directed_message(struct Client* sptr, char* name, char* server, const
   if (host)
     *--host = '%';
 
+  /* slug: I don't think this is required, but I might have missed something */
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr))
+    return;
+
   if (!(is_silenced(sptr, acptr)))
     sendcmdto_one(sptr, CMD_PRIVATE, acptr, "%s :%s", name, text);
 }
@@ -352,6 +356,9 @@ void relay_directed_notice(struct Client* sptr, char* name, char* server, const 
   *server = '@';
   if (host)
     *--host = '%';
+
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr))
+    return;
 
   if (!(is_silenced(sptr, acptr)))
     sendcmdto_one(sptr, CMD_NOTICE, acptr, "%s :%s", name, text);
