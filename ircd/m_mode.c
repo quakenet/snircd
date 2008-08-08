@@ -134,12 +134,6 @@ m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   member = find_member_link(chptr, sptr);
 
-  /* We don't want mode requests from non-members, prolly to counter ban evasion. Allow channel-privacy opers and opers overriding a local chan */ 
-  if (! (member || HasPriv(sptr, PRIV_CHANNEL_PRIVACY) || (IsLocalChannel(chptr->chname) && HasPriv(sptr, PRIV_MODE_LCHAN)))) {
-    send_reply(sptr, ERR_NOTONCHANNEL, chptr->chname);
-    return 0;
-  }
-
   if (parc < 3) {
     char modebuf[MODEBUFLEN];
     char parabuf[MODEBUFLEN];
@@ -149,6 +143,14 @@ m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     channel_modes(sptr, modebuf, parabuf, sizeof(parabuf), chptr, member);
     send_reply(sptr, RPL_CHANNELMODEIS, chptr->chname, modebuf, parabuf);
     send_reply(sptr, RPL_CREATIONTIME, chptr->chname, chptr->creationtime);
+    return 0;
+  }
+  
+  /* We don't want mode requests from non-members, prolly to counter ban evasion. Allow channel-privacy opers and opers overriding a local chan */
+  /* if the aim is to hide the banlist from outsiders, but not the modes and creation time
+     thus only block the request when 3 or more parameters are given -> move check here - wiebe */ 
+  if (! (member || HasPriv(sptr, PRIV_CHANNEL_PRIVACY) || (IsLocalChannel(chptr->chname) && HasPriv(sptr, PRIV_MODE_LCHAN)))) {
+    send_reply(sptr, ERR_NOTONCHANNEL, chptr->chname);
     return 0;
   }
 
