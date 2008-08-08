@@ -129,18 +129,22 @@ static int do_kill(struct Client* cptr, struct Client* sptr,
    * was changed, the message has to be sent to all links, also
    * back.
    * Client suicide kills are NOT passed on --SRB
+   *    
+   *  but Kill is a kill, and should reach the entire net as such
+   *  so that the kill is shown in snomask to opers, which is not possible
+   *  when it is changed into quit, as happens below with this condition in place
+   *  - wiebe            
    */
-  if (IsServer(cptr) || !MyConnect(victim)) {
-    sendcmdto_serv_butone(sptr, CMD_KILL, cptr, "%C :%s!%s %s", victim,
+   /* if (IsServer(cptr) || !MyConnect(victim)) { */
+  sendcmdto_serv_butone(sptr, CMD_KILL, cptr, "%C :%s!%s %s", victim,
                           inpath, path, msg);
 
-    /*
-     * Set FLAG_KILLED. This prevents exit_one_client from sending
-     * the unnecessary QUIT for this. (This flag should never be
-     * set in any other place)
-     */
-    SetFlag(victim, FLAG_KILLED);
-  }
+   /*
+    * Set FLAG_KILLED. This prevents exit_one_client from sending
+    * the unnecessary QUIT for this. (This flag should never be
+    * set in any other place)
+    */
+  SetFlag(victim, FLAG_KILLED);
 
   /*
    * Tell the victim she/he has been zapped, but *only* if
