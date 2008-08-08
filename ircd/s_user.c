@@ -1503,8 +1503,12 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
       if ((ts = strchr(account, ':'))) {
 	len = (ts++) - account;
 	cli_user(sptr)->acc_create = atoi(ts);
-        if ((pts = strchr(ts, ':')))
-	  cli_user(sptr)->acc_id = strtoul(pts + 1, NULL, 10);
+        if ((pts = strchr(ts, ':'))) {
+          char *pflags;
+	  cli_user(sptr)->acc_id = strtoul(pts + 1, &pflags, 10);
+          if (*pflags == ':')
+	    cli_user(sptr)->acc_flags = strtoull(pflags + 1, NULL, 10);
+        }
       }
       ircd_strncpy(cli_user(sptr)->account, account, len);
   }
@@ -1590,9 +1594,9 @@ char *umode_str(struct Client *cptr, int opernames)
   {
     char *t, nbuf[64+ACCOUNTLEN];
 
-    ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu",
+    ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu:%llu",
                   cli_user(cptr)->account, cli_user(cptr)->acc_create,
-		  cli_user(cptr)->acc_id);
+		  cli_user(cptr)->acc_id, cli_user(cptr)->acc_flags);
 
     while ((*m++ = *t++))
       ; /* Empty loop */
