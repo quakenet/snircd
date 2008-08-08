@@ -2948,7 +2948,16 @@ mode_parse_ban(struct ParseState *state, int *flag_p)
   newban->flags = ((state->dir == MODE_ADD) ? BAN_ADD : BAN_DEL)
       | (*flag_p == MODE_BAN ? 0 : BAN_EXCEPTION);
   set_ban_mask(newban, collapse(pretty_mask(t_str)));
-  ircd_strncpy(newban->who, IsUser(state->sptr) ? cli_name(state->sptr) : "*", NICKLEN);
+
+  /* source not a user OR feat HIS_MODEWHO enabled and ban set with /OPMODE
+    so hide the source in banlist - wiebe */
+  if (!IsUser(state->sptr) || 
+    (feature_bool(FEAT_HIS_MODEWHO) && state->mbuf != NULL && (state->mbuf->mb_dest & MODEBUF_DEST_OPMODE))) {
+    ircd_strncpy(newban->who, "*", NICKLEN);
+  } else {
+    ircd_strncpy(newban->who, cli_name(state->sptr), NICKLEN);
+  }
+
   newban->when = TStime();
   apply_ban(&state->chptr->banlist, newban, 0);
 }
