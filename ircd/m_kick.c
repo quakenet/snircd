@@ -141,7 +141,8 @@ int m_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return send_reply(sptr, ERR_ISREALSERVICE, cli_name(who), chptr->chname);
 
     if (!IsXtraOp(sptr) && (who!=sptr)) {
-      if (IsParanoid(who)) {
+      /* the victim is paranoid AND on the channel but not a zombie - wiebe */
+      if (IsParanoid(who) && (member = find_member_link(chptr, who)) && !IsZombie(member)) {
         sendcmdto_one(&me, CMD_NOTICE, who, "%C :kick: %s tried to /KICK you from %s.", who, cli_name(sptr), chptr->chname);
       }
       return send_reply(sptr, ERR_ISCHANSERVICE, cli_name(who), chptr->chname);
