@@ -446,8 +446,13 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   case GLINE_LOCAL_ACTIVATE: /* locally activate a G-line */
   case GLINE_LOCAL_DEACTIVATE: /* locally deactivate a G-line */
-    if (parc > 2) /* if target is available, pick it */
+    if (parc > 2) { /* if target is available, pick it */
       target = parv[2];
+
+      /* local activations can be local/remote servers, but can not be * */
+      if (target[0] == '*' && target[1] == '\0')
+        return need_more_params(sptr, "GLINE");
+    }
     break;
 
   case GLINE_ACTIVATE: /* activating/adding a G-line */
