@@ -103,6 +103,7 @@
  * parv[2] = account name (12 characters or less)
  * parv[3] = account timestamp (optional)
  * parv[4] = account id (optional, requires timestamp to be set to use)
+ * parv[5] = account flags (optional, requires id to be set to use)
  */
 int ms_account(struct Client* cptr, struct Client* sptr, int parc,
 	       char* parv[])
@@ -133,10 +134,19 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
     }
     cli_user(acptr)->acc_create = atoi(parv[3]);
     cli_user(acptr)->acc_id = strtoul(parv[4], NULL, 10);      
-    sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu",
-                              acptr, cli_user(acptr)->account,
-                              cli_user(acptr)->acc_create,
-                              cli_user(acptr)->acc_id);
+    if (parc >= 6) {
+      cli_user(acptr)->acc_flags = strtoul(parv[5], NULL, 10);      
+      sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %llu",
+                                acptr, cli_user(acptr)->account,
+                                cli_user(acptr)->acc_create,
+                                cli_user(acptr)->acc_id,
+                                cli_user(acptr)->acc_flags);
+    } else {
+      sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu",
+                                acptr, cli_user(acptr)->account,
+                                cli_user(acptr)->acc_create,
+                                cli_user(acptr)->acc_id);
+    }
     return 0;
   }
 
@@ -155,13 +165,23 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
     if (parc > 4) {
       cli_user(acptr)->acc_id = strtoul(parv[4], NULL, 10); 
       Debug((DEBUG_DEBUG, "Received account id for account \"%s\": id %lu", parv[2], cli_user(acptr)->acc_id));
+      if (parc > 5) {
+        cli_user(acptr)->acc_flags = strtoul(parv[5], NULL, 10); 
+        Debug((DEBUG_DEBUG, "Received account flags for account \"%s\": id %llu", parv[2], cli_user(acptr)->acc_flags));
+      }
     }
   }
 
   ircd_strncpy(cli_user(acptr)->account, parv[2], ACCOUNTLEN);
   hide_hostmask(acptr, FLAG_ACCOUNT);
 
-   if (cli_user(acptr)->acc_id) {
+   if (cli_user(acptr)->acc_flags) {
+     sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %llu",
+                           acptr, cli_user(acptr)->account,
+                           cli_user(acptr)->acc_create,
+                           cli_user(acptr)->acc_id,
+                           cli_user(acptr)->acc_flags);
+   } else if (cli_user(acptr)->acc_id) {
      sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu",
                            acptr, cli_user(acptr)->account,
                            cli_user(acptr)->acc_create,
