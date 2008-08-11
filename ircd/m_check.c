@@ -401,10 +401,17 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_snprintf(0, outbuf, sizeof(outbuf), "      Real Name:: %s%c", cli_info(acptr), COLOR_OFF);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  if (IsChannelService(acptr) && IsService(cli_user(acptr)->server))
-    send_reply(sptr, RPL_DATASTR, "         Status:: Network Service");
-  else if (IsAnOper(acptr))
+  if( IsService(cli_user(acptr)->server)) {
+    if (IsChannelService(acptr))
+      send_reply(sptr, RPL_DATASTR, "         Status:: Network Service");
+    else if (IsAnOper(acptr))
+      send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator (service)");
+    else 
+      send_reply(sptr, RPL_DATASTR, "         Status:: Client (service)");
+  } else if (IsAnOper(acptr))
     send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator");
+  else
+    send_reply(sptr, RPL_DATASTR, "         Status:: Client");
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected to:: %s (%d)", cli_name(cli_user(acptr)->server), cli_hopcount(acptr));
   send_reply(sptr, RPL_DATASTR, outbuf);
