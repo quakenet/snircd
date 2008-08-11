@@ -69,5 +69,6 @@ extern void init_server_identity(void);
 extern void close_connections(int close_stderr);
 extern int  init_connection_limits(void);
 extern void update_write(struct Client* cptr);
+extern void reset_connection_timer();
 
 #endif /* INCLUDED_s_bsd_h */

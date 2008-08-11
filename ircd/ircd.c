@@ -316,6 +316,10 @@ static void try_connections(struct Event* ev) {
   timer_add(&connect_timer, try_connections, 0, TT_ABSOLUTE, next);
 }
 
+void reset_connection_timer() {
+  Debug((DEBUG_NOTICE, "reset_connect_timer: Next connection check : %s", myctime(CurrentTime + feature_int(FEAT_HANGONRETRYDELAY) + 1)));
+  timer_chg(&connect_timer, TT_ABSOLUTE, CurrentTime + feature_int(FEAT_HANGONRETRYDELAY) + 1);
+}
 
 /** Check for clients that have not sent a ping response recently.
  * Reschedules itself to run again at the appropriate time.

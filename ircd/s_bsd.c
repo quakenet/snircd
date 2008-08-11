@@ -392,6 +392,7 @@ void close_connection(struct Client *cptr)
 		      feature_int(FEAT_HANGONRETRYDELAY) : ConfConFreq(aconf));
 /*        if (nextconnect > aconf->hold) */
 /*          nextconnect = aconf->hold; */
+      reset_connection_timer();
     }
   }
   else if (IsUser(cptr)) {
@@ -402,6 +403,14 @@ void close_connection(struct Client *cptr)
   }
   else
     ServerStats->is_ni++;
+
+  if (IsServerPort(cptr) || IsHandshake(cptr)) {
+    if ((aconf = find_conf_exact(cli_name(cptr), cptr, CONF_SERVER))) {
+    /* update aconf->hold for a failed connection (so as not to spam reconnect's */
+      aconf->hold = CurrentTime + ConfConFreq(aconf);
+    } 
+    reset_connection_timer();
+  }
 
   if (-1 < cli_fd(cptr)) {
     flush_connections(cptr);
