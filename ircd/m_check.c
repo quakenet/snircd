@@ -578,18 +578,20 @@ void checkServer(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_ENDOFCHECK, " ");
 }
 
-signed int checkHostmask(struct Client *sptr, char *hoststr, int flags) {
+signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
   struct Client *acptr;
   struct Channel *chptr;
   struct Membership *lp;
   int count = 0, found = 0;
   char outbuf[BUFSIZE];
   char targhost[NICKLEN + USERLEN + HOSTLEN + 3], curhost[NICKLEN + USERLEN + HOSTLEN + 3];
+  char hoststr[NICKLEN + USERLEN + HOSTLEN + 3];
   char nickm[NICKLEN + 1], userm[USERLEN + 1], hostm[HOSTLEN + 1];
   char *p = NULL;
   struct irc_in_addr cidr_check;
   unsigned char cidr_check_bits;
 
+  ircd_strncpy(hoststr, orighoststr, NICKLEN + USERLEN + HOSTLEN + 3);
   strcpy(nickm,"*");
   strcpy(userm,"*");
   strcpy(hostm,"*");
