@@ -130,10 +130,10 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
         break;
       case 's':
         flags |= CHECK_SHOWSERVER;
-	break;
+        break;
       case 'I':
         flags |= CHECK_SHOWHOSTIP;
-	break;
+        break;
       default:
         /* might want to raise some sort of error here? */
         break;
@@ -237,7 +237,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
         if (c) {
           ircd_snprintf(0, ustat, sizeof(ustat), "%2d %3hu@", c, OpLevel(lp));
         } else {
-	  ircd_snprintf(0, ustat, sizeof(ustat), "%3hu@", OpLevel(lp));
+          ircd_snprintf(0, ustat, sizeof(ustat), "%3hu@", OpLevel(lp));
         }
       } else {
         if (c) {
@@ -259,9 +259,9 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     }
     else {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s", c, (flags & CHECK_OPLEVELS) ? "   " : "" );
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s", c, (flags & CHECK_OPLEVELS) ? "   " : "");
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), " %s", (flags & CHECK_OPLEVELS) ? "   " : "" );
+        ircd_snprintf(0, ustat, sizeof(ustat), " %s", (flags & CHECK_OPLEVELS) ? "   " : "");
       }
     }
 
@@ -271,7 +271,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
     if ((flags & CHECK_SHOWUSERS) || ((flags & CHECK_OPSONLY) && opped)) {
       ircd_snprintf(0, outbuf, sizeof(outbuf), "%s%c", acptr->cli_info, COLOR_OFF);
-      if (flags & CHECK_SHOWHOSTIP ) {
+      if (flags & CHECK_SHOWHOSTIP) {
         ircd_snprintf(0, outbuf2, sizeof(outbuf2), " [%s]", ircd_ntoa(&(cli_ip(acptr))));
       }
       send_reply(sptr, RPL_CHANUSER, ustat, acptr->cli_name, cli_user(acptr)->realusername,
@@ -677,7 +677,7 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
         send_reply(sptr, RPL_CHKHEAD, "host", targhost);
 
         send_reply(sptr, RPL_DATASTR, " ");
-        ircd_snprintf(0, outbuf, sizeof(outbuf),  "%s   %-*s%-*s%s", "No.", (NICKLEN + 2 ), "Nick",
+        ircd_snprintf(0, outbuf, sizeof(outbuf),  "%s   %-*s%-*s%s", "No.", (NICKLEN + 2), "Nick",
                 (USERLEN + 2), "User", "Host");
         send_reply(sptr, RPL_DATASTR, outbuf);
       }
