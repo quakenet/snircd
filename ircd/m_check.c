@@ -323,7 +323,7 @@ void checkChannel(struct Client *sptr, struct Channel *chptr) {
   send_reply(sptr, RPL_DATASTR, " ");
 
   /* Creation Time */
-  ircd_snprintf(sptr, outbuf, sizeof(outbuf), "  Creation time:: %s", myctime(chptr->creationtime));
+  ircd_snprintf(sptr, outbuf, sizeof(outbuf), "  Creation time:: %s (%Tu)", myctime(chptr->creationtime), chptr->creationtime);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   /* Topic */
@@ -337,7 +337,7 @@ void checkChannel(struct Client *sptr, struct Channel *chptr) {
     ircd_snprintf(sptr, outbuf, sizeof(outbuf), "         Set by:: %s", chptr->topic_nick);
     send_reply(sptr, RPL_DATASTR, outbuf);
 
-    ircd_snprintf(sptr, outbuf, sizeof(outbuf), "         Set at:: %s", myctime(chptr->topic_time));
+    ircd_snprintf(sptr, outbuf, sizeof(outbuf), "         Set at:: %s (%Tu)", myctime(chptr->topic_time), chptr->topic_time);
     send_reply(sptr, RPL_DATASTR, outbuf); 
   }
 
@@ -382,7 +382,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   if (MyUser(acptr)) {  
-    ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Signed on:: %s", myctime(acptr->cli_firsttime));
+    ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Signed on:: %s (%Tu)", myctime(acptr->cli_firsttime), acptr->cli_firsttime);
     send_reply(sptr, RPL_DATASTR, outbuf);
   }
 
@@ -481,11 +481,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
       send_reply(sptr, RPL_DATASTR, chntext);
   }
 
-  /* If client processing command ISN'T target (or a registered
-   * Network Service), show idle time since the last time we
-   * parsed something.
-   */
-  if (MyUser(acptr) && !(IsService(acptr) == -1) && !(strCasediff(acptr->cli_name, sptr->cli_name) == 0)) {
+  if (MyUser(acptr)) {
     nowr = CurrentTime - cli_user(acptr)->last;
     ircd_snprintf(0, outbuf, sizeof(outbuf), "       Idle for:: %d days, %02ld:%02ld:%02ld",
         nowr / 86400, (nowr / 3600) % 24, (nowr / 60) % 60, nowr % 60);
