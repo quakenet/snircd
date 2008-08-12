@@ -159,6 +159,7 @@ int m_topic(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 int ms_topic(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct Channel *chptr;
+  struct Membership* member;
   char *topic = 0, *name, *p = 0;
   time_t ts = 0;
 
@@ -190,6 +191,10 @@ int ms_topic(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
     if (parc > 4 && (ts = atoi(parv[3])) && chptr->topic_time > ts)
       continue;
+
+    /* Reveal delayedjoin user */
+    if ((member = find_member_link(chptr, sptr)) && IsDelayedJoin(member))
+      RevealDelayedJoin(member);
 
     do_settopic(sptr,cptr,chptr,topic, ts);
   }
