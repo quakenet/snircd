@@ -637,8 +637,9 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
     if (IsMe(acptr))   /* Always the last acptr record */
       break;
 
-    if(count > 500) { /* sanity stuff */
-      send_reply(sptr, RPL_ENDOFCHECK, " ");
+    if(count >= 500) { /* sanity stuff */
+      ircd_snprintf(0, outbuf, sizeof(outbuf), "More than %d results, truncating...", count);
+      send_reply(sptr, RPL_DATASTR, outbuf);
       break;
     }
 
