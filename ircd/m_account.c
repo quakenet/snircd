@@ -120,7 +120,7 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
   if (!(acptr = findNUser(parv[1])))
     return 0; /* Ignore ACCOUNT for a user that QUIT; probably crossed */
 
-  if (IsAccount(acptr) && ((parc < 5) || (parc >= 5 && cli_user(acptr)->acc_id)))
+  if (IsAccount(acptr) && (parc < 5))
     return protocol_violation(cptr, "ACCOUNT for already registered user %s "
 			      "(%s -> %s)", cli_name(acptr),
 			      cli_user(acptr)->account, parv[2]);
