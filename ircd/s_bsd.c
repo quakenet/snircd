@@ -392,7 +392,9 @@ void close_connection(struct Client *cptr)
 		      feature_int(FEAT_HANGONRETRYDELAY) : ConfConFreq(aconf));
 /*        if (nextconnect > aconf->hold) */
 /*          nextconnect = aconf->hold; */
-      reset_connection_timer();
+      #ifdef DEBUGMODE
+        reset_connection_timer();
+      #endif
     }
   }
   else if (IsUser(cptr)) {
@@ -404,6 +406,7 @@ void close_connection(struct Client *cptr)
   else
     ServerStats->is_ni++;
 
+  #ifdef DEBUGMODE
   if (IsServerPort(cptr) || IsHandshake(cptr)) {
     if ((aconf = find_conf_exact(cli_name(cptr), cptr, CONF_SERVER))) {
     /* update aconf->hold for a failed connection (so as not to spam reconnect's */
@@ -411,6 +414,7 @@ void close_connection(struct Client *cptr)
     } 
     reset_connection_timer();
   }
+  #endif
 
   if (-1 < cli_fd(cptr)) {
     flush_connections(cptr);
