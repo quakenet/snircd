@@ -135,7 +135,7 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
     cli_user(acptr)->acc_create = atoi(parv[3]);
     cli_user(acptr)->acc_id = strtoul(parv[4], NULL, 10);      
     if (parc >= 6) {
-      cli_user(acptr)->acc_flags = strtoul(parv[5], NULL, 10);      
+      cli_user(acptr)->acc_flags = strtoull(parv[5], NULL, 10);      
       sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %llu",
                                 acptr, cli_user(acptr)->account,
                                 cli_user(acptr)->acc_create,
@@ -166,7 +166,7 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
       cli_user(acptr)->acc_id = strtoul(parv[4], NULL, 10); 
       Debug((DEBUG_DEBUG, "Received account id for account \"%s\": id %lu", parv[2], cli_user(acptr)->acc_id));
       if (parc > 5) {
-        cli_user(acptr)->acc_flags = strtoul(parv[5], NULL, 10); 
+        cli_user(acptr)->acc_flags = strtoull(parv[5], NULL, 10); 
         Debug((DEBUG_DEBUG, "Received account flags for account \"%s\": id %llu", parv[2], cli_user(acptr)->acc_flags));
       }
     }
