@@ -302,8 +302,8 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     send_reply(sptr, RPL_DATASTR, "Bans on channel::");
 
     for (ban = chptr->banlist; ban; ban = ban->next) {
-      ircd_snprintf(0, outbuf, sizeof(outbuf),  "[%d] - %s - Set by %s, on %s",
-        ++bans, ban->banstr, ban->who, myctime(ban->when));
+      ircd_snprintf(0, outbuf, sizeof(outbuf),  "[%d] - %s - Set by %s, on %s (%Tu)",
+        ++bans, ban->banstr, ban->who, myctime(ban->when), ban->when);
       send_reply(sptr, RPL_DATASTR, outbuf);
     }
 
@@ -531,7 +531,7 @@ void checkServer(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_CHKHEAD, "server", acptr->cli_name);
   send_reply(sptr, RPL_DATASTR, " ");
 
-  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected at:: %s", myctime(acptr->cli_serv->timestamp));
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected at:: %s (%Tu)", myctime(acptr->cli_serv->timestamp), acptr->cli_serv->timestamp);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "    Server name:: %s", acptr->cli_name);
