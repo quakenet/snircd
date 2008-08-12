@@ -203,7 +203,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
   struct Client *acptr;
 
   char outbuf[BUFSIZE], outbuf2[BUFSIZE], ustat[64];
-  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0;
+  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0, delayedjoin = 0;
 
   if (flags & CHECK_SHOWUSERS) { 
     send_reply(sptr, RPL_DATASTR, "Users (@ = op, + = voice)");
@@ -232,7 +232,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       }
     }
 
-    if (chptr && is_chan_op(acptr, chptr)) {
+    if (IsChanOp(lp)) {
       if (flags & CHECK_OPLEVELS) {
         if (c) {
           ircd_snprintf(0, ustat, sizeof(ustat), "%2d %3hu@", c, OpLevel(lp));
@@ -249,13 +249,21 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       opcntr++;
       opped = 1;
     }
-    else if (chptr && has_voice(acptr, chptr)) {
+    else if (HasVoice(lp)) {
       if (c) {
         ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s+", c, (flags & CHECK_OPLEVELS) ? "   " : "");
       } else {
         ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   +" : "+");
       }
       vcntr++;
+    }
+    else if (IsDelayedJoin(lp)) {
+      if (c) {
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s<", c, (flags & CHECK_OPLEVELS) ? "   " : "");
+      } else {
+        ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   <" : "<");
+      }
+      delayedjoin++;
     }
     else {
       if (c) {
@@ -286,12 +294,12 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
   if (flags & CHECK_CLONES) {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
-        "Total users:: %d (%d ops, %d voiced, %d clones, %d authed)",
-        cntr, opcntr, vcntr, clones, authed);
+        "Total users:: %d (%d ops, %d voiced, %d clones, %d authed, %d hidden)",
+        cntr, opcntr, vcntr, clones, authed, delayedjoin);
   } else {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
-        "Total users:: %d (%d ops, %d voiced, %d authed)",
-        cntr, opcntr, vcntr, authed);
+        "Total users:: %d (%d ops, %d voiced, %d authed, %d hidden)",
+        cntr, opcntr, vcntr, authed, delayedjoin);
   }
 
   send_reply(sptr, RPL_DATASTR, outbuf);
