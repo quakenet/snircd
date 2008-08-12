@@ -393,7 +393,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_ntoa(&(cli_ip(acptr))));
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  if (IsSetHost(acptr) || IsAccount(acptr)) {
+  if (IsSetHost(acptr) || HasHiddenHost(acptr)) {
     ircd_snprintf(0, outbuf, sizeof(outbuf), " Real User/Host:: %s@%s", cli_user(acptr)->realusername, cli_user(acptr)->realhost);
     send_reply(sptr, RPL_DATASTR, outbuf);
   }
