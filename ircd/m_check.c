@@ -203,7 +203,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
   struct Client *acptr;
 
   char outbuf[BUFSIZE], outbuf2[BUFSIZE], ustat[64];
-  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0;
+  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0, delayedjoin = 0;
 
   if (flags & CHECK_SHOWUSERS) { 
     send_reply(sptr, RPL_DATASTR, "Users (@ = op, + = voice)");
@@ -232,7 +232,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       }
     }
 
-    if (chptr && is_chan_op(acptr, chptr)) {
+    if (IsChanOp(lp)) {
       if (flags & CHECK_OPLEVELS) {
         if (c) {
           ircd_snprintf(0, ustat, sizeof(ustat), "%2d %3hu@", c, OpLevel(lp));
@@ -249,13 +249,21 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       opcntr++;
       opped = 1;
     }
-    else if (chptr && has_voice(acptr, chptr)) {
+    else if (HasVoice(lp)) {
       if (c) {
         ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s+", c, (flags & CHECK_OPLEVELS) ? "   " : "");
       } else {
         ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   +" : "+");
       }
       vcntr++;
+    }
+    else if (IsDelayedJoin(lp)) {
+      if (c) {
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s<", c, (flags & CHECK_OPLEVELS) ? "   " : "");
+      } else {
+        ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   <" : "<");
+      }
+      delayedjoin++;
     }
     else {
       if (c) {
@@ -286,12 +294,12 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
   if (flags & CHECK_CLONES) {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
-        "Total users:: %d (%d ops, %d voiced, %d clones, %d authed)",
-        cntr, opcntr, vcntr, clones, authed);
+        "Total users:: %d (%d ops, %d voiced, %d clones, %d authed, %d hidden)",
+        cntr, opcntr, vcntr, clones, authed, delayedjoin);
   } else {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
-        "Total users:: %d (%d ops, %d voiced, %d authed)",
-        cntr, opcntr, vcntr, authed);
+        "Total users:: %d (%d ops, %d voiced, %d authed, %d hidden)",
+        cntr, opcntr, vcntr, authed, delayedjoin);
   }
 
   send_reply(sptr, RPL_DATASTR, outbuf);
@@ -302,8 +310,8 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     send_reply(sptr, RPL_DATASTR, "Bans on channel::");
 
     for (ban = chptr->banlist; ban; ban = ban->next) {
-      ircd_snprintf(0, outbuf, sizeof(outbuf),  "[%d] - %s - Set by %s, on %s",
-        ++bans, ban->banstr, ban->who, myctime(ban->when));
+      ircd_snprintf(0, outbuf, sizeof(outbuf),  "[%d] - %s - Set by %s, on %s (%Tu)",
+        ++bans, ban->banstr, ban->who, myctime(ban->when), ban->when);
       send_reply(sptr, RPL_DATASTR, outbuf);
     }
 
@@ -393,7 +401,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_ntoa(&(cli_ip(acptr))));
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  if (IsSetHost(acptr) || IsAccount(acptr)) {
+  if (IsSetHost(acptr) || HasHiddenHost(acptr)) {
     ircd_snprintf(0, outbuf, sizeof(outbuf), " Real User/Host:: %s@%s", cli_user(acptr)->realusername, cli_user(acptr)->realhost);
     send_reply(sptr, RPL_DATASTR, outbuf);
   }
@@ -531,7 +539,7 @@ void checkServer(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_CHKHEAD, "server", acptr->cli_name);
   send_reply(sptr, RPL_DATASTR, " ");
 
-  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected at:: %s", myctime(acptr->cli_serv->timestamp));
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected at:: %s (%Tu)", myctime(acptr->cli_serv->timestamp), acptr->cli_serv->timestamp);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "    Server name:: %s", acptr->cli_name);
@@ -637,8 +645,9 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
     if (IsMe(acptr))   /* Always the last acptr record */
       break;
 
-    if(count > 500) { /* sanity stuff */
-      send_reply(sptr, RPL_ENDOFCHECK, " ");
+    if(count >= 500) { /* sanity stuff */
+      ircd_snprintf(0, outbuf, sizeof(outbuf), "More than %d results, truncating...", count);
+      send_reply(sptr, RPL_DATASTR, outbuf);
       break;
     }
 

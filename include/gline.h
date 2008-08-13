@@ -36,7 +36,7 @@
 struct Client;
 struct StatDesc;
 
-#define GLINE_MAX_EXPIRE 31536000	/**< max expire: 1 year */
+#define GLINE_MAX_EXPIRE 604800	/**< max expire: 1 week */
 
 /** Local state of a G-line. */
 enum GlineLocalState {
