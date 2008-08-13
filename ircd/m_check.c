@@ -130,10 +130,10 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
         break;
       case 's':
         flags |= CHECK_SHOWSERVER;
-	break;
+        break;
       case 'I':
         flags |= CHECK_SHOWHOSTIP;
-	break;
+        break;
       default:
         /* might want to raise some sort of error here? */
         break;
@@ -203,7 +203,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
   struct Client *acptr;
 
   char outbuf[BUFSIZE], outbuf2[BUFSIZE], ustat[64];
-  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0;
+  int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0, delayedjoin = 0;
 
   if (flags & CHECK_SHOWUSERS) { 
     send_reply(sptr, RPL_DATASTR, "Users (@ = op, + = voice)");
@@ -232,12 +232,12 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       }
     }
 
-    if (chptr && is_chan_op(acptr, chptr)) {
+    if (IsChanOp(lp)) {
       if (flags & CHECK_OPLEVELS) {
         if (c) {
           ircd_snprintf(0, ustat, sizeof(ustat), "%2d %3hu@", c, OpLevel(lp));
         } else {
-	  ircd_snprintf(0, ustat, sizeof(ustat), "%3hu@", OpLevel(lp));
+          ircd_snprintf(0, ustat, sizeof(ustat), "%3hu@", OpLevel(lp));
         }
       } else {
         if (c) {
@@ -249,7 +249,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       opcntr++;
       opped = 1;
     }
-    else if (chptr && has_voice(acptr, chptr)) {
+    else if (HasVoice(lp)) {
       if (c) {
         ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s+", c, (flags & CHECK_OPLEVELS) ? "   " : "");
       } else {
@@ -257,11 +257,19 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
       }
       vcntr++;
     }
+    else if (IsDelayedJoin(lp)) {
+      if (c) {
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s<", c, (flags & CHECK_OPLEVELS) ? "   " : "");
+      } else {
+        ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   <" : "<");
+      }
+      delayedjoin++;
+    }
     else {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s", c, (flags & CHECK_OPLEVELS) ? "   " : "" );
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s", c, (flags & CHECK_OPLEVELS) ? "   " : "");
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), " %s", (flags & CHECK_OPLEVELS) ? "   " : "" );
+        ircd_snprintf(0, ustat, sizeof(ustat), " %s", (flags & CHECK_OPLEVELS) ? "   " : "");
       }
     }
 
@@ -271,7 +279,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
     if ((flags & CHECK_SHOWUSERS) || ((flags & CHECK_OPSONLY) && opped)) {
       ircd_snprintf(0, outbuf, sizeof(outbuf), "%s%c", acptr->cli_info, COLOR_OFF);
-      if (flags & CHECK_SHOWHOSTIP ) {
+      if (flags & CHECK_SHOWHOSTIP) {
         ircd_snprintf(0, outbuf2, sizeof(outbuf2), " [%s]", ircd_ntoa(&(cli_ip(acptr))));
       }
       send_reply(sptr, RPL_CHANUSER, ustat, acptr->cli_name, cli_user(acptr)->realusername,
@@ -286,12 +294,12 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
   if (flags & CHECK_CLONES) {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
-        "Total users:: %d (%d ops, %d voiced, %d clones, %d authed)",
-        cntr, opcntr, vcntr, clones, authed);
+        "Total users:: %d (%d ops, %d voiced, %d clones, %d authed, %d hidden)",
+        cntr, opcntr, vcntr, clones, authed, delayedjoin);
   } else {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
-        "Total users:: %d (%d ops, %d voiced, %d authed)",
-        cntr, opcntr, vcntr, authed);
+        "Total users:: %d (%d ops, %d voiced, %d authed, %d hidden)",
+        cntr, opcntr, vcntr, authed, delayedjoin);
   }
 
   send_reply(sptr, RPL_DATASTR, outbuf);
@@ -302,8 +310,8 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     send_reply(sptr, RPL_DATASTR, "Bans on channel::");
 
     for (ban = chptr->banlist; ban; ban = ban->next) {
-      ircd_snprintf(0, outbuf, sizeof(outbuf),  "[%d] - %s - Set by %s, on %s",
-        ++bans, ban->banstr, ban->who, myctime(ban->when));
+      ircd_snprintf(0, outbuf, sizeof(outbuf),  "[%d] - %s - Set by %s, on %s (%Tu)",
+        ++bans, ban->banstr, ban->who, myctime(ban->when), ban->when);
       send_reply(sptr, RPL_DATASTR, outbuf);
     }
 
@@ -323,7 +331,7 @@ void checkChannel(struct Client *sptr, struct Channel *chptr) {
   send_reply(sptr, RPL_DATASTR, " ");
 
   /* Creation Time */
-  ircd_snprintf(sptr, outbuf, sizeof(outbuf), "  Creation time:: %s", myctime(chptr->creationtime));
+  ircd_snprintf(sptr, outbuf, sizeof(outbuf), "  Creation time:: %s (%Tu)", myctime(chptr->creationtime), chptr->creationtime);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   /* Topic */
@@ -337,7 +345,7 @@ void checkChannel(struct Client *sptr, struct Channel *chptr) {
     ircd_snprintf(sptr, outbuf, sizeof(outbuf), "         Set by:: %s", chptr->topic_nick);
     send_reply(sptr, RPL_DATASTR, outbuf);
 
-    ircd_snprintf(sptr, outbuf, sizeof(outbuf), "         Set at:: %s", myctime(chptr->topic_time));
+    ircd_snprintf(sptr, outbuf, sizeof(outbuf), "         Set at:: %s (%Tu)", myctime(chptr->topic_time), chptr->topic_time);
     send_reply(sptr, RPL_DATASTR, outbuf); 
   }
 
@@ -382,7 +390,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   if (MyUser(acptr)) {  
-    ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Signed on:: %s", myctime(acptr->cli_firsttime));
+    ircd_snprintf(0, outbuf, sizeof(outbuf),  "      Signed on:: %s (%Tu)", myctime(acptr->cli_firsttime), acptr->cli_firsttime);
     send_reply(sptr, RPL_DATASTR, outbuf);
   }
 
@@ -393,7 +401,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_ntoa(&(cli_ip(acptr))));
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  if (IsSetHost(acptr) || IsAccount(acptr)) {
+  if (IsSetHost(acptr) || HasHiddenHost(acptr)) {
     ircd_snprintf(0, outbuf, sizeof(outbuf), " Real User/Host:: %s@%s", cli_user(acptr)->realusername, cli_user(acptr)->realhost);
     send_reply(sptr, RPL_DATASTR, outbuf);
   }
@@ -401,10 +409,17 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_snprintf(0, outbuf, sizeof(outbuf), "      Real Name:: %s%c", cli_info(acptr), COLOR_OFF);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  if (IsChannelService(acptr) && IsService(cli_user(acptr)->server))
-    send_reply(sptr, RPL_DATASTR, "         Status:: Network Service");
-  else if (IsAnOper(acptr))
+  if( IsService(cli_user(acptr)->server)) {
+    if (IsChannelService(acptr))
+      send_reply(sptr, RPL_DATASTR, "         Status:: Network Service");
+    else if (IsAnOper(acptr))
+      send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator (service)");
+    else 
+      send_reply(sptr, RPL_DATASTR, "         Status:: Client (service)");
+  } else if (IsAnOper(acptr))
     send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator");
+  else
+    send_reply(sptr, RPL_DATASTR, "         Status:: Client");
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected to:: %s (%d)", cli_name(cli_user(acptr)->server), cli_hopcount(acptr));
   send_reply(sptr, RPL_DATASTR, outbuf);
@@ -474,11 +489,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
       send_reply(sptr, RPL_DATASTR, chntext);
   }
 
-  /* If client processing command ISN'T target (or a registered
-   * Network Service), show idle time since the last time we
-   * parsed something.
-   */
-  if (MyUser(acptr) && !(IsService(acptr) == -1) && !(strCasediff(acptr->cli_name, sptr->cli_name) == 0)) {
+  if (MyUser(acptr)) {
     nowr = CurrentTime - cli_user(acptr)->last;
     ircd_snprintf(0, outbuf, sizeof(outbuf), "       Idle for:: %d days, %02ld:%02ld:%02ld",
         nowr / 86400, (nowr / 3600) % 24, (nowr / 60) % 60, nowr % 60);
@@ -528,7 +539,7 @@ void checkServer(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_CHKHEAD, "server", acptr->cli_name);
   send_reply(sptr, RPL_DATASTR, " ");
 
-  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected at:: %s", myctime(acptr->cli_serv->timestamp));
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected at:: %s (%Tu)", myctime(acptr->cli_serv->timestamp), acptr->cli_serv->timestamp);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "    Server name:: %s", acptr->cli_name);
@@ -571,18 +582,20 @@ void checkServer(struct Client *sptr, struct Client *acptr) {
   send_reply(sptr, RPL_ENDOFCHECK, " ");
 }
 
-signed int checkHostmask(struct Client *sptr, char *hoststr, int flags) {
+signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
   struct Client *acptr;
   struct Channel *chptr;
   struct Membership *lp;
   int count = 0, found = 0;
   char outbuf[BUFSIZE];
   char targhost[NICKLEN + USERLEN + HOSTLEN + 3], curhost[NICKLEN + USERLEN + HOSTLEN + 3];
+  char hoststr[NICKLEN + USERLEN + HOSTLEN + 3];
   char nickm[NICKLEN + 1], userm[USERLEN + 1], hostm[HOSTLEN + 1];
   char *p = NULL;
   struct irc_in_addr cidr_check;
   unsigned char cidr_check_bits;
 
+  ircd_strncpy(hoststr, orighoststr, NICKLEN + USERLEN + HOSTLEN + 3);
   strcpy(nickm,"*");
   strcpy(userm,"*");
   strcpy(hostm,"*");
@@ -632,8 +645,9 @@ signed int checkHostmask(struct Client *sptr, char *hoststr, int flags) {
     if (IsMe(acptr))   /* Always the last acptr record */
       break;
 
-    if(count > 500) { /* sanity stuff */
-      send_reply(sptr, RPL_ENDOFCHECK, " ");
+    if(count >= 500) { /* sanity stuff */
+      ircd_snprintf(0, outbuf, sizeof(outbuf), "More than %d results, truncating...", count);
+      send_reply(sptr, RPL_DATASTR, outbuf);
       break;
     }
 
@@ -668,7 +682,7 @@ signed int checkHostmask(struct Client *sptr, char *hoststr, int flags) {
         send_reply(sptr, RPL_CHKHEAD, "host", targhost);
 
         send_reply(sptr, RPL_DATASTR, " ");
-        ircd_snprintf(0, outbuf, sizeof(outbuf),  "%s   %-*s%-*s%s", "No.", (NICKLEN + 2 ), "Nick",
+        ircd_snprintf(0, outbuf, sizeof(outbuf),  "%s   %-*s%-*s%s", "No.", (NICKLEN + 2), "Nick",
                 (USERLEN + 2), "User", "Host");
         send_reply(sptr, RPL_DATASTR, outbuf);
       }
