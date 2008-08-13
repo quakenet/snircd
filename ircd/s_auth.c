@@ -1861,9 +1861,10 @@ static int iauth_cmd_done_account(struct IAuth *iauth, struct Client *cli,
     char *end;
     cli_user(cli)->acc_create = strtoul(params[0] + len + 1, &end, 10);
     if (*end == ':') {
-      cli_user(cli)->acc_id = strtoul(end + 1, NULL, 10);
-      if (*end == ':')
-        cli_user(cli)->acc_flags = strtoull(end + 1, NULL, 10);
+      char *end2;
+      cli_user(cli)->acc_id = strtoul(end + 1, &end2, 10);
+      if (*end2 == ':')
+        cli_user(cli)->acc_flags = strtoull(end2 + 1, NULL, 10);
     }
   }
 
