@@ -80,6 +80,8 @@
  * - Dianora
  */
 
+#include "config.h"
+
 #include "ircd.h"
 #include "res.h"
 #include "ircd_reslib.h"
