@@ -32,13 +32,6 @@
 #include "ircd_defs.h"       /* sizes */
 #endif
 
-#ifdef HAVE_STDINT_H
-#ifndef INCLUDED_stdint_h
-#include <stdint.h>
-#define INCLUDED_stdint_h
-#endif
-#endif
-
 struct DLink;
 struct Client;
 struct User;
@@ -92,8 +85,7 @@ struct User {
   char               realhost[HOSTLEN + 1];     /**< actual hostname */
   char               account[ACCOUNTLEN + 1];   /**< IRC account name */
   time_t	     acc_create;                /**< IRC account timestamp */
-  unsigned long      acc_id;                    /**< IRC account unique id */
-  uint64_t           acc_flags;                 /**< IRC account flags */
+  unsigned long       acc_id;                    /**< IRC account unique id */
   char*              opername;                  /**< IRC Oper Account name */
 };
 

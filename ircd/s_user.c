@@ -1509,22 +1509,12 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
       if ((ts = strchr(account, ':'))) {
 	len = (ts++) - account;
 	cli_user(sptr)->acc_create = atoi(ts);
-        if ((pts = strchr(ts, ':'))) {
+        if ((pts = strchr(ts, ':')))
 	  cli_user(sptr)->acc_id = strtoul(pts + 1, NULL, 10);
-          if ((pts = strchr(pts + 1, ':'))) {
-            cli_user(sptr)->acc_flags = strtoull(pts + 1, NULL, 10);
-             Debug((DEBUG_DEBUG, "Received timestamped+flagged account in user mode; "
-              "account \"%s\", timestamp %Tu, id %lu %llu", account,
-              cli_user(sptr)->acc_create,
-              cli_user(sptr)->acc_id,
-	      cli_user(sptr)->acc_flags));
-          }
-        } else {
-          Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
+        Debug((DEBUG_DEBUG, "Received timestamped account in user mode; "
 	      "account \"%s\", timestamp %Tu, id %lu", account,
 	      cli_user(sptr)->acc_create,
 	      cli_user(sptr)->acc_id));
-        }
       }
       ircd_strncpy(cli_user(sptr)->account, account, len);
   }
@@ -1639,9 +1629,9 @@ char *umode_str(struct Client *cptr, int opernames)
       Debug((DEBUG_DEBUG, "Sending timestamped account in user mode for "
 	     "account \"%s\"; timestamp %Tu", cli_user(cptr)->account,
 	     cli_user(cptr)->acc_create));
-      if(cli_user(cptr)->acc_id || cli_user(cptr)->acc_flags) {
-        ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu:%lu:%llu",
-                      cli_user(cptr)->acc_create, cli_user(cptr)->acc_id, cli_user(cptr)->acc_flags);
+      if(cli_user(cptr)->acc_id) {
+        ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu:%lu",
+                      cli_user(cptr)->acc_create, cli_user(cptr)->acc_id);
       } else {
         ircd_snprintf(0, t = nbuf, sizeof(nbuf), ":%Tu",
                       cli_user(cptr)->acc_create);

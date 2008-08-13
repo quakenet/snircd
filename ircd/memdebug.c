@@ -1,5 +1,4 @@
 #include <sys/types.h>
-#include "config.h"
 #include "ircd.h"
 #include "ircd_alloc.h"
 #include "ircd_log.h"

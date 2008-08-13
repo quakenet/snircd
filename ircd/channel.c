@@ -698,6 +698,13 @@ int member_can_send_to_channel(struct Membership* member, int reveal)
       RevealDelayedJoin(member);
     return 1;
   }
+  
+  /* +X user can always speak on the channel */
+  if (IsXtraOp(member->user)) {
+    if (IsDelayedJoin(member) && reveal)
+      RevealDelayedJoin(member);
+    return 1;
+  }
 
   /* Discourage using the Apass to get op.  They should use the Upass. */
   if (IsChannelManager(member) && member->channel->mode.apass[0])
@@ -750,7 +757,7 @@ int client_can_send_to_channel(struct Client *cptr, struct Channel *chptr, int r
   /*
    * Servers can always speak on channels.
    */
-  if (IsServer(cptr) || IsXtraOp(cptr))
+  if (IsServer(cptr))
     return 1;
 
   member = find_channel_member(cptr, chptr);
@@ -760,7 +767,9 @@ int client_can_send_to_channel(struct Client *cptr, struct Channel *chptr, int r
    * or +m (moderated).
    */
   if (!member) {
-    if ((chptr->mode.mode & (MODE_NOPRIVMSGS|MODE_MODERATED)) ||
+    if (IsXtraOp(cptr))
+      return 1;
+    else if ((chptr->mode.mode & (MODE_NOPRIVMSGS|MODE_MODERATED)) ||
 	((chptr->mode.mode & (MODE_REGONLY|MODE_MODERATENOREG)) && !IsAccount(cptr)))
       return 0;
     else
