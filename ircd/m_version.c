@@ -127,15 +127,22 @@ int m_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct Client *acptr;
+  char *target=parv[1];
 
   if (MyConnect(sptr) && parc > 1)
   {
-    if (!(acptr = find_match_server(parv[1])))
-    {
-      send_reply(sptr, ERR_NOSUCHSERVER, parv[1]);
+    /* Send version request to all servers when * is given as parameter */
+    if (target[0] == '*' && target[1] == '\0') { 
+      sendcmdto_serv_butone(sptr, CMD_VERSION, cptr, ":%s", target);
+      send_reply(sptr, RPL_VERSION, version, debugmode, cli_name(&me),
+	         debug_serveropts());
+	    return 0;
+    }
+    if (!(acptr = find_match_server(target))) {
+      send_reply(sptr, ERR_NOSUCHSERVER, target);
       return 0;
     }
-    parv[1] = cli_name(acptr);
+    target = cli_name(acptr);
   }
 
   if (hunt_server_cmd(sptr, CMD_VERSION, cptr, feature_int(FEAT_HIS_REMOTE),
@@ -160,17 +167,26 @@ int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 int ms_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct Client *acptr;
+  char *target=parv[1];
 
   if (MyConnect(sptr) && parc > 1)
   {
-    if (!(acptr = find_match_server(parv[1])))
+    if (!(acptr = find_match_server(target)))
     {
-      send_reply(sptr, ERR_NOSUCHSERVER, parv[1]);
+      send_reply(sptr, ERR_NOSUCHSERVER, target);
       return 0;
     }
-    parv[1] = cli_name(acptr);
+    target = cli_name(acptr);
   }
 
+  /* Version request with parameter *, send my version info and pass on the request */
+  if (target[0] == '*' && target[1] == '\0') 
+  {
+    sendcmdto_serv_butone(sptr, CMD_VERSION, cptr, ":%s", target);
+    send_reply(sptr, RPL_VERSION, version, debugmode, cli_name(&me),
+        debug_serveropts());
+    return 0;
+  }
   if (hunt_server_cmd(sptr, CMD_VERSION, cptr, 0, ":%C", 1, parc, parv) ==
       HUNTED_ISME)
   {
