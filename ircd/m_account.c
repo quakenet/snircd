@@ -90,6 +90,7 @@
 #include "s_debug.h"
 #include "s_user.h"
 #include "send.h"
+#include "s_misc.h"
 
 /* #include <assert.h> -- Now using assert in ircd_log.h */
 #include <stdlib.h>
@@ -144,7 +145,7 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
 
     cli_user(acptr)->acc_flags = acc_flags;
 
-    sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %llu",
+    sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %"PRIu64,
 			  acptr, cli_user(acptr)->account,
 			  cli_user(acptr)->acc_create,
 			  cli_user(acptr)->acc_id,
@@ -168,7 +169,7 @@ int ms_account(struct Client* cptr, struct Client* sptr, int parc,
   ircd_strncpy(cli_user(acptr)->account, parv[2], ACCOUNTLEN);
   hide_hostmask(acptr, FLAG_ACCOUNT);
 
-  sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %llu",
+  sendcmdto_serv_butone(sptr, CMD_ACCOUNT, cptr, "%C %s %Tu %lu %"PRIu64,
 			acptr, cli_user(acptr)->account,
 			cli_user(acptr)->acc_create,
 			cli_user(acptr)->acc_id,

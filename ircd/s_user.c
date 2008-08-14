@@ -1620,7 +1620,7 @@ char *umode_str(struct Client *cptr, int opernames)
   {
     char *t, nbuf[64+ACCOUNTLEN];
 
-    ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu:%llu",
+    ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu:%"PRIu64,
                   cli_user(cptr)->account, cli_user(cptr)->acc_create,
 		  cli_user(cptr)->acc_id, cli_user(cptr)->acc_flags);
 
