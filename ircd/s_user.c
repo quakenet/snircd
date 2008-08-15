@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c,v 1.99.2.11 2007/08/21 01:13:15 entrope Exp $
+ * @version $Id: s_user.c,v 1.99.2.12 2008/03/15 05:33:22 entrope Exp $
  */
 #include "config.h"
 
@@ -1078,7 +1078,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
 	  do_host_hiding = 1;
 	break;
       case 'r':
-	if (what == MODE_ADD) {
+	if (*(p + 1) && (what == MODE_ADD)) {
 	  account = *(++p);
 	  SetAccount(sptr);
 	}
