@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Functions that now (or in the past) relied on BSD APIs.
- * @version $Id: s_bsd.c,v 1.80.2.4 2007/05/29 03:08:33 entrope Exp $
+ * @version $Id: s_bsd.c,v 1.80.2.5 2008/03/15 05:24:14 entrope Exp $
  */
 #include "config.h"
 
@@ -182,7 +182,7 @@ int init_connection_limits(void)
   if (0 == limit)
     return 1;
   if (limit < 0) {
-    fprintf(stderr, "error setting max fd's to %d\n", limit);
+    fprintf(stderr, "error setting max fds to %d: %s\n", limit, strerror(errno));
   }
   else if (limit > 0) {
     fprintf(stderr, "ircd fd table too big\nHard Limit: %d IRC max: %d\n",
