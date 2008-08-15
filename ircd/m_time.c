@@ -104,6 +104,16 @@
  */
 int m_time(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
+  char *target=parv[1];
+
+  /* Time request with parameter *, send my time info and pass on the request */
+  if (parc > 1) { 
+    if (target[0] == '*' && target[1] == '\0' && IsOper(sptr)) {
+      sendcmdto_serv_butone(sptr, CMD_TIME, cptr, ":%s", target);
+      send_reply(sptr, RPL_TIME, cli_name(&me), TStime(), TSoffset, date((long)0));
+      return 0;
+    }
+  }
   if (hunt_server_cmd(sptr, CMD_TIME, cptr, feature_int(FEAT_HIS_REMOTE), ":%C",
                       1, parc, parv)
       != HUNTED_ISME)
