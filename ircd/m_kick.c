@@ -221,8 +221,12 @@ int ms_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
 
   /* We go ahead and pass on the KICK for users not on the channel */
-  if (!(member = find_member_link(chptr, who)) || IsZombie(member))
-    member = 0;
+  if (!(member = find_member_link(chptr, who)) || IsZombie(member)) {
+    if (member) {
+      make_zombie(member, who, cptr, sptr, chptr);
+      member=0;
+    }
+  }
 
   /* Send HACK notice, but not for servers in BURST */
   /* 2002-10-17: Don't send HACK if the users local server is kicking them */
