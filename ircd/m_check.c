@@ -168,6 +168,9 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
   return 1;
 }
 
+
+
+/* return number of clients from same IP on the channel */
 static int checkClones(struct Channel *chptr, struct Client *cptr) {
   int clones = 0, count = 0;
   struct Membership *lp;
@@ -175,7 +178,7 @@ static int checkClones(struct Channel *chptr, struct Client *cptr) {
 
   for (lp = chptr->members; lp; lp = lp->next_member) {
     acptr = lp->user;
-    if (!strcmp(cli_user(cptr)->realhost, cli_user(acptr)->realhost)) {
+    if (are_ips_clones(&cli_ip(cptr),&cli_ip(acptr))) { 
       clones++;
     }
   }
@@ -184,7 +187,7 @@ static int checkClones(struct Channel *chptr, struct Client *cptr) {
   if (clones >= 2) {
     for (lp = chptr->members; lp; lp = lp->next_member) {
       acptr = lp->user;
-      if (!strcmp(cli_user(cptr)->realhost, cli_user(acptr)->realhost)) {
+      if (are_ips_clones(&cli_ip(cptr),&cli_ip(acptr))) {
         cli_marker(acptr) = clones;
         count++;
         if (clones == count) {
@@ -196,6 +199,26 @@ static int checkClones(struct Channel *chptr, struct Client *cptr) {
 
   return clones;
 }
+
+
+/* compare IPs from clients and return 1 when they are clones
+ *  same IPv4 IP
+ *  IPv4 and IPv6 IPs, but IPv4 over IPv6 etc cases
+ *  IPv6 IPs from the same /64 block 
+ */
+int are_ips_clones(const struct irc_in_addr *ip1, const struct irc_in_addr *ip2) {
+  int ipv4ip1 = has_ipv4_addr(ip1);
+
+  /* are both ip addresses ipv4 or ipv6? if not, no clones */
+  if (ipv4ip1 != has_ipv4_addr(ip2)) return 0;
+
+  if (ipv4ip1) /* check ipv4 */
+    return (get_ipv4_addr(ip1) == get_ipv4_addr(ip2)) ? 1 : 0;
+
+  /* check ipv6 */
+  return ipmask_check(ip1, ip2, IPV6USERBITS) ? 1 : 0;
+}
+
 
 void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
   struct Membership *lp;

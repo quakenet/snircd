@@ -33,6 +33,13 @@
 #define HEADERLINE "--------------------------------------------------------------------"
 #define COLOR_OFF  '\017'
 
+/* IP is IPv4, or IPv4 over IPv6 (2002::/16 range) */
+#define has_ipv4_addr(x) (irc_in_addr_is_ipv4(x) || (x)->in6_16[0] == htons(0x2002))
+/* Return IP in IPv4 notation, also when IP is IPv4 over IPv6 */
+#define get_ipv4_addr(x) (irc_in_addr_is_ipv4(x) ? \
+                         (ntohs((x)->in6_16[6]) << 16) | ntohs((x)->in6_16[7]) : \
+                         (ntohs((x)->in6_16[1]) << 16) | ntohs((x)->in6_16[2]))
+
 extern void checkChannel(struct Client *sptr, struct Channel *chptr);
 extern void checkUsers(struct Client *sptr, struct Channel *chptr, int flags);
 extern void checkClient(struct Client *sptr, struct Client *acptr);

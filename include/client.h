@@ -793,6 +793,9 @@ struct Client {
 #define HIDE_IP 0 /**< Do not show IP address in get_client_name() */
 #define SHOW_IP 1 /**< Show ident and IP address in get_client_name() */
 
+/** Number of bits unique per user under IPv6, used for clone checks */
+#define IPV6USERBITS 64
+
 extern const char* get_client_name(const struct Client* sptr, int showip);
 extern const char* client_get_default_umode(const struct Client* sptr);
 extern int client_get_ping(const struct Client* local_client);
