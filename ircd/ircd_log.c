@@ -959,28 +959,29 @@ log_feature_mark(int flag)
 /** Feature list callback to report log settings.
  * @param[in] to Client requesting list.
  * @param[in] flag If non-zero, report default syslog facility.
+ * @param[in] showall If non-zero, report all (ignored). 
  */
 void
-log_feature_report(struct Client *to, int flag)
+log_feature_report(struct Client *to, int flag, int showall)
 {
   int i;
 
   for (i = 0; i < LS_LAST_SYSTEM; i++)
   {
-    if (logDesc[i].mark & LOG_MARK_FILE) /* report file */
+    if ((logDesc[i].mark & LOG_MARK_FILE) || (showall)) /* report file */
       send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s FILE %s",
                  logDesc[i].name, (logDesc[i].file && logDesc[i].file->file ?
                                    logDesc[i].file->file : "(terminal)"));
 
-    if (logDesc[i].mark & LOG_MARK_FACILITY) /* report facility */
+    if ((logDesc[i].mark & LOG_MARK_FACILITY) || (showall)) /* report facility */
       send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s FACILITY %s",
 		 logDesc[i].name, log_fac_name(logDesc[i].facility));
 
-    if (logDesc[i].mark & LOG_MARK_SNOMASK) /* report snomask */
+    if ((logDesc[i].mark & LOG_MARK_SNOMASK) || (showall))/* report snomask */
       send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s SNOMASK %s",
 		 logDesc[i].name, log_sno_name(logDesc[i].snomask));
 
-    if (logDesc[i].mark & LOG_MARK_LEVEL) /* report log level */
+    if ((logDesc[i].mark & LOG_MARK_LEVEL) || (showall)) /* report log level */
       send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s LEVEL %s",
 		 logDesc[i].name, log_lev_name(logDesc[i].level));
   }

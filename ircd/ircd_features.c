@@ -41,6 +41,7 @@
 #include "s_bsd.h"
 #include "s_debug.h"
 #include "s_misc.h"
+#include "s_stats.h"
 #include "send.h"
 #include "struct.h"
 #include "sys.h"    /* FALSE bleah */
@@ -232,7 +233,7 @@ typedef int  (*feat_mark_call)(int marked);
  * @param[in] sptr Client asking for feature list.
  * @param[in] marked Non-zero if the feature is marked.
  */
-typedef void (*feat_report_call)(struct Client* sptr, int marked);
+typedef void (*feat_report_call)(struct Client* sptr, int marked, int showall);
 
 #define FEAT_NONE   0x0000	/**< no value */
 #define FEAT_INT    0x0001	/**< set if entry contains an integer value */
@@ -835,24 +836,24 @@ feature_report(struct Client* to, const struct StatDesc* sd, char* param)
     switch (features[i].flags & FEAT_MASK) {
     case FEAT_NONE:
       if (features[i].report) /* let the callback handle this */
-	(*features[i].report)(to, features[i].flags & FEAT_MARK ? 1 : 0);
+	(*features[i].report)(to, features[i].flags & FEAT_MARK ? 1 : 0, sd->sd_funcdata);
       break;
 
 
     case FEAT_INT: /* Report an F-line with integer values */
-      if (features[i].flags & FEAT_MARK) /* it's been changed */
+      if ((features[i].flags & FEAT_MARK) || (sd->sd_funcdata)) /* it's been changed */
 	send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F %s %d",
 		   features[i].type, features[i].v_int);
       break;
 
     case FEAT_BOOL: /* Report an F-line with boolean values */
-      if (features[i].flags & FEAT_MARK) /* it's been changed */
+      if ((features[i].flags & FEAT_MARK) || (sd->sd_funcdata)) /* it's been changed */
 	send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F %s %s",
 		   features[i].type, features[i].v_int ? "TRUE" : "FALSE");
       break;
 
     case FEAT_STR: /* Report an F-line with string values */
-      if (features[i].flags & FEAT_MARK) { /* it's been changed */
+      if ((features[i].flags & FEAT_MARK) || (sd->sd_funcdata)) { /* it's been changed */
 	if (features[i].v_str)
 	  send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F %s %s",
 		     features[i].type, features[i].v_str);
