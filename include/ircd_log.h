@@ -110,7 +110,7 @@ extern char *log_get_default(void);
 
 extern void log_feature_unmark(void);
 extern int log_feature_mark(int flag);
-extern void log_feature_report(struct Client *to, int flag);
+extern void log_feature_report(struct Client *to, int flag, int showall);
 
 extern int log_inassert;
 

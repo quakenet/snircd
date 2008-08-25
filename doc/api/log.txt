@@ -221,7 +221,7 @@ documentation for notes on what this function does.
 </function>
 
 <function>
-void log_feature_report(struct Client *to, int flag);
+void log_feature_report(struct Client *to, int flag, int showall);
 
 This function is called by the ircd_features.c subsystem and should
 not be called by any other part of ircd.  See the features API
