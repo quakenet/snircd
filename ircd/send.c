@@ -892,7 +892,7 @@ void vsendto_opmask_butone(struct Client *one, unsigned int mask,
 {
   struct VarData vd;
   struct MsgBuf *mb;
-  int i = 0; /* so that 1 points to opsarray[0] */
+  unsigned int i = 0; /* so that 1 points to opsarray[0] */
   struct SLink *opslist;
 
   while ((mask >>= 1))
@@ -907,7 +907,7 @@ void vsendto_opmask_butone(struct Client *one, unsigned int mask,
    */
   vd.vd_format = pattern;
   va_copy(vd.vd_args, vl);
-  mb = msgq_make(0, ":%s " MSG_NOTICE " * :*** Notice -- %v", cli_name(&me),
+  mb = msgq_make(0, ":%s " MSG_NOTICE " * :*** Notice -%02u- %v", cli_name(&me), i,
 		 &vd);
 
   for (; opslist; opslist = opslist->next)
