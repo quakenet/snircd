@@ -106,6 +106,12 @@ int mo_die(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   if (!HasPriv(sptr, PRIV_DIE))
     return send_reply(sptr, ERR_NOPRIVILEGES);
 
+  if (parc < 2 || ircd_strcmp(parv[1],cli_name(&me))) {
+    sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :This will terminate the server %s", sptr, cli_name(&me));
+    sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :If you are sure this is what you want, use /quote DIE %s", sptr, cli_name(&me));
+    return 0;
+  }
+
   for (i = 0; i <= HighestFd; i++)
   {
     if (!(acptr = LocalClientArray[i]))

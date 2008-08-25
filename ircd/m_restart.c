@@ -86,6 +86,7 @@
 #include "ircd_log.h"
 #include "ircd_reply.h"
 #include "ircd_string.h"
+#include "msg.h"
 #include "numeric.h"
 #include "numnicks.h"
 #include "send.h"
@@ -99,6 +100,12 @@ int mo_restart(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   if (!HasPriv(sptr, PRIV_RESTART))
     return send_reply(sptr, ERR_NOPRIVILEGES);
+
+  if (parc < 2 || ircd_strcmp(parv[1],cli_name(&me))) {
+    sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :This will restart the server %s", sptr, cli_name(&me));
+    sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :If you are sure this is what you want, use /quote RESTART %s", sptr, cli_name(&me));
+    return 0;
+  }
 
   log_write(LS_SYSTEM, L_NOTICE, 0, "Server RESTART by %#C", sptr);
   server_restart("received RESTART");
