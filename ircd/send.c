@@ -826,8 +826,8 @@ void sendcmdto_match_butone(struct Client *from, const char *cmd,
   bump_sentalong(one);
   for (cptr = GlobalClientList; cptr; cptr = cli_next(cptr)) {
     if (!IsRegistered(cptr) || IsServer(cptr) ||
-	!match_it(from, cptr, to, who) || cli_fd(cli_from(cptr)) < 0 ||
-	cli_sentalong(cptr) == sentalong_marker)
+        cli_sentalong(cptr) == sentalong_marker ||
+	!match_it(from, cptr, to, who) || cli_fd(cli_from(cptr)) < 0)
       continue; /* skip it */
     cli_sentalong(cptr) = sentalong_marker;
 
