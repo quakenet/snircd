@@ -319,6 +319,10 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
         "Total users:: %d (%d ops, %d voiced, %d clones, %d authed, %d hidden)",
         cntr, opcntr, vcntr, clones, authed, delayedjoin);
+
+    for (lp = chptr->members; lp; lp = lp->next_member) {
+      cli_marker(lp->user) = 0;
+    }
   } else {
     ircd_snprintf(0, outbuf, sizeof(outbuf),
         "Total users:: %d (%d ops, %d voiced, %d authed, %d hidden)",
