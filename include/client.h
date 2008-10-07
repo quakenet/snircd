@@ -275,7 +275,7 @@ struct Client {
                                      server, XXX if this is a user */
   time_t         cli_firsttime;   /**< time client was created */
   time_t         cli_lastnick;    /**< TimeStamp on nick */
-  int            cli_marker;      /**< /who processing marker */
+  unsigned int   cli_marker;      /**< processing marker */
   struct Flags   cli_flags;       /**< client flags */
   unsigned int   cli_hopcount;    /**< number of servers to this 0 = local */
   struct irc_in_addr cli_ip;      /**< Real IP of client */
@@ -804,6 +804,7 @@ extern void client_add_sendq(struct Connection* con,
 			     struct Connection** con_p);
 extern void client_set_privs(struct Client *client, struct ConfItem *oper);
 extern int client_report_privs(struct Client* to, struct Client* client);
+extern unsigned int get_client_marker(void);
 
 #endif /* INCLUDED_client_h */
 
