@@ -283,6 +283,7 @@ struct Channel {
   struct SLink*      invites;	   /**< List of invites on this channel */
   struct Ban*        banlist;      /**< List of bans on this channel */
   struct Mode        mode;	   /**< This channels mode */
+  unsigned int       marker;       /**< Channel marker */
   char               topic[TOPICLEN + 1]; /**< Channels topic */
   char               topic_nick[NICKLEN + 1]; /**< Nick of the person who set
 						*  The topic
@@ -458,5 +459,7 @@ extern struct Ban *make_ban(const char *banstr);
 extern struct Ban *find_ban(struct Client *cptr, struct Ban *banlist);
 extern int apply_ban(struct Ban **banlist, struct Ban *newban, int free);
 extern void free_ban(struct Ban *ban);
+
+extern unsigned int get_channel_marker(void);
 
 #endif /* INCLUDED_channel_h */

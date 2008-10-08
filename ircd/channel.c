@@ -3772,3 +3772,21 @@ void CheckDelayedJoins(struct Channel *chan)
                                      "%H -d", chan);
   }
 }
+
+unsigned int get_channel_marker(void)
+{
+  static unsigned int marker = 0;
+
+  if (!++marker)
+  {
+    struct Channel *cptr;
+    for (cptr=GlobalChannelList;cptr;cptr=cptr->next)
+    {
+      cptr->marker = 0;
+    }
+
+    marker++;
+  }
+
+  return marker;
+}
