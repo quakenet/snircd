@@ -305,7 +305,7 @@ void relay_directed_message(struct Client* sptr, char* name, char* server, const
     *--host = '%';
 
   /* slug: I don't think this is required, but I might have missed something */
-  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr))
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsXtraOp(sptr))
     return;
 
   if (!(is_silenced(sptr, acptr)))
@@ -357,7 +357,7 @@ void relay_directed_notice(struct Client* sptr, char* name, char* server, const 
   if (host)
     *--host = '%';
 
-  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr))
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsXtraOp(sptr))
     return;
 
   if (!(is_silenced(sptr, acptr)))
@@ -394,7 +394,7 @@ void relay_private_message(struct Client* sptr, const char* name, const char* te
    * deny the message
    */
 
-  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr)) {
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsXtraOp(sptr)) {
     send_reply(sptr, ERR_ACCOUNTONLY, cli_name(acptr), feature_str(FEAT_URLREG));
     return;
   }
@@ -440,7 +440,7 @@ void relay_private_notice(struct Client* sptr, const char* name, const char* tex
    * deny the message
    */
 
-  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsOper(sptr))
+  if (IsAccountOnly(acptr) && !IsAccount(sptr) && !IsXtraOp(sptr))
     return;
 
   /*

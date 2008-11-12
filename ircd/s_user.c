@@ -850,7 +850,7 @@ int whisper(struct Client* source, const char* nick, const char* channel,
   if (is_silenced(source, dest))
     return 0;
 
-  if (IsAccountOnly(dest) && !IsAccount(source) && !IsOper(source)) {
+  if (IsAccountOnly(dest) && !IsAccount(source) && !IsXtraOp(source)) {
     if(!is_notice)
       send_reply(source, ERR_ACCOUNTONLY, cli_name(source), feature_str(FEAT_URLREG));
     return 0;
