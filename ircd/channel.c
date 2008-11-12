@@ -3031,9 +3031,13 @@ mode_process_bans(struct ParseState *state)
 	count--;
 	len -= banlen;
       } else {
+        /* we allow opmode to override both the average? length check
+         * and the maximum amount of bans
+         */
 	if (state->flags & MODE_PARSE_SET && MyUser(state->sptr) &&
 	    (len > (feature_int(FEAT_AVBANLEN) * feature_int(FEAT_MAXBANS)) ||
-	     count > feature_int(FEAT_MAXBANS))) {
+	     count > feature_int(FEAT_MAXBANS)) &&
+	    ((state->mbuf == NULL) || !(state->mbuf->mb_dest & MODEBUF_DEST_OPMODE))) {
 	  send_reply(state->sptr, ERR_BANLISTFULL, state->chptr->chname,
 		     ban->banstr);
 	  count--;
