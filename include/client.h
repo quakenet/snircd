@@ -752,7 +752,7 @@ struct Client {
 #define SNO_GLINE       0x200   /**< glines */
 #define SNO_NETWORK     0x400   /**< net join/break, etc */
 #define SNO_IPMISMATCH  0x800   /**< IP mismatches */
-#define SNO_THROTTLE    0x1000  /**< host throttle add/remove notices */
+#define SNO_SERVICEKILL 0x1000  /**< service kills (kills by service servers or clients on them) */
 #define SNO_OLDREALOP   0x2000  /**< old oper-only messages */
 #define SNO_CONNEXIT    0x4000  /**< client connect/exit (ugh) */
 #define SNO_AUTO        0x8000  /**< AUTO G-Lines */
@@ -772,7 +772,7 @@ struct Client {
 /** Server notice bits enabled by default for normal users. */
 #define SNO_DEFAULT (SNO_NETWORK|SNO_OPERKILL|SNO_GLINE)
 /** Server notice bits enabled by default for IRC operators. */
-#define SNO_OPERDEFAULT (SNO_DEFAULT|SNO_HACK2|SNO_HACK4|SNO_THROTTLE|SNO_OLDSNO)
+#define SNO_OPERDEFAULT (SNO_DEFAULT|SNO_HACK2|SNO_HACK4|SNO_OLDSNO)
 /** Server notice bits reserved to IRC operators. */
 #define SNO_OPER (SNO_CONNEXIT|SNO_OLDREALOP|SNO_AUTH)
 /** Noisy server notice bits that cause other bits to be cleared during connect. */

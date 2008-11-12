@@ -106,10 +106,17 @@
 static int do_kill(struct Client* cptr, struct Client* sptr,
 		   struct Client* victim, char* inpath, char* path, char* msg)
 {
+  int snomask;
+
   assert(0 != cptr);
   assert(0 != sptr);
   assert(!IsServer(victim));
 
+  /* determine what snomask the KILL should go to */
+  if (IsServer(sptr))
+    snomask = IsService(sptr) ? SNO_SERVICEKILL : SNO_SERVKILL;
+  else
+    snomask = IsService(cli_user(sptr)->server) ? SNO_SERVICEKILL : SNO_OPERKILL;
   /*
    * Notify all *local* opers about the KILL (this includes the one
    * originating the kill, if from this server--the special numeric
@@ -118,7 +125,7 @@ static int do_kill(struct Client* cptr, struct Client* sptr,
    * Note: "victim->name" is used instead of "user" because we may
    *       have changed the target because of the nickname change.
    */
-  sendto_opmask_butone(0, IsServer(sptr) ? SNO_SERVKILL : SNO_OPERKILL,
+  sendto_opmask_butone(0, snomask,
                        "Received KILL message for %s. From %s Path: %s!%s %s",
                        get_client_name(victim, SHOW_IP), cli_name(sptr),
                        inpath, path, msg);
