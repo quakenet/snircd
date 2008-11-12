@@ -104,7 +104,7 @@ static void userhost_formatter(struct Client* cptr, struct Client *sptr, struct 
 	       * of +x.  If an oper wants the real host, he should go to
 	       * /whois to get it.
 	       */
-	      (!HasPriv(sptr, PRIV_USER_PRIVACY)) ?
+	      (HasHiddenHost(cptr) || HasSetHost(cptr)) && (sptr != cptr) ?
 	      cli_user(cptr)->host : cli_user(cptr)->realhost);
 }
 
