@@ -26,6 +26,7 @@
 #include "class.h"
 #include "client.h"
 #include "hash.h"
+#include "IPcheck.h"
 #include "ircd.h"
 #include "ircd_alloc.h"
 #include "ircd_defs.h"
@@ -57,6 +58,8 @@
 #define CHECK_CLONES     0x40 /* -C */
 #define CHECK_SHOWSERVER 0x80 /* -s */
 #define CHECK_SHOWHOSTIP 0x100 /* -I */
+#define CHECK_SHOWMORE   0x200 /* -e */
+
 /*
  * - ASUKA ---------------------------------------------------------------------
  * This is the implimentation of the CHECK function for Asuka.
@@ -72,12 +75,14 @@
  * 
  * Where valid flags are:
  * -c: Show channels when checking a hostmask.
+ * -e: show more inform when checking a mask.
  * -i: Show IPs instead of hostnames when displaying results.
- * -o: Only show channel operators when checking a channel.
- * -u: Hide users when checking a channel.
  * -l: Show oplevels when checking a channel.
+ * -o: Only show channel operators when checking a channel.
+ * -s: show server user is on when checking a channel (or on a mask when combined with -e).
+ * -u: Hide users when checking a channel.
  * -C: Perform clone count when checking a channel.
- * -s: show server user is on when checking a channel. 
+ * -I: show hostnames and IPs when checking a channel.
  *
  * <hostmask> can be of the form host, user@host, nick!user@host, 
  * with host being host.domain.cc, 127.0.0.1 or 127.0.0.0/24.
@@ -134,7 +139,10 @@ int m_check(struct Client *cptr, struct Client *sptr, int parc, char *parv[]) {
       case 'I':
         flags |= CHECK_SHOWHOSTIP;
         break;
-      default:
+      case 'e':
+        flags |= CHECK_SHOWMORE;
+        break; 
+     default:
         /* might want to raise some sort of error here? */
         break;
       }
@@ -449,7 +457,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   } else
     send_reply(sptr, RPL_DATASTR, "         Status:: Client");
 
-  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected to:: %s (%d)", cli_name(cli_user(acptr)->server), cli_hopcount(acptr));
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected to:: %s (Hops: %d)", cli_name(cli_user(acptr)->server), cli_hopcount(acptr));
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   /* +s (SERV_NOTICE) is not relayed to us from remote servers,
@@ -494,6 +502,8 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
       }
       if (IsDeaf(acptr))
         *(chntext + len++) = '-';
+      if (!PubChannel(chptr)
+        *(chntext + len++) = '*';
       if (IsZombie(lp))
         *(chntext + len++) = '!';
       if (IsChanOp(lp))
@@ -618,6 +628,7 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
   char hoststr[NICKLEN + USERLEN + HOSTLEN + 3];
   char nickm[NICKLEN + 1], userm[USERLEN + 1], hostm[HOSTLEN + 1];
   char *p = NULL;
+  char *umodes;
   struct irc_in_addr cidr_check;
   unsigned char cidr_check_bits;
 
@@ -708,14 +719,32 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
         send_reply(sptr, RPL_CHKHEAD, "host", targhost);
 
         send_reply(sptr, RPL_DATASTR, " ");
-        ircd_snprintf(0, outbuf, sizeof(outbuf),  "%s   %-*s%-*s%s", "No.", (NICKLEN + 2), "Nick",
+        if (flags & CHECK_SHOWMORE)
+          ircd_snprintf(0, outbuf, sizeof(outbuf), "No. %s  nick  user@host  [IP]  (usermodes)  :realname", (flags & CHECK_CLONES) ? "[clients]" : ""); 
+        else 
+          ircd_snprintf(0, outbuf, sizeof(outbuf),  "%s   %-*s%-*s%s", "No.", (NICKLEN + 2), "Nick",
                 (USERLEN + 2), "User", "Host");
         send_reply(sptr, RPL_DATASTR, outbuf);
       }
 
-      ircd_snprintf(0, outbuf, sizeof(outbuf), "%-4d  %-*s%-*s%s", (count+1), (NICKLEN + 2),
-            acptr->cli_name, (USERLEN + 2), cli_user(acptr)->realusername, 
-            (flags & CHECK_SHOWIPS) ? ircd_ntoa(&(cli_ip(acptr))) : cli_user(acptr)->realhost);
+      if (flags & CHECK_SHOWMORE) {
+        /* show more information */
+        umodes = umode_str(acptr, UMODE_AND_ACCOUNT_SHORT);
+        ircd_snprintf(0, outbuf, sizeof(outbuf), "%-4d  ", (count+1));
+        if (flags & CHECK_CLONES)
+          ircd_snprintf(0, outbuf, sizeof(outbuf), "%s[%+3u]    ", outbuf, IPcheck_nr(acptr));
+        ircd_snprintf(0, outbuf, sizeof(outbuf), "%s%s  %s@%s  [%s]  (%s%s)  :%s", outbuf,
+              acptr->cli_name,
+              cli_user(acptr)->realusername, cli_user(acptr)->realhost,
+              ircd_ntoa(&(cli_ip(acptr))),
+              *umodes ? "+" : "<none>", umodes,
+              (flags & CHECK_SHOWSERVER) ? cli_name(cli_user(acptr)->server) : cli_info(acptr));
+      } else {
+        /* default output */
+        ircd_snprintf(0, outbuf, sizeof(outbuf), "%-4d  %-*s%-*s%s", (count+1), (NICKLEN + 2),
+              acptr->cli_name, (USERLEN + 2), cli_user(acptr)->realusername, 
+              (flags & CHECK_SHOWIPS) ? ircd_ntoa(&(cli_ip(acptr))) : cli_user(acptr)->realhost);
+      }
       send_reply(sptr, RPL_DATASTR, outbuf);
 
       /* Show channel output (if applicable) - the 50 channel limit sanity check
@@ -740,6 +769,8 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
             }
             if (IsDeaf(acptr))
               *(chntext + len++) = '-';
+            if (!PubChannel(chptr)
+              *(chntext + len++) = '*';
             if (IsZombie(lp))
               *(chntext + len++) = '!';
             if (IsChanOp(lp))
