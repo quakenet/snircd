@@ -495,12 +495,12 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
       }
       if (IsDeaf(acptr))
         *(chntext + len++) = '-';
-      if (is_chan_op(acptr, chptr))
-        *(chntext + len++) = '@';
-      else if (has_voice(acptr, chptr))
-        *(chntext + len++) = '+';
-      else if (IsZombie(lp))
+      if (IsZombie(lp))
         *(chntext + len++) = '!';
+      if (IsChanOp(lp))
+        *(chntext + len++) = '@';
+      else if (HasVoice(lp))
+        *(chntext + len++) = '+';
       else if (IsDelayedJoin(lp))
         *(chntext + len++) = '<';
       if (len)
@@ -741,12 +741,12 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
             }
             if (IsDeaf(acptr))
               *(chntext + len++) = '-';
-            if (is_chan_op(acptr, chptr))
-              *(chntext + len++) = '@';
-            else if (has_voice(acptr, chptr))
-              *(chntext + len++) = '+';
-            else if (IsZombie(lp))
+            if (IsZombie(lp))
               *(chntext + len++) = '!';
+            if (IsChanOp(lp))
+              *(chntext + len++) = '@';
+            else if (HasVoice(lp))
+              *(chntext + len++) = '+';
             else if (IsDelayedJoin(lp))
               *(chntext + len++) = '<';
             if (len)
