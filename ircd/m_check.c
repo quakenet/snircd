@@ -502,7 +502,7 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
       }
       if (IsDeaf(acptr))
         *(chntext + len++) = '-';
-      if (!PubChannel(chptr)
+      if (!PubChannel(chptr))
         *(chntext + len++) = '*';
       if (IsZombie(lp))
         *(chntext + len++) = '!';
@@ -769,7 +769,7 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
             }
             if (IsDeaf(acptr))
               *(chntext + len++) = '-';
-            if (!PubChannel(chptr)
+            if (!PubChannel(chptr))
               *(chntext + len++) = '*';
             if (IsZombie(lp))
               *(chntext + len++) = '!';

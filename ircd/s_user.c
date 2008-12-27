@@ -1621,9 +1621,12 @@ char *umode_str(struct Client *cptr, int type)
   {
     char *t, nbuf[64+ACCOUNTLEN];
 
-    ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu:%"PRIu64,
-                  cli_user(cptr)->account, cli_user(cptr)->acc_create,
-		  cli_user(cptr)->acc_id, cli_user(cptr)->acc_flags);
+    if ( type == UMODE_AND_ACCOUNT_SHORT)
+      ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s", cli_user(cptr)->account);
+    else
+      ircd_snprintf(0, t = nbuf, sizeof(nbuf), " %s:%Tu:%lu:%"PRIu64,
+                    cli_user(cptr)->account, cli_user(cptr)->acc_create,
+		    cli_user(cptr)->acc_id, cli_user(cptr)->acc_flags);
 
     while ((*m++ = *t++))
       ; /* Empty loop */
@@ -1632,7 +1635,7 @@ char *umode_str(struct Client *cptr, int type)
   }
 
   /* sethost parameter is wanted */
-  if (type != UMODE_AND_ACCOUNT && IsSetHost(cptr)) {
+  if ((type != UMODE_AND_ACCOUNT && type != UMODE_AND_ACCOUNT_SHORT) && IsSetHost(cptr)) {
     *m++ = ' ';
     ircd_snprintf(0, m, USERLEN + HOSTLEN + 2, "%s@%s", cli_user(cptr)->username,
          cli_user(cptr)->host);
