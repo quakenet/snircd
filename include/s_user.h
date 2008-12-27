@@ -54,6 +54,11 @@ struct Flags;
 #define ALLOWMODES_ANY	0 /**< Allow any user mode */
 #define ALLOWMODES_DEFAULT  1 /**< Only allow the subset of modes that are legit defaults */
 
+/* return sets for umode_str() */
+#define UMODE_ALL_PARAMS            0 /**< return the user modes and all parameters */
+#define UMODE_ALL_PARAMS_BUT_OPERID 1 /**< return the user modes and all parameters except OperID */
+#define UMODE_AND_ACCOUNT           2 /**< return the user modes and account parameter */
+
 /** Formatter function for send_user_info().
  * @param who Client being displayed.
  * @param sptr Client requesting information.
@@ -94,7 +99,7 @@ extern int hunt_server_prio_cmd(struct Client *from, const char *cmd,
 				int MustBeOper, const char *pattern,
 				int server, int parc, char *parv[]);
 extern struct Client* next_client(struct Client* next, const char* ch);
-extern char *umode_str(struct Client *cptr, int opernames);
+extern char *umode_str(struct Client *cptr, int type);
 extern void send_umode(struct Client *cptr, struct Client *sptr,
                        struct Flags *old, int sendset, int opernames);
 extern void set_snomask(struct Client *, unsigned int, int);

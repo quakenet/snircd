@@ -440,12 +440,13 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
     if (IsChannelService(acptr))
       send_reply(sptr, RPL_DATASTR, "         Status:: Network Service");
     else if (IsAnOper(acptr))
-      send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator (service)");
+      send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator (service) (ID: %s)", cli_user(acptr)->opername ? cli_user(acptr)->opername : "<unknown>");
     else 
       send_reply(sptr, RPL_DATASTR, "         Status:: Client (service)");
-  } else if (IsAnOper(acptr))
-    send_reply(sptr, RPL_DATASTR, "         Status:: IRC Operator");
-  else
+  } else if (IsAnOper(acptr)) {
+    ircd_snprintf(0, outbuf, sizeof(outbuf), "         Status:: IRC Operator (ID: %s)", cli_user(acptr)->opername ? cli_user(acptr)->opername : "<unknown>");
+    send_reply(sptr, RPL_DATASTR, outbuf);
+  } else
     send_reply(sptr, RPL_DATASTR, "         Status:: Client");
 
   ircd_snprintf(0, outbuf, sizeof(outbuf), "   Connected to:: %s (%d)", cli_name(cli_user(acptr)->server), cli_hopcount(acptr));
@@ -457,11 +458,9 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
    * (and breaks if the user is +r) so we won't do that either.
    */
 
-  umodes = umode_str(acptr, 1);
-  if (umodes[0] == '+')
-    strcpy(outbuf, "       Umode(s):: <none>");
-  else
-    ircd_snprintf(0, outbuf, sizeof(outbuf), "       Umode(s):: +%s", umodes);
+  /* show the usermodes and account info (but not OperID and sethost)  */
+  umodes = umode_str(acptr, UMODE_AND_ACCOUNT);
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "    Usermode(s):: %s%s", *umodes ? "+" : "<none>", umodes);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   if (cli_user(acptr)->joined == 0)

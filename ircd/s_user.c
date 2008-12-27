@@ -1586,7 +1586,7 @@ int set_user_mode(struct Client *cptr, struct Client *sptr, int parc,
  * @param[in] cptr Some user.
  * @return Pointer to a static buffer.
  */
-char *umode_str(struct Client *cptr, int opernames)
+char *umode_str(struct Client *cptr, int type)
 {
   /* Maximum string size: "owidgrx\0" */
   char *m = umodeBuf;
@@ -1603,7 +1603,8 @@ char *umode_str(struct Client *cptr, int opernames)
       *m++ = userModeList[i].c;
   }
 
-  if (opernames && IsOper(cptr))
+  /* OperID is wanted */
+  if (type == UMODE_ALL_PARAMS && IsOper(cptr))
   {
     *m++ = ' ';
     if (cli_user(cptr)->opername) {
@@ -1630,7 +1631,8 @@ char *umode_str(struct Client *cptr, int opernames)
     m--; /* Step back over the '\0' */
   }
 
-  if (IsSetHost(cptr)) {
+  /* sethost parameter is wanted */
+  if (type != UMODE_AND_ACCOUNT && IsSetHost(cptr)) {
     *m++ = ' ';
     ircd_snprintf(0, m, USERLEN + HOSTLEN + 2, "%s@%s", cli_user(cptr)->username,
          cli_user(cptr)->host);
