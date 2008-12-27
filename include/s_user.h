@@ -58,6 +58,7 @@ struct Flags;
 #define UMODE_ALL_PARAMS            0 /**< return the user modes and all parameters */
 #define UMODE_ALL_PARAMS_BUT_OPERID 1 /**< return the user modes and all parameters except OperID */
 #define UMODE_AND_ACCOUNT           2 /**< return the user modes and account parameter */
+#define UMODE_AND_ACCOUNT_SHORT     3 /**< return the user modes and account (but no account timestamp, ID or flags) */
 
 /** Formatter function for send_user_info().
  * @param who Client being displayed.
