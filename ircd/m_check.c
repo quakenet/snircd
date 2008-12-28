@@ -432,8 +432,8 @@ void checkClient(struct Client *sptr, struct Client *acptr) {
   ircd_snprintf(0, outbuf, sizeof(outbuf), "      Timestamp:: %s (%d)", myctime(acptr->cli_lastnick), acptr->cli_lastnick);
   send_reply(sptr, RPL_DATASTR, outbuf);
 
-  ircd_snprintf(0, outbuf, sizeof(outbuf), "  User/Hostmask:: %s@%s (%s)", cli_user(acptr)->username, cli_user(acptr)->host,
-  ircd_ntoa(&(cli_ip(acptr))));
+  ircd_snprintf(0, outbuf, sizeof(outbuf), "  User/Hostmask:: %s@%s [%s] (Clients: %hu)", cli_user(acptr)->username, cli_user(acptr)->host,
+  ircd_ntoa(&(cli_ip(acptr))), IPcheck_nr(acptr));
   send_reply(sptr, RPL_DATASTR, outbuf);
 
   if (IsSetHost(acptr) || HasHiddenHost(acptr)) {
@@ -732,7 +732,7 @@ signed int checkHostmask(struct Client *sptr, char *orighoststr, int flags) {
         umodes = umode_str(acptr, UMODE_AND_ACCOUNT_SHORT);
         ircd_snprintf(0, outbuf, sizeof(outbuf), "%-4d  ", (count+1));
         if (flags & CHECK_CLONES)
-          ircd_snprintf(0, outbuf, sizeof(outbuf), "%s[%+3u]    ", outbuf, IPcheck_nr(acptr));
+          ircd_snprintf(0, outbuf, sizeof(outbuf), "%s[%+3hu]    ", outbuf, IPcheck_nr(acptr));
         ircd_snprintf(0, outbuf, sizeof(outbuf), "%s%s  %s@%s  [%s]  (%s%s)  :%s", outbuf,
               acptr->cli_name,
               cli_user(acptr)->realusername, cli_user(acptr)->realhost,
