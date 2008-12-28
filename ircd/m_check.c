@@ -235,6 +235,7 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
 
   char outbuf[BUFSIZE], outbuf2[BUFSIZE], ustat[64];
   int cntr = 0, opcntr = 0, vcntr = 0, clones = 0, bans = 0, authed = 0, delayedjoin = 0;
+  char *zombie, *showlevel;
 
   if (flags & CHECK_SHOWUSERS) { 
     send_reply(sptr, RPL_DATASTR, "Users (@ = op, + = voice)");
@@ -250,6 +251,8 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     int opped = 0, c = 0;
 
     acptr = lp->user;
+    zombie = IsZombie(lp) ? "!" : "";
+    showlevel = (flags & CHECK_OPLEVELS) ? "   " : "";
 
     if (flags & CHECK_CLONES) {
       if (!cli_marker(acptr)) {
@@ -266,15 +269,15 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     if (IsChanOp(lp)) {
       if (flags & CHECK_OPLEVELS) {
         if (c) {
-          ircd_snprintf(0, ustat, sizeof(ustat), "%2d %3hu@", c, OpLevel(lp));
+          ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s%3hu@", c, zombie, OpLevel(lp));
         } else {
-          ircd_snprintf(0, ustat, sizeof(ustat), "%3hu@", OpLevel(lp));
+          ircd_snprintf(0, ustat, sizeof(ustat), "%s%3hu@", zombie, OpLevel(lp));
         }
       } else {
         if (c) {
-          ircd_snprintf(0, ustat, sizeof(ustat), "%2d @", c);
+          ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s@", c, zombie);
         } else {
-          ircd_snprintf(0, ustat, sizeof(ustat), "@");
+          ircd_snprintf(0, ustat, sizeof(ustat), "%s@", zombie);
         }
       }
       opcntr++;
@@ -282,25 +285,25 @@ void checkUsers(struct Client *sptr, struct Channel *chptr, int flags) {
     }
     else if (HasVoice(lp)) {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s+", c, (flags & CHECK_OPLEVELS) ? "   " : "");
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s%s+", c, showlevel, zombie);
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   +" : "+");
+        ircd_snprintf(0, ustat, sizeof(ustat), "%s%s+", showlevel, zombie);
       }
       vcntr++;
     }
     else if (IsDelayedJoin(lp)) {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s<", c, (flags & CHECK_OPLEVELS) ? "   " : "");
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d %s%s<", c, showlevel, zombie);
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%s", (flags & CHECK_OPLEVELS) ? "   <" : "<");
+        ircd_snprintf(0, ustat, sizeof(ustat), "%s%s<", showlevel, zombie);
       }
       delayedjoin++;
     }
     else {
       if (c) {
-        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s", c, (flags & CHECK_OPLEVELS) ? "   " : "");
+        ircd_snprintf(0, ustat, sizeof(ustat), "%2d  %s%s", c, showlevel, zombie);
       } else {
-        ircd_snprintf(0, ustat, sizeof(ustat), " %s", (flags & CHECK_OPLEVELS) ? "   " : "");
+        ircd_snprintf(0, ustat, sizeof(ustat), " %s%s", showlevel, zombie);
       }
     }
 
