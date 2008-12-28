@@ -526,12 +526,6 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (flags & GLINE_LOCAL) {
     assert(acptr);
 
-    /* normalize the action, first */
-    if (action == GLINE_LOCAL_ACTIVATE || action == GLINE_MODIFY)
-      action = GLINE_ACTIVATE;
-    else if (action == GLINE_LOCAL_DEACTIVATE)
-      action = GLINE_DEACTIVATE;
-
     /* If it's not for us, forward */
     /* UPDATE NOTE: Once all servers are updated to u2.10.12.11, the
      * format string in this sendcmdto_one() may be updated to omit
