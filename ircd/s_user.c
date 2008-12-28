@@ -461,7 +461,7 @@ int register_user(struct Client *cptr, struct Client *sptr)
   if (IsOper(sptr))
     ++UserStats.opers;
 
-  tmpstr = umode_str(sptr, 0);
+  tmpstr = umode_str(sptr, UMODE_ALL_PARAMS_BUT_OPERID);
 
   /* Do not send oper name and send full IP address to IPv6-grokking servers. */
   sendcmdto_flag_serv_butone(user->server, CMD_NICK, cptr,
@@ -484,7 +484,8 @@ int register_user(struct Client *cptr, struct Client *sptr)
                              iptobase64(ip_base64, &cli_ip(sptr), sizeof(ip_base64), 0),
                              NumNick(sptr), cli_info(sptr));
 
-  tmpstr = umode_str(sptr, 1);
+  tmpstr = umode_str(sptr, UMODE_ALL_PARAMS);
+
   /* Send oper name and full IP address to IPv6-grokking servers. */
   sendcmdto_flagarray_serv_butone(user->server, CMD_NICK, cptr,
                              ipv6andopername, 2, NULL, 0,
