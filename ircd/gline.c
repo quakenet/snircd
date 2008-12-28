@@ -989,8 +989,7 @@ gline_find(char *userhost, unsigned int flags)
 
   if (flags & (GLINE_BADCHAN | GLINE_ANY)) {
     gliter(BadChanGlineList, gline, sgline) {
-      if ((flags & GLINE_GLOBAL && gline->gl_flags & GLINE_LOCAL) ||
-	  (flags & GLINE_LOCAL && gline->gl_flags & GLINE_GLOBAL) ||
+      if ((flags & (GlineIsLocal(gline) ? GLINE_GLOBAL : GLINE_LOCAL)) ||
 	  (flags & GLINE_LASTMOD && !gline->gl_lastmod))
 	continue;
       else if ((flags & GLINE_EXACT ? ircd_strcmp(gline->gl_user, userhost) :
@@ -1007,8 +1006,7 @@ gline_find(char *userhost, unsigned int flags)
   canon_userhost(t_uh, &nick, &user, &host, "*");
 
   gliter(GlobalGlineList, gline, sgline) {
-    if ((flags & GLINE_GLOBAL && gline->gl_flags & GLINE_LOCAL) ||
-	(flags & GLINE_LOCAL && gline->gl_flags & GLINE_GLOBAL) ||
+    if ((flags & (GlineIsLocal(gline) ? GLINE_GLOBAL : GLINE_LOCAL)) ||
 	(flags & GLINE_LASTMOD && !gline->gl_lastmod))
       continue;
     else if (flags & GLINE_EXACT) {

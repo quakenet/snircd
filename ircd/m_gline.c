@@ -581,9 +581,6 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (!agline) /* G-line doesn't exist, so let's complain... */
 	return send_reply(sptr, ERR_NOSUCHGLINE, mask);
 
-      if (!GlineIsLocal(agline)) 
-        return send_reply(sptr, SND_EXPLICIT | ERR_NOSUCHGLINE, ":No such local gline");
-      
       /* Let's now destroy the G-line */
       Debug((DEBUG_DEBUG, "I am destroying a local G-line here; target %s, "
 	     "mask %s, operforce %s, action %s", target, mask,
