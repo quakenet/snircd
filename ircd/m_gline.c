@@ -318,7 +318,7 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   }
 
-  if (!lastmod) /* must have a lastmod parameter by now */
+  if (!lastmod || action == GLINE_LOCAL_ACTIVATE || action == GLINE_LOCAL_DEACTIVATE ) /* must have a lastmod parameter by now */
     return need_more_params(sptr, "GLINE");
 
   Debug((DEBUG_DEBUG, "I have a global G-line I am acting upon now; "
