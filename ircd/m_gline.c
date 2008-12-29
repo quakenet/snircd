@@ -588,7 +588,7 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /* can't modify a G-line that doesn't exist... */
   if (!agline &&
       (action == GLINE_MODIFY || action == GLINE_LOCAL_ACTIVATE ||
-       action == GLINE_LOCAL_DEACTIVATE))
+       action == GLINE_LOCAL_DEACTIVATE || (action == GLINE_DEACTIVATE && expire == 0)))
     return send_reply(sptr, ERR_NOSUCHGLINE, mask);
 
   /* check for G-line permissions... */
