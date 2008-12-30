@@ -234,7 +234,7 @@ do_gline(struct Client *cptr, struct Client *sptr, struct Gline *gline)
         if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
           continue;
         sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
-        sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+        sendcmdto_channel_butserv_butone(&his, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
         make_zombie(member, member->user, &me, &me, chptr);
         retval=1;
       }
