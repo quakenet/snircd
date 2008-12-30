@@ -285,6 +285,18 @@ static void exit_one_client(struct Client* bcptr, const char* comment)
   remove_client_from_list(bcptr);
 }
 
+/*
+ * report_lost_links
+ * send map of lost links to SNO_NETWORK
+ * using dump_map from m_map.c
+ */
+void dump_map(struct Client *server, char *mask, int prompt_length,
+  void (*reply_function)(void **, const char *, int), void **args);
+static void report_lost_links(void **args, const char *buf, int overflow)
+{
+  sendto_opmask_butone(0, SNO_NETWORK, "     Lost: %s", buf);
+}
+
 /* exit_downlinks - added by Run 25-9-94 */
 /**
  * Removes all clients and downlinks (+clients) of any server
@@ -470,6 +482,7 @@ int exit_client(struct Client *cptr,
 			   get_client_name(killer, HIDE_IP));
     sendto_opmask_butone(0, SNO_NETWORK, "Net break: %C %C (%s)",
 			 cli_serv(victim)->up, victim, comment);
+    dump_map(victim, "*", 0, report_lost_links, 0);
   }
 
   /*

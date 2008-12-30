@@ -102,17 +102,21 @@
 #include <stdio.h>
 #include <string.h>
 
-static void dump_map(struct Client *cptr, struct Client *server, char *mask, int prompt_length)
+void dump_map(struct Client *server, char *mask, int prompt_length, void (*reply_function)(void **, const char *, int), void **args)
 {
   const char *chr;
   static char prompt[64];
   struct DLink *lp;
   char *p = prompt + prompt_length;
   int cnt = 0;
+  static char buf[512];
   
   *p = '\0';
   if (prompt_length > 60)
-    send_reply(cptr, RPL_MAPMORE, prompt, cli_name(server));
+  {
+    ircd_snprintf(0, buf, sizeof(buf), "%s%s --> *more*", prompt, cli_name(server));
+    reply_function(args, buf, 1);
+  }
   else
   {
     char lag[512];
@@ -128,9 +132,13 @@ static void dump_map(struct Client *cptr, struct Client *server, char *mask, int
       chr = "!";
     else
       chr = "";
-    send_reply(cptr, RPL_MAP, prompt, chr, cli_name(server),
-               lag, (server == &me) ? UserStats.local_clients :
-                                      cli_serv(server)->clients);
+
+    ircd_snprintf(0, buf, sizeof(buf), "%s%s%s %s [%u clients]",
+                  prompt, chr, cli_name(server), lag,
+                  (server == &me) ? UserStats.local_clients :
+                                    cli_serv(server)->clients);
+
+    reply_function(args, buf, 0);
   }
   if (prompt_length > 0)
   {
@@ -155,12 +163,21 @@ static void dump_map(struct Client *cptr, struct Client *server, char *mask, int
       continue;
     if (--cnt == 0)
       *p = '`';
-    dump_map(cptr, lp->value.cptr, mask, prompt_length + 2);
+    dump_map(lp->value.cptr, mask, prompt_length + 2, reply_function, args);
   }
   if (prompt_length > 0)
     p[-1] = '-';
 }
 
+static void map_reply(void **args, const char *buf, int overflow)
+{
+  struct Client *cptr = (struct Client *)args[0];
+
+  if (!overflow)
+    send_reply(cptr, RPL_MAP, buf);
+  else
+    send_reply(cptr, RPL_MAPMORE, buf);
+}
 
 /*
  * m_map - generic message handler
@@ -171,6 +188,7 @@ static void dump_map(struct Client *cptr, struct Client *server, char *mask, int
  */
 int m_map(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
+  void *args[1];
   if (feature_bool(FEAT_HIS_MAP) && (!IsAnOper(sptr) || (IsAnOper(sptr) && !HasPriv(sptr, PRIV_ROUTEINFO))))
   {
     sendcmdto_one(&me, CMD_NOTICE, sptr, "%C :%s %s", sptr,
@@ -180,7 +198,9 @@ int m_map(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   }
   if (parc < 2)
     parv[1] = "*";
-  dump_map(sptr, &me, parv[1], 0);
+
+  args[0] = sptr;
+  dump_map(&me, parv[1], 0, map_reply, args);
   send_reply(sptr, RPL_MAPEND);
 
   return 0;

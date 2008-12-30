@@ -95,6 +95,20 @@
 
 /* #include <assert.h> -- Now using assert in ircd_log.h */
 
+
+/*
+ * report_new_links
+ * send map of new links to SNO_NETWORK
+ * using dump_map from m_map.c
+ */
+void dump_map(struct Client *server, char *mask, int prompt_length,
+  void (*reply_function)(void **, const char *, int), void **args);
+static void report_new_links(void **args, const char *buf, int overflow)
+{
+  sendto_opmask_butone(0, SNO_NETWORK, "  New server: %s", buf);
+}
+
+
 /*
  * ms_end_of_burst - server message handler
  * - Added Xorath 6-14-96, rewritten by Run 24-7-96
@@ -115,11 +129,12 @@ int ms_end_of_burst(struct Client* cptr, struct Client* sptr, int parc, char* pa
   assert(0 != cptr);
   assert(0 != sptr);
 
-  sendto_opmask_butone(0, SNO_NETWORK, "Completed net.burst from %C.", 
-  	sptr);
   sendcmdto_serv_butone(sptr, CMD_END_OF_BURST, cptr, "");
   ClearBurst(sptr);
   SetBurstAck(sptr);
+  dump_map(sptr, "*", 0, report_new_links, 0);
+  sendto_opmask_butone(0, SNO_NETWORK, "Completed net.burst from %C.", 
+  	sptr);
   if (MyConnect(sptr))
     sendcmdto_one(&me, CMD_END_OF_BURST_ACK, sptr, "");
 
