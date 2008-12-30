@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Debug support for the ircd.
- * @version $Id: s_debug.c,v 1.41 2005/06/19 02:31:27 entrope Exp $
+ * @version $Id: s_debug.c 1429 2005-06-19 02:31:27Z entrope $
  */
 #include "config.h"
 

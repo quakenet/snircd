@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_endburst.c,v 1.10 2005/05/30 13:14:53 entrope Exp $
+ * $Id: m_endburst.c 1411 2005-05-30 13:14:54Z entrope $
  */
 
 /*

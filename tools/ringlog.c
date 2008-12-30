@@ -15,7 +15,7 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 **
-** @(#)$Id: ringlog.c,v 1.4 2004/07/01 12:38:28 entrope Exp $
+** @(#)$Id: ringlog.c 1084 2004-07-01 12:38:31Z entrope $
 */
 /*
  * This file contains two separate pieces, along with some common

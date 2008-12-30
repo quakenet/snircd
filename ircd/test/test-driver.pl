@@ -4,7 +4,7 @@
 # collection isn't broken.  POE is sometimes too clever for our good
 # in finding references to sessions, and keeps running even after we
 # want to stop.
-# $Id: test-driver.pl,v 1.3 2005/05/31 00:26:19 entrope Exp $
+# $Id: test-driver.pl 1419 2005-05-31 00:26:19Z entrope $
 
 # This interprets a simple scripting language.  Lines starting with a
 # hash mark (#, aka octothorpe, pound sign, etc) are ignored.  The

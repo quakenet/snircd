@@ -1,6 +1,6 @@
 /** @file s_misc.h
  * @brief Miscellaneous support functions and declarations.
- * @version $Id: s_misc.h,v 1.10 2005/06/27 13:11:52 entrope Exp $
+ * @version $Id: s_misc.h 1436 2005-06-27 13:11:52Z entrope $
  */
 #ifndef INCLUDED_s_misc_h
 #define INCLUDED_s_misc_h

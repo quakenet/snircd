@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_admin.c,v 1.13.2.1 2007/05/20 13:02:51 entrope Exp $
+ * $Id: m_admin.c 1803 2007-05-20 13:02:51Z entrope $
  */
 
 /*

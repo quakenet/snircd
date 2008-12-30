@@ -1,6 +1,6 @@
 /** @file match.h
  * @brief Interface for matching strings to IRC masks.
- * @version $Id: match.h,v 1.7 2005/09/12 03:40:17 entrope Exp $
+ * @version $Id: match.h 1478 2005-09-12 03:40:17Z entrope $
  */
 #ifndef INCLUDED_match_h
 #define INCLUDED_match_h

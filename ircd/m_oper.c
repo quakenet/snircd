@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_oper.c,v 1.25 2005/03/19 22:52:33 entrope Exp $
+ * $Id: m_oper.c 1327 2005-03-19 22:52:33Z entrope $
  */
 
 /*

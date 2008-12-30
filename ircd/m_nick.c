@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_nick.c,v 1.25.2.2 2006/11/04 21:42:00 entrope Exp $
+ * $Id: m_nick.c 1729 2006-11-04 21:42:00Z entrope $
  */
 
 /*

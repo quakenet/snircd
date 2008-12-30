@@ -46,7 +46,7 @@
 
 /** @file
  * @brief Hash table management.
- * @version $Id: hash.c,v 1.18.2.1 2007/11/05 03:01:34 entrope Exp $
+ * @version $Id: hash.c 1841 2007-11-05 03:01:34Z entrope $
  *
  * This file used to use some very complicated hash function.  Now it
  * uses CRC-32, but effectively remaps each input byte according to a

@@ -17,7 +17,7 @@
 ## Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ## MA 02111-1307, USA
 ##
-## @(#)$Id: Makefile.am,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+## @(#)$Id: Makefile.am 923 2003-03-07 02:36:11Z klmitch $
 ##
 ## Process this file with automake to generate Makefile.in
 

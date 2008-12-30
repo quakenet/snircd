@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Linux epoll_*() event engine.
- * @version $Id: engine_epoll.c,v 1.12 2005/08/25 01:26:46 entrope Exp $
+ * @version $Id: engine_epoll.c 1463 2005-08-25 01:26:46Z entrope $
  */
 #include "config.h"
 

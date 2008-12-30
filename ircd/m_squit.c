@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_squit.c,v 1.12 2005/03/20 16:06:24 entrope Exp $
+ * $Id: m_squit.c 1334 2005-03-20 16:06:30Z entrope $
  */
 #include "config.h"
 

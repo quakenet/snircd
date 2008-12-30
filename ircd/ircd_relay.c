@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Helper functions to relay various types of messages.
- * @version $Id: ircd_relay.c,v 1.17 2004/12/11 05:13:45 klmitch Exp $
+ * @version $Id: ircd_relay.c 1271 2004-12-11 05:14:07Z klmitch $
  *
  * There are four basic types of messages, each with four subtypes.
  *

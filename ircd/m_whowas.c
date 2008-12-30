@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_whowas.c,v 1.12.2.1 2006/01/01 04:39:07 entrope Exp $
+ * $Id: m_whowas.c 1599 2006-01-01 04:39:07Z entrope $
  */
 
 /*

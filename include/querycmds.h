@@ -1,6 +1,6 @@
 /** @file
  * @brief Interface and declarations for client counting functions.
- * @version $Id: querycmds.h,v 1.7 2004/10/03 17:02:23 entrope Exp $
+ * @version $Id: querycmds.h 1212 2004-10-03 17:02:23Z entrope $
  */
 #ifndef INCLUDED_querycmds_h
 #define INCLUDED_querycmds_h

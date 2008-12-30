@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief POSIX poll() event engine.
- * @version $Id: engine_poll.c,v 1.10 2004/12/11 05:13:44 klmitch Exp $
+ * @version $Id: engine_poll.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 #include "config.h"
 

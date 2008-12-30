@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Report operators' privileges to others
- * @version $Id: m_privs.c,v 1.6.2.2 2007/05/20 14:15:58 entrope Exp $
+ * @version $Id: m_privs.c 1810 2007-05-20 14:15:58Z entrope $
  */
 
 #include "config.h"

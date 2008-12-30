@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c,v 1.155.2.20 2007/12/28 15:52:43 klmitch Exp $
+ * @version $Id: channel.c 1860 2007-12-28 15:52:43Z klmitch $
  */
 #include "config.h"
 

@@ -1,6 +1,6 @@
 /** @file opercmds.h
  * @brief Declarations of AsLL ping helper commands.
- * @version $Id: opercmds.h,v 1.5 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: opercmds.h 1231 2004-10-05 04:21:37Z entrope $
  */
 #ifndef INCLUDED_opercmds_h
 #define INCLUDED_opercmds_h

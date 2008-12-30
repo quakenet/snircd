@@ -1,3 +1,23 @@
+2008-11-17  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_kick.c (ms_kick): Properly handle crossing net rider and
+	normal KICKs (in the case where we get the normal kick first).
+
+2008-11-17  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/match.c (match): Fix an error in backtracking (apparently
+	exacerbated by escapes).
+
+	* ircd/test/ircd_match_t.c: Update headers and make sure we have a
+	mmap() anonymous request flag.
+	(test_match): New function.
+	(do_match_test): Use it instead of calling match() directly.
+
+2008-09-07  Perry Lorier <isomer@undernet.org>
+	
+	* ircd/m_kill.c: Remove the . from the end of the nickname in kill
+	messages to make cut and pasting easier.
+
 2008-03-20  Michael Poole <mdpoole@troilus.org>
 
 	* ircd/ircd_string.c (ircd_aton_ip4): Reject strings with more

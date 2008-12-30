@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Entry point and other initialization functions for the daemon.
- * @version $Id: ircd.c,v 1.91.2.5 2007/03/17 14:17:27 entrope Exp $
+ * @version $Id: ircd.c 1776 2007-03-17 14:17:28Z entrope $
  */
 #include "config.h"
 

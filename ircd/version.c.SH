@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: version.c.SH,v 1.7.2.5 2007/11/30 23:50:04 klmitch Exp $
+# $Id: version.c.SH 1852 2007-11-30 23:50:04Z klmitch $
 
 echo "Extracting ircd/version.c ..."
 

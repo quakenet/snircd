@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: sys.h,v 1.6 2005/07/12 02:13:10 entrope Exp $
+ * $Id: sys.h 1442 2005-07-12 02:13:10Z entrope $
  */
 #ifndef INCLUDED_sys_h
 #define INCLUDED_sys_h

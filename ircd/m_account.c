@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_account.c,v 1.6 2004/12/11 05:13:46 klmitch Exp $
+ * $Id: m_account.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 
 /*

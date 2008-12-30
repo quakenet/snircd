@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Send a numeric message to a client.
- * @version $Id: s_numeric.c,v 1.11.2.1 2005/10/10 12:17:48 entrope Exp $
+ * @version $Id: s_numeric.c 1519 2005-10-10 12:18:11Z entrope $
  */
 #include "config.h"
 

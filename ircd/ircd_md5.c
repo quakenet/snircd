@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief MD5 implementation for ircu.
- * @version $Id: ircd_md5.c,v 1.4 2004/10/05 22:51:47 entrope Exp $
+ * @version $Id: ircd_md5.c 1234 2004-10-05 22:51:47Z entrope $
  */
 
 #include <string.h>

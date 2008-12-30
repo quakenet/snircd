@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: Bounce.h,v 1.3 2002/03/07 22:52:57 ghostwolf Exp $
+ * $Id: Bounce.h 667 2002-03-07 22:52:57Z ghostwolf $
  *
  */
 

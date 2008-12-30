@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of functions dealing with data buffers.
- * @version $Id: dbuf.c,v 1.12 2004/12/11 05:13:44 klmitch Exp $
+ * @version $Id: dbuf.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 #include "config.h"
 

@@ -23,7 +23,7 @@
  */
 /** @file
  * @brief Message-of-the-day manipulation implementation.
- * @version $Id: motd.c,v 1.22 2005/05/10 03:43:08 entrope Exp $
+ * @version $Id: motd.c 1402 2005-05-10 03:43:09Z entrope $
  */
 #include "config.h"
 

@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Singly and doubly linked list manipulation implementation.
- * @version $Id: list.c,v 1.34.2.4 2007/03/18 01:33:02 entrope Exp $
+ * @version $Id: list.c 1781 2007-03-18 01:33:02Z entrope $
  */
 #include "config.h"
 

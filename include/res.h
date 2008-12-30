@@ -1,6 +1,6 @@
 /** @file
  * @brief IRC resolver API.
- * @version $Id: res.h,v 1.17.2.4 2007/08/09 03:41:18 entrope Exp $
+ * @version $Id: res.h 1823 2007-08-09 03:41:18Z entrope $
  */
 
 #ifndef INCLUDED_res_h

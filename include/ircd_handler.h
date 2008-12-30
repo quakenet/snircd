@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Message handler types and definitions.
- * @version $Id: ircd_handler.h,v 1.2 2004/10/05 04:11:36 entrope Exp $
+ * @version $Id: ircd_handler.h 1228 2004-10-05 04:11:36Z entrope $
  */
 #ifndef INCLUDED_ircd_handler_h
 #define INCLUDED_ircd_handler_h

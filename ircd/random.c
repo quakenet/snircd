@@ -17,7 +17,7 @@
  */
 /** @file
  * @brief 32-bit pseudo-random number generator implementation.
- * @version $Id: random.c,v 1.8 2004/10/06 00:22:09 entrope Exp $
+ * @version $Id: random.c 1235 2004-10-06 00:22:09Z entrope $
  */
 #include "config.h"
 

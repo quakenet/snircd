@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# @(#)$Id: ringlog.pl,v 1.4 2004/07/01 12:38:28 entrope Exp $
+# @(#)$Id: ringlog.pl 1084 2004-07-01 12:38:31Z entrope $
 #
 # This program is intended to be used in conjunction with ringlog and
 # the binutils program addr2line.  The -r option specifies the path to

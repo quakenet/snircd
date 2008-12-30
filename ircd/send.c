@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Send messages to certain targets.
- * @version $Id: send.c,v 1.55.2.2 2007/10/30 01:14:50 entrope Exp $
+ * @version $Id: send.c 1835 2007-10-30 01:14:50Z entrope $
  */
 #include "config.h"
 

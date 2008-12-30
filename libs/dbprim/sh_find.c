@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: sh_find.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $
+** @(#)$Id: sh_find.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: sh_find.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $");
+RCSTAG("@(#)$Id: sh_find.c 923 2003-03-07 02:36:11Z klmitch $");
 
 struct _sh_find_s {
   smat_comp_t	sf_comp;	/* comparison function */

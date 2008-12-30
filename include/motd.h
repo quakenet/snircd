@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Message-of-the-day manipulation interface and declarations.
- * @version $Id: motd.h,v 1.8 2004/10/17 01:58:16 entrope Exp $
+ * @version $Id: motd.h 1248 2004-10-17 01:58:17Z entrope $
  */
 
 #ifndef INCLUDED_time_h

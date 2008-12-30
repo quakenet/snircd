@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_destruct.c,v 1.9.2.3 2006/01/03 01:25:50 entrope Exp $
+ * $Id: m_destruct.c 1600 2006-01-03 01:25:50Z entrope $
  */
 
 #include "config.h"

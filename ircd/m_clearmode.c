@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_clearmode.c,v 1.31 2005/09/27 02:41:57 entrope Exp $
+ * $Id: m_clearmode.c 1496 2005-09-27 02:41:57Z entrope $
  */
 
 /*

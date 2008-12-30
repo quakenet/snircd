@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief  Interface and declarations for juped server handling.
- * @version $Id: jupe.h,v 1.6 2004/10/03 14:12:35 entrope Exp $
+ * @version $Id: jupe.h 1208 2004-10-03 14:12:35Z entrope $
  */
 #ifndef INCLUDED_sys_types_h
 #include <sys/types.h>

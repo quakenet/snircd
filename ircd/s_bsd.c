@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Functions that now (or in the past) relied on BSD APIs.
- * @version $Id: s_bsd.c,v 1.80.2.5 2008/03/15 05:24:14 entrope Exp $
+ * @version $Id: s_bsd.c 1863 2008-03-15 05:24:14Z entrope $
  */
 #include "config.h"
 

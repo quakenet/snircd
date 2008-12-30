@@ -2,7 +2,7 @@
 # linesync.sh, Copyright (c) 2002 Arjen Wolfs
 # 20020604, sengaia@undernet.org
 # 20050417, daniel@undernet.org  - modified for u2.10.12
-# $Id: linesync.sh,v 1.5 2005/04/17 16:59:49 entrope Exp $
+# $Id: linesync.sh 1368 2005-04-17 16:59:49Z entrope $
 #
 # The code contained is in this file is licenced under the terms
 # and conditions as specified in the GNU General Public License.

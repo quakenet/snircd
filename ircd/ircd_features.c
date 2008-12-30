@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c,v 1.50.2.8 2007/05/20 14:50:27 entrope Exp $
+ * @version $Id: ircd_features.c 1812 2007-05-20 14:50:27Z entrope $
  */
 #include "config.h"
 

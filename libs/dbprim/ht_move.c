@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: ht_move.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $
+** @(#)$Id: ht_move.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: ht_move.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $");
+RCSTAG("@(#)$Id: ht_move.c 923 2003-03-07 02:36:11Z klmitch $");
 
 /** \ingroup dbprim_hash
  * \brief Move an entry in the hash table.

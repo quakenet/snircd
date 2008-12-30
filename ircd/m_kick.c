@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_kick.c,v 1.19.2.4 2005/11/14 21:17:07 entrope Exp $
+ * $Id: m_kick.c 1893 2008-11-18 03:18:46Z entrope $
  */
 
 /*
@@ -206,8 +206,21 @@ int ms_kick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
 
   /* We go ahead and pass on the KICK for users not on the channel */
-  if (!(member = find_member_link(chptr, who)) || IsZombie(member))
+  member = find_member_link(chptr, who);
+  if (member && IsZombie(member))
+  {
+    /* We might get a KICK from a zombie's own server because the user
+     * net-rode during a burst (which always generates a KICK) *and*
+     * was kicked via another server.  In that case, we must remove
+     * the user from the channel.
+     */
+    if (sptr == cli_user(who)->server)
+    {
+      remove_user_from_channel(who, chptr);
+    }
+    /* Otherwise, we treat zombies like they are not channel members. */
     member = 0;
+  }
 
   /* Send HACK notice, but not for servers in BURST */
   /* 2002-10-17: Don't send HACK if the users local server is kicking them */

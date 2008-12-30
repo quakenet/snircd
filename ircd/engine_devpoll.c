@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Solaris /dev/poll event engine.
- * @version $Id: engine_devpoll.c,v 1.6.2.1 2005/12/30 13:28:40 entrope Exp $
+ * @version $Id: engine_devpoll.c 1593 2005-12-30 13:28:42Z entrope $
  */
 #include "config.h"
 

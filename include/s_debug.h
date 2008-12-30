@@ -1,6 +1,6 @@
 /* @file s_debug.h
  * @brief Debug APIs for the ircd.
- * @version $Id: s_debug.h,v 1.12 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: s_debug.h 1231 2004-10-05 04:21:37Z entrope $
  */
 #ifndef INCLUDED_s_debug_h
 #define INCLUDED_s_debug_h

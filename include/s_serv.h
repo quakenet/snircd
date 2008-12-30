@@ -1,6 +1,6 @@
 /** @file s_serv.h
  * @brief Miscellaneous server support functions.
- * @version $Id: s_serv.h,v 1.7 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: s_serv.h 1231 2004-10-05 04:21:37Z entrope $
  */
 #ifndef INCLUDED_s_serv_h
 #define INCLUDED_s_serv_h

@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: sh_init.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $
+** @(#)$Id: sh_init.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: sh_init.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $");
+RCSTAG("@(#)$Id: sh_init.c 923 2003-03-07 02:36:11Z klmitch $");
 
 /** \ingroup dbprim_smat
  * \brief Dynamically initialize a sparse matrix row or column head.

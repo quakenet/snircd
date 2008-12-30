@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation for handling listening sockets.
- * @version $Id: listener.c,v 1.28.2.6 2007/05/20 14:10:30 entrope Exp $
+ * @version $Id: listener.c 1809 2007-05-20 14:10:30Z entrope $
  */
 #include "config.h"
 

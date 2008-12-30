@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of timed channel destruction events.
- * @version $Id: destruct_event.c,v 1.4 2004/12/11 05:13:44 klmitch Exp $
+ * @version $Id: destruct_event.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 #include "config.h"
 

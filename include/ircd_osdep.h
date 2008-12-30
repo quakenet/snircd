@@ -1,6 +1,6 @@
 /** @file ircd_osdep.h
  * @brief Public definitions and APIs for OS-dependent operations.
- * @version $Id: ircd_osdep.h,v 1.7.2.2 2006/03/14 03:45:52 entrope Exp $
+ * @version $Id: ircd_osdep.h 1626 2006-03-14 03:45:52Z entrope $
  */
 #ifndef INCLUDED_ircd_osdep_h
 #define INCLUDED_ircd_osdep_h

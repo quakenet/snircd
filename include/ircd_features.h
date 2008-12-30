@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Public interfaces and declarations for dealing with configurable features.
- * @version $Id: ircd_features.h,v 1.38.2.7 2007/03/17 03:48:48 klmitch Exp $
+ * @version $Id: ircd_features.h 1774 2007-03-17 03:48:49Z klmitch $
  */
 
 struct Client;
