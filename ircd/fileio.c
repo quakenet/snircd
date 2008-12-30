@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief ANSI FILE* clone API implementation.
- * @version $Id: fileio.c,v 1.8 2005/03/20 16:06:17 entrope Exp $
+ * @version $Id: fileio.c 1334 2005-03-20 16:06:30Z entrope $
  */
 #include "config.h"
 

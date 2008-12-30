@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_error.c,v 1.11 2004/12/11 05:13:46 klmitch Exp $
+ * $Id: m_error.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 
 /*

@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c,v 1.37.2.26 2007/11/17 14:12:36 entrope Exp $
+ * @version $Id: s_auth.c 1843 2007-11-17 14:12:37Z entrope $
  */
 #include "config.h"
 

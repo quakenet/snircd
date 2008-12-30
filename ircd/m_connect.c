@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_connect.c,v 1.17.2.1 2007/05/20 13:55:59 entrope Exp $
+ * $Id: m_connect.c 1807 2007-05-20 13:55:59Z entrope $
  */
 
 /*

@@ -1,6 +1,6 @@
 /** @file fileio.h
  * @brief ANSI FILE* clone API declarations.
- * @version $Id: fileio.h,v 1.4 2004/10/05 01:45:24 entrope Exp $
+ * @version $Id: fileio.h 1219 2004-10-05 01:45:24Z entrope $
  */
 #ifndef INCLUDED_fileio_h
 #define INCLUDED_fileio_h

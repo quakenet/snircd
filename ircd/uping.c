@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief UDP ping implementation.
- * @version $Id: uping.c,v 1.23.2.1 2006/03/14 03:45:52 entrope Exp $
+ * @version $Id: uping.c 1626 2006-03-14 03:45:52Z entrope $
  */
 #include "config.h"
 

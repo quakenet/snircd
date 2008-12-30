@@ -4,7 +4,7 @@
  */
 /** @file
  * @brief Interface from ircd resolver to its support functions.
- * @version $Id: ircd_reslib.h,v 1.4 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: ircd_reslib.h 1231 2004-10-05 04:21:37Z entrope $
  */
 #ifndef INCLUDED_ircdreslib_h
 #define INCLUDED_ircdreslib_h

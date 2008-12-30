@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Implementation of AsLL ping helper commands.
- * @version $Id: opercmds.c,v 1.12 2004/10/03 16:34:03 entrope Exp $
+ * @version $Id: opercmds.c 1210 2004-10-03 16:34:03Z entrope $
  */
 #include "config.h"
 

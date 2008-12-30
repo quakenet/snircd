@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Interface and public definitions for event loop.
- * @version $Id: ircd_events.h,v 1.5.2.1 2007/04/01 02:11:41 entrope Exp $
+ * @version $Id: ircd_events.h 1794 2007-04-01 02:11:41Z entrope $
  */
 
 #ifndef INCLUDED_config_h

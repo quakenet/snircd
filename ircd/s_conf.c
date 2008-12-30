@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief ircd configuration file driver
- * @version $Id: s_conf.c,v 1.81.2.9 2007/10/30 02:13:09 entrope Exp $
+ * @version $Id: s_conf.c 1839 2007-10-30 02:13:09Z entrope $
  */
 #include "config.h"
 

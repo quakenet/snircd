@@ -1,6 +1,6 @@
 /** @file IPcheck.h
  * @brief Interface to count users connected from particular IP addresses.
- * @version $Id: IPcheck.h,v 1.13 2005/03/19 23:22:09 entrope Exp $
+ * @version $Id: IPcheck.h 1329 2005-03-19 23:22:09Z entrope $
  */
 #ifndef INCLUDED_ipcheck_h
 #define INCLUDED_ipcheck_h

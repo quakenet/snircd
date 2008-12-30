@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Functions for handling timed channel destruction events.
- * @version $Id: destruct_event.h,v 1.2 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: destruct_event.h 1231 2004-10-05 04:21:37Z entrope $
  */
 
 #ifndef INCLUDED_config_h

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_jupe.c,v 1.15.2.1 2006/12/19 05:20:48 entrope Exp $
+ * $Id: m_jupe.c 1737 2006-12-19 05:20:48Z entrope $
  */
 
 /*

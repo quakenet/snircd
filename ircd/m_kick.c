@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_kick.c,v 1.19.2.4 2005/11/14 21:17:07 entrope Exp $
+ * $Id: m_kick.c 1893 2008-11-18 03:18:46Z entrope $
  */
 
 /*

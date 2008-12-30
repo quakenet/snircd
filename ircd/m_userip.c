@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_userip.c,v 1.15 2005/04/22 01:39:08 klmitch Exp $
+ * $Id: m_userip.c 1375 2005-04-22 01:39:08Z klmitch $
  */
 
 /*

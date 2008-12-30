@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_join.c,v 1.34.2.10 2007/02/25 14:32:41 entrope Exp $
+ * $Id: m_join.c 1763 2007-02-25 14:32:41Z entrope $
  */
 
 #include "config.h"

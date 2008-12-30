@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_quit.c,v 1.14 2004/12/11 05:13:48 klmitch Exp $
+ * $Id: m_quit.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 
 /*

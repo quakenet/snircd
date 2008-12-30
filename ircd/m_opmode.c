@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_opmode.c,v 1.18 2005/09/13 15:17:46 entrope Exp $
+ * $Id: m_opmode.c 1485 2005-09-13 15:17:46Z entrope $
  */
 
 /*

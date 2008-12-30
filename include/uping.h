@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief UDP ping implementation.
- * @version $Id: uping.h,v 1.9 2004/12/29 03:08:09 entrope Exp $
+ * @version $Id: uping.h 1290 2004-12-29 03:08:09Z entrope $
  */
 #ifndef INCLUDED_uping_h
 #define INCLUDED_uping_h

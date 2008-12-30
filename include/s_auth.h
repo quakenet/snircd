@@ -17,7 +17,7 @@
  */
 /** @file
  * @brief Interface for DNS and ident lookups.
- * @version $Id: s_auth.h,v 1.6.2.4 2007/01/16 01:21:36 entrope Exp $
+ * @version $Id: s_auth.h 1748 2007-01-16 01:21:37Z entrope $
  */
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c,v 1.26.2.10 2007/12/14 02:37:48 klmitch Exp $
+ * $Id: m_gline.c 1859 2007-12-14 02:37:48Z klmitch $
  */
 
 /*

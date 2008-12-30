@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Structures and functions for handling local clients.
- * @version $Id: client.h,v 1.48.2.2 2008/03/20 17:41:00 klmitch Exp $
+ * @version $Id: client.h 1868 2008-03-20 17:41:00Z klmitch $
  */
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h

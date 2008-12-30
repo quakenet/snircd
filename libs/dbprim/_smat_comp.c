@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: _smat_comp.c,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+** @(#)$Id: _smat_comp.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: _smat_comp.c,v 1.1 2003/03/07 02:36:10 klmitch Exp $");
+RCSTAG("@(#)$Id: _smat_comp.c 923 2003-03-07 02:36:11Z klmitch $");
 
 unsigned long
 _smat_comp(hash_table_t *table, db_key_t *key1, db_key_t *key2)

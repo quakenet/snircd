@@ -21,7 +21,7 @@
  */
 /** @file
  * @brief Report configuration lines and other statistics from this server.
- * @version $Id: s_stats.h,v 1.12.2.1 2005/10/12 01:13:48 entrope Exp $
+ * @version $Id: s_stats.h 1521 2005-10-12 01:13:48Z entrope $
  */
 
 #ifndef INCLUDED_s_stats_h

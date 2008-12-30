@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c,v 1.61.2.7 2007/12/14 02:37:48 klmitch Exp $
+ * @version $Id: gline.c 1859 2007-12-14 02:37:48Z klmitch $
  */
 #include "config.h"
 

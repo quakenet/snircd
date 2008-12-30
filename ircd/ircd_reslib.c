@@ -101,7 +101,7 @@
 
 /** @file
  * @brief DNS resolver library functions.
- * @version $Id: ircd_reslib.c,v 1.5.2.1 2007/02/25 15:41:49 entrope Exp $
+ * @version $Id: ircd_reslib.c 1764 2007-02-25 15:41:49Z entrope $
  */
 
 /** Array of nameserver addresses. */

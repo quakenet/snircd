@@ -24,7 +24,7 @@
  */
 /** @file
  * @brief Interface to functions for relaying messages.
- * @version $Id: ircd_relay.h,v 1.2 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: ircd_relay.h 1231 2004-10-05 04:21:37Z entrope $
  */
 
 struct Client;

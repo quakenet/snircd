@@ -1,6 +1,6 @@
 /** @file list.h
  * @brief Singly and doubly linked list manipulation interface.
- * @version $Id: list.h,v 1.12 2005/05/30 21:07:33 entrope Exp $
+ * @version $Id: list.h 1417 2005-05-30 21:07:33Z entrope $
  */
 #ifndef INCLUDED_list_h
 #define INCLUDED_list_h

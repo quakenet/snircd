@@ -27,7 +27,7 @@
  * NOTE: Changing any of these definitions (except for the
  * target-related ones at the bottom) is equivalent to a protocol
  * revision. Every server on a given network must use the same values.
- * @version $Id: ircd_defs.h,v 1.9 2004/10/05 02:21:08 entrope Exp $
+ * @version $Id: ircd_defs.h 1222 2004-10-05 02:21:08Z entrope $
  */
 
 /** Maximum length allowed for a nickname.

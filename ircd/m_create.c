@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_create.c,v 1.18.2.4 2007/01/13 18:45:08 entrope Exp $
+ * $Id: m_create.c 1744 2007-01-13 18:45:08Z entrope $
  */
 
 /*

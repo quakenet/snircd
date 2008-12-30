@@ -20,7 +20,7 @@
  */
 /** @file
  * @brief Structure definitions for users and servers.
- * @version $Id: struct.h,v 1.9.2.1 2007/01/15 03:08:23 entrope Exp $
+ * @version $Id: struct.h 1746 2007-01-15 03:08:23Z entrope $
  */
 #ifndef INCLUDED_struct_h
 #define INCLUDED_struct_h

@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Implementation of client counting functions.
- * @version $Id: querycmds.c,v 1.4 2004/10/03 17:02:23 entrope Exp $
+ * @version $Id: querycmds.c 1212 2004-10-03 17:02:23Z entrope $
  */
 #include "config.h"
 

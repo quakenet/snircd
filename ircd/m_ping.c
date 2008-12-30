@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_ping.c,v 1.12 2005/09/11 17:40:21 decampos Exp $
+ * $Id: m_ping.c 1477 2005-09-11 17:40:21Z decampos $
  */
 
 /*

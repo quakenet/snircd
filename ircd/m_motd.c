@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_motd.c,v 1.13 2004/12/11 05:13:47 klmitch Exp $
+ * $Id: m_motd.c 1271 2004-12-11 05:14:07Z klmitch $
  */
 
 /*

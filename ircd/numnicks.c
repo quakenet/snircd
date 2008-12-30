@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of numeric nickname operations.
- * @version $Id: numnicks.c,v 1.30 2005/05/08 00:56:05 entrope Exp $
+ * @version $Id: numnicks.c 1398 2005-05-08 00:56:05Z entrope $
  */
 #include "config.h"
 

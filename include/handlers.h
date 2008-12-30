@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Declarations for all protocol message handler functions.
- * @version $Id: handlers.h,v 1.22 2005/04/02 02:50:12 entrope Exp $
+ * @version $Id: handlers.h 1347 2005-04-02 02:50:15Z entrope $
  */
 #ifndef INCLUDED_handlers_h
 #define INCLUDED_handlers_h

@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: st_find.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $
+** @(#)$Id: st_find.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: st_find.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $");
+RCSTAG("@(#)$Id: st_find.c 923 2003-03-07 02:36:11Z klmitch $");
 
 /** \ingroup dbprim_smat
  * \brief Find an entry in a sparse matrix.

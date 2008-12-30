@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: he_init.c,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+** @(#)$Id: he_init.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: he_init.c,v 1.1 2003/03/07 02:36:10 klmitch Exp $");
+RCSTAG("@(#)$Id: he_init.c 923 2003-03-07 02:36:11Z klmitch $");
 
 /** \ingroup dbprim_hash
  * \brief Dynamically initialize a hash table entry.

@@ -16,14 +16,14 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: ht_free.c,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+** @(#)$Id: ht_free.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include <stdlib.h>
 
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: ht_free.c,v 1.1 2003/03/07 02:36:10 klmitch Exp $");
+RCSTAG("@(#)$Id: ht_free.c 923 2003-03-07 02:36:11Z klmitch $");
 
 /** \ingroup dbprim_hash
  * \brief Free memory used by an empty hash table.

@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Declarations for salted MD5 password crypting.
- * @version $Id: ircd_crypt_smd5.h,v 1.2 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: ircd_crypt_smd5.h 1231 2004-10-05 04:21:37Z entrope $
  */
 #ifndef INCLUDED_ircd_crypt_smd5_h
 #define INCLUDED_ircd_crypt_smd5_h

@@ -11,7 +11,7 @@ dnl even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 dnl PARTICULAR PURPOSE.
 
 
-dnl @(#)$Id: aclocal.m4,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+dnl @(#)$Id: aclocal.m4,v 1.1 2003-03-07 02:36:10 klmitch Exp $
 dnl
 dnl KLM_COM_ERR_OBJ
 dnl
@@ -27,7 +27,7 @@ fi
 AC_SUBST($1)
 ])
 
-dnl @(#)$Id: aclocal.m4,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+dnl @(#)$Id: aclocal.m4,v 1.1 2003-03-07 02:36:10 klmitch Exp $
 dnl
 dnl KLM_WITH_COM_ERR
 dnl

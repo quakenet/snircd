@@ -809,7 +809,7 @@ diff -u -r1.46 send.c
 + * along with this program; if not, write to the Free Software
 + * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 + *
-+ * $Id: lazy.diff,v 1.2 2002/04/12 13:50:27 vampire Exp $
++ * $Id: lazy.diff,v 1.2 2002-04-12 13:50:27 vampire Exp $
 + */
 +
 +/*

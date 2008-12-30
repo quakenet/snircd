@@ -1,6 +1,6 @@
 /** @file ircd.h
  * @brief Global data for the daemon.
- * @version $Id: ircd.h,v 1.14 2004/10/05 04:14:44 entrope Exp $
+ * @version $Id: ircd.h 1229 2004-10-05 04:14:44Z entrope $
  */
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h

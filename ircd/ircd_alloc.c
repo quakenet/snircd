@@ -21,7 +21,7 @@
  */
 /** @file
  * @brief IRC daemon memory allocation functions.
- * @version $Id: ircd_alloc.c,v 1.10 2005/01/27 04:07:46 entrope Exp $
+ * @version $Id: ircd_alloc.c 1306 2005-01-27 04:07:46Z entrope $
  */
 #include "config.h"
 

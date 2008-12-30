@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_kill.c,v 1.31 2005/08/21 13:46:07 entrope Exp $
+ * $Id: m_kill.c 1876 2008-09-07 02:10:22Z isomer $
  */
 
 /*
@@ -126,7 +126,7 @@ static int do_kill(struct Client* cptr, struct Client* sptr,
    *       have changed the target because of the nickname change.
    */
   sendto_opmask_butone(0, snomask,
-                       "Received KILL message for %s. From %s Path: %s!%s %s",
+                       "Received KILL message for %s from %s Path: %s!%s %s",
                        get_client_name(victim, SHOW_IP), cli_name(sptr),
                        inpath, path, msg);
   log_write_kill(victim, sptr, inpath, path, msg);

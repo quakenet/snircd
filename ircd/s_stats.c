@@ -63,7 +63,7 @@
 /** @file
  * @brief Report configuration lines and other statistics from this
  * server.
- * @version $Id: s_stats.c,v 1.44.2.4 2006/03/14 14:56:50 entrope Exp $
+ * @version $Id: s_stats.c 1628 2006-03-14 14:56:51Z entrope $
  *
  * Note: The info is reported in the order the server uses
  *       it--not reversed as in ircd.conf!

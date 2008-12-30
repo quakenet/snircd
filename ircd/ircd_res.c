@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief IRC resolver functions.
- * @version $Id: ircd_res.c,v 1.23.2.5 2007/02/25 15:41:49 entrope Exp $
+ * @version $Id: ircd_res.c 1764 2007-02-25 15:41:49Z entrope $
  */
 
 #include "client.h"

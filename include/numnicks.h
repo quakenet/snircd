@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Interface for numeric nickname functions.
- * @version $Id: numnicks.h,v 1.11 2004/12/16 03:28:51 entrope Exp $
+ * @version $Id: numnicks.h 1274 2004-12-16 03:28:52Z entrope $
  */
 #ifndef INCLUDED_numnicks_h
 #define INCLUDED_numnicks_h

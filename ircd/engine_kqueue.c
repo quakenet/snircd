@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief FreeBSD kqueue()/kevent() event engine.
- * @version $Id: engine_kqueue.c,v 1.8 2005/03/23 00:25:16 entrope Exp $
+ * @version $Id: engine_kqueue.c 1335 2005-03-23 00:25:16Z entrope $
  */
 #include "config.h"
 

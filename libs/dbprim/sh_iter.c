@@ -16,12 +16,12 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: sh_iter.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $
+** @(#)$Id: sh_iter.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include "dbprim.h"
 #include "dbprim_int.h"
 
-RCSTAG("@(#)$Id: sh_iter.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $");
+RCSTAG("@(#)$Id: sh_iter.c 923 2003-03-07 02:36:11Z klmitch $");
 
 struct _sh_iter_s {
   smat_table_t *si_table;	/* pointer to the smat table */

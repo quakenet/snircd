@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Hash table management APIs.
- * @version $Id: hash.h,v 1.7 2005/03/30 03:48:22 entrope Exp $
+ * @version $Id: hash.h 1343 2005-03-30 03:48:22Z entrope $
  */
 
 #ifndef INCLUDED_hash_h

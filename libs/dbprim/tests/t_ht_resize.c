@@ -16,7 +16,7 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: t_ht_resize.c,v 1.1 2003/03/07 02:36:11 klmitch Exp $
+** @(#)$Id: t_ht_resize.c 923 2003-03-07 02:36:11Z klmitch $
 */
 #include <errno.h>
 #include <stdio.h>

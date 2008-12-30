@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h,v 1.55.2.4 2007/12/28 15:52:43 klmitch Exp $
+ * @version $Id: channel.h 1860 2007-12-28 15:52:43Z klmitch $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h

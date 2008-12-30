@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Handlers for the SERVER command.
- * @version $Id: m_server.c,v 1.41 2005/05/30 16:51:05 entrope Exp $
+ * @version $Id: m_server.c 1415 2005-05-30 16:51:05Z entrope $
  */
 
 #include "config.h"

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_topic.c,v 1.21.2.1 2005/12/31 01:41:40 entrope Exp $
+ * $Id: m_topic.c 1597 2005-12-31 01:41:40Z entrope $
  */
 
 #include "config.h"

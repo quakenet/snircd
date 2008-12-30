@@ -16,7 +16,7 @@
 ** Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 ** MA 02111-1307, USA
 **
-** @(#)$Id: dbprim.h.top,v 1.1 2003/03/07 02:36:10 klmitch Exp $
+** @(#)$Id: dbprim.h.top,v 1.1 2003-03-07 02:36:10 klmitch Exp $
 */
 #ifndef __include_dbprim_h__
 #define __include_dbprim_h__

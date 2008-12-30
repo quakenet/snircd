@@ -1,6 +1,6 @@
 /** @file crule.h
  * @brief Interfaces and declarations for connection rule checking.
- * @version $Id: crule.h,v 1.4 2004/10/05 04:21:37 entrope Exp $
+ * @version $Id: crule.h 1231 2004-10-05 04:21:37Z entrope $
  */
 #ifndef INCLUDED_crule_h
 #define INCLUDED_crule_h

@@ -19,7 +19,7 @@
 
 /** @file
  * @brief Character attribute definitions and arrays.
- * @version $Id: ircd_chattr.h,v 1.3 2004/10/05 02:10:00 entrope Exp $
+ * @version $Id: ircd_chattr.h 1221 2004-10-05 02:10:00Z entrope $
  *
  * This character set code is adapted from Nemesi's Tools Library,
  * which gives us the prefix NTL_ on these macros.

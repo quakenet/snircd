@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Interfaces and declarations for dealing with data buffers.
- * @version $Id: dbuf.h,v 1.7 2004/10/05 00:51:56 entrope Exp $
+ * @version $Id: dbuf.h 1216 2004-10-05 00:51:56Z entrope $
  */
 #ifndef INCLUDED_dbuf_h
 #define INCLUDED_dbuf_h

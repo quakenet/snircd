@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Functions to match strings against IRC mask strings.
- * @version $Id: match.c,v 1.20.2.1 2006/02/16 03:16:19 entrope Exp $
+ * @version $Id: match.c 1891 2008-11-18 02:30:15Z entrope $
  */
 #include "config.h"
 
@@ -201,6 +201,8 @@ int match(const char *mask, const char *name)
       return 1;
     m = m_tmp;
     n = ++n_tmp;
+    if (*n == '\0')
+      return 1;
     break;
   case '\\':
     m++;
