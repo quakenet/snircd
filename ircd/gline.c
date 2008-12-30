@@ -234,7 +234,7 @@ do_gline(struct Client *cptr, struct Client *sptr, struct Gline *gline)
         if (!MyUser(member->user) || IsZombie(member) || IsAnOper(member->user))
           continue;
         sendcmdto_serv_butone(&me, CMD_KICK, NULL, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
-        sendcmdto_channel_butserv_butone(&me, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
+        sendcmdto_channel_butserv_butone(&his, CMD_KICK, chptr, NULL, 0, "%H %C :Badchanneled (%s)", chptr, member->user, gline->gl_reason);
         make_zombie(member, member->user, &me, &me, chptr);
         retval=1;
       }
@@ -1040,18 +1040,16 @@ gline_lookup_badchan(char *userhost, unsigned int flags)
   struct Gline *sgline;
 
   if (flags & (GLINE_BADCHAN | GLINE_ANY)) {
-    for (gline = BadChanGlineList; gline; gline = sgline) {
-      sgline = gline->gl_next;
-
-      if (gline->gl_expire <= CurrentTime)
-        gline_free(gline);
-      else if ((flags & GLINE_GLOBAL && gline->gl_flags & GLINE_LOCAL) ||
+    gliter(BadChanGlineList, gline, sgline) {
+      if ((flags & GLINE_GLOBAL && gline->gl_flags & GLINE_LOCAL) ||
                (flags & GLINE_LASTMOD && !gline->gl_lastmod))
-        continue;
-      else if ((flags & GLINE_EXACT ? ircd_strcmp(gline->gl_user, userhost) :
-                match(gline->gl_user, userhost)) == 0)
+          continue;
+
+      if ((flags & GLINE_EXACT ? ircd_strcmp(gline->gl_user, userhost) :
+              match(gline->gl_user, userhost)) == 0) {
         if (GlineIsActive(gline))
           return gline;
+      }
     }
   }
 
@@ -1264,6 +1262,16 @@ gline_stats(struct Client *sptr, const struct StatDesc *sd,
 	       GlineIsRemActive(gline) ? '+' : '-',
 	       gline->gl_reason);
   }
+
+  gliter(BadChanGlineList, gline, sgline) {
+    send_reply(sptr, RPL_STATSGLINE, 'G', gline->gl_user, "", "", "", "",
+               gline->gl_expire + TSoffset, gline->gl_lastmod,
+               gline->gl_lifetime + TSoffset,
+               gline->gl_state == GLOCAL_ACTIVATED ? ">" :
+               (gline->gl_state == GLOCAL_DEACTIVATED ? "<" : ""),
+               GlineIsRemActive(gline) ? '+' : '-', gline->gl_reason);
+  }
+
 }
 
 /** Calculate memory used by G-lines.
