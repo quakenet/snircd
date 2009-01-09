@@ -74,9 +74,14 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
   char *p1;
   struct Membership *chan = 0;
 
-  static char buf1[512];
+  static char buf1[1024];
   /* NOTE: with current fields list and sizes this _cannot_ overrun, 
      and also the message finally sent shouldn't ever be truncated */
+  /* NOTE2: HACK this has been doubled to 1024 as we're getting far too close...
+     ideally this would be rewritten but that's likely to introduce more bugs.
+     truncation is better than a buffer overflow exploit...
+     now we truncate to 512 manually at the end of the function,
+     I guess it's truncated in one of the functions in send_reply too... */
 
   p1 = buf1;
   buf1[1] = '\0';
@@ -276,5 +281,8 @@ void do_who(struct Client* sptr, struct Client* acptr, struct Channel* repchan,
      need to terminate buf1 */
   *p1 = '\0';
   p1 = buf1;
+
+  buf1[511] = '\0';
+
   send_reply(sptr, fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, ++p1);
 }
