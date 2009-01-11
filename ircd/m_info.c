@@ -105,17 +105,15 @@
  */
 int m_info(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  const char **text = infotext;
+  const char **text;
 
   if (hunt_server_cmd(sptr, CMD_INFO, cptr, 1, ":%C", 1, parc, parv) !=
       HUNTED_ISME)
     return 0;
 
-  while (text[212])
-  {
+  for (text=infotext;*text;text++)
     send_reply(sptr, RPL_INFO, *text);
-    text++;
-  }
+
   send_reply(sptr, SND_EXPLICIT | RPL_INFO, ":Birth Date: %s, compile # %s",
       creation, generation);
   send_reply(sptr, SND_EXPLICIT | RPL_INFO, ":On-line since %s",
@@ -133,7 +131,7 @@ int m_info(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  */
 int ms_info(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  const char **text = infotext;
+  const char **text;
 
   if (IsServer(sptr))
     return 0;
@@ -141,18 +139,18 @@ int ms_info(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   if (hunt_server_cmd(sptr, CMD_INFO, cptr, 1, ":%C", 1, parc, parv) !=
       HUNTED_ISME)
     return 0;
-  while (text[212])
+
+  if (!IsOper(sptr))
   {
-    if (!IsOper(sptr))
+    for (text=infotext;*text;text++)
       send_reply(sptr, RPL_INFO, *text);
-    text++;
   }
-  if (IsOper(sptr))
+  else
   {
-    while (*text)
-      send_reply(sptr, RPL_INFO, *text++);
-    send_reply(sptr, RPL_INFO, "");
+    for (text=sourcestext;*text;text++)
+      send_reply(sptr, RPL_INFO, *text);
   }
+
   send_reply(sptr, SND_EXPLICIT | RPL_INFO, ":Birth Date: %s, compile # %s",
       creation, generation);
   send_reply(sptr, SND_EXPLICIT | RPL_INFO, ":On-line since %s",
@@ -175,18 +173,17 @@ int mo_info(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       HUNTED_ISME)
     return 0;
 
-  while (text[212])
+  if (!IsOper(sptr))
   {
-    if (!IsOper(sptr))
+    for (text=infotext;*text;text++)
       send_reply(sptr, RPL_INFO, *text);
-    text++;
   }
-  if (IsOper(sptr) && (NULL != parv[1]))
+  else
   {
-    while (*text)
-      send_reply(sptr, RPL_INFO, *text++);
-    send_reply(sptr, RPL_INFO, "");
+    for (text=sourcestext;*text;text++)
+      send_reply(sptr, RPL_INFO, *text);
   }
+
   send_reply(sptr, SND_EXPLICIT | RPL_INFO, ":Birth Date: %s, compile # %s",
              creation, generation);
   send_reply(sptr, SND_EXPLICIT | RPL_INFO, ":On-line since %s",

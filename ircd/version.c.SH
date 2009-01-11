@@ -81,7 +81,10 @@ const char *infotext[] = {
     "Thanks goes to all other people who contributed to any version.",
     "A full listing of all coders can be found in doc/Authors in the",
     "source.",
-    "",
+    0,
+};
+
+const char *sourcestext[] = {
     "Sources:",
 !SUB!THIS!
 
