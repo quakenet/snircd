@@ -299,6 +299,12 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           nmember = member->next_member;
           if (!MyUser(member->user) || IsZombie(member))
             continue;
+          /* Do not kick +k user or operator with priv to set it */
+          if (IsChannelService(member->user) || HasPriv(member->user, PRIV_CHANSERV))
+            continue;
+          /* Do not kick +X user or operator with priv to set it */
+          if (IsXtraOp(member->user) || HasPriv(member->user, PRIV_XTRA_OPER))
+            continue;
           /* Kick as netrider if key mismatch *or* remote channel is
            * +i (unless user is an oper) *or* remote channel is +r
            * (unless user has an account).
