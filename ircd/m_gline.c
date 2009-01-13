@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c 1859 2007-12-14 02:37:48Z klmitch $
+ * $Id: m_gline.c 1900 2009-01-13 02:30:25Z entrope $
  */
 
 /*
@@ -279,6 +279,7 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   case GLINE_LOCAL_DEACTIVATE: /* locally deactivating a G-line */
     if (!agline) /* no G-line to locally activate or deactivate? */
       return send_reply(sptr, ERR_NOSUCHGLINE, mask);
+    lastmod = agline->gl_lastmod;
     break; /* no additional parameters to manipulate */
 
   case GLINE_ACTIVATE: /* activating a G-line */
@@ -379,7 +380,7 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   unsigned int flags = 0;
   enum GlineAction action = GLINE_MODIFY;
   time_t expire = 0;
-  char *mask = parv[1], *target = 0, *reason = 0;
+  char *mask = parv[1], *target = 0, *reason = 0, *end;
 
   if (parc < 2) {
     if (!HasPriv(sptr, PRIV_SERVERINFO)) 
@@ -426,7 +427,9 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return need_more_params(sptr, "GLINE");
 
     target = parv[2]; /* get the target... */
-    expire = atoi(parv[3]) + CurrentTime; /* and the expiration */
+    expire = strtol(parv[3], &end, 10) + CurrentTime; /* and the expiration */
+    if (*end != '\0')
+      return send_reply(sptr, SND_EXPLICIT | ERR_BADEXPIRE, "%s :Bad expire time", parv[3]);
 
     flags |= GLINE_EXPIRE; /* remember that we got an expire time */
 
@@ -448,10 +451,8 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   case GLINE_LOCAL_DEACTIVATE: /* locally deactivate a G-line */
     if (parc > 2) { /* if target is available, pick it */
       target = parv[2];
-
-      /* local activations can be local/remote servers, but can not be * */
       if (target[0] == '*' && target[1] == '\0')
-        return need_more_params(sptr, "GLINE");
+        return send_reply(sptr, ERR_NOSUCHSERVER, target);
     }
     break;
 
@@ -462,8 +463,10 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
     if (parc > 3) {
       /* get expiration and target */
-      expire = atoi(parv[parc - 2]) + CurrentTime;
       reason = parv[parc - 1];
+      expire = strtol(parv[parc - 2], &end, 10) + CurrentTime;
+      if (*end != '\0')
+        return send_reply(sptr, SND_EXPLICIT | ERR_BADEXPIRE, "%s :Bad expire time", parv[parc - 2]);
 
       flags |= GLINE_EXPIRE | GLINE_REASON; /* remember that we got 'em */
 
@@ -508,8 +511,8 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	   action == GLINE_LOCAL_ACTIVATE ? '>' : '<'));
 
     sendcmdto_one(sptr, CMD_GLINE, acptr, "%C %s%c%s", acptr,
-		  flags & GLINE_OPERFORCE ? "!" : "",
-		  action == GLINE_LOCAL_ACTIVATE ? '>' : '<', mask);
+                  flags & GLINE_OPERFORCE ? "!" : "",
+                  action == GLINE_LOCAL_ACTIVATE ? '>' : '<', mask);
 
     return 0; /* all done */
   }
@@ -585,10 +588,12 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   }
 
-  /* can't modify a G-line that doesn't exist... */
+  /* can't modify a G-line that doesn't exist...
+   * (and if we are creating a new one, we need a reason and expiration)
+   */
   if (!agline &&
       (action == GLINE_MODIFY || action == GLINE_LOCAL_ACTIVATE ||
-       action == GLINE_LOCAL_DEACTIVATE || (action == GLINE_DEACTIVATE && expire == 0)))
+       action == GLINE_LOCAL_DEACTIVATE || !reason || !expire))
     return send_reply(sptr, ERR_NOSUCHGLINE, mask);
 
   /* check for G-line permissions... */
@@ -601,6 +606,12 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return send_reply(sptr, ERR_DISABLED, "GLINE");
     else if (!HasPriv(sptr, PRIV_GLINE))
       return send_reply(sptr, ERR_NOPRIVILEGES);
+  }
+
+  /* If globally disabling a G-line that we do not already have, avoid
+   * creating a temporary one. */
+  if (!agline && action == GLINE_DEACTIVATE) {
+    return gline_forward_deactivation(cptr, sptr, mask, expire, CurrentTime, 0, flags);
   }
 
   Debug((DEBUG_DEBUG, "I have a global G-line I am acting upon now; "

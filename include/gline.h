@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Structures and APIs for G-line manipulation.
- * @version $Id: gline.h 1838 2007-10-30 01:53:33Z entrope $
+ * @version $Id: gline.h 1900 2009-01-13 02:30:25Z entrope $
  */
 #ifndef INCLUDED_sys_types_h
 #include <sys/types.h>
@@ -131,6 +131,9 @@ extern int gline_activate(struct Client *cptr, struct Client *sptr,
 extern int gline_deactivate(struct Client *cptr, struct Client *sptr,
 			    struct Gline *gline, time_t lastmod,
 			    unsigned int flags);
+extern int gline_forward_deactivation(struct Client *cptr, struct Client *sptr,
+                                      char *userhost, time_t expire, time_t lastmod,
+                                      time_t lifetime, unsigned int flags);
 extern int gline_modify(struct Client *cptr, struct Client *sptr,
 			struct Gline *gline, enum GlineAction action,
 			char *reason, time_t expire, time_t lastmod,

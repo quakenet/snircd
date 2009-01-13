@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c 1860 2007-12-28 15:52:43Z klmitch $
+ * @version $Id: channel.c 1902 2009-01-13 03:27:27Z entrope $
  */
 #include "config.h"
 
@@ -2070,7 +2070,7 @@ modebuf_mode_uint(struct ModeBuf *mbuf, unsigned int mode, unsigned int uint)
   assert(0 != mbuf);
   assert(0 != (mode & (MODE_ADD | MODE_DEL)));
 
-  if (mode == (MODE_LIMIT | ((mbuf->mb_dest & MODEBUF_DEST_BOUNCE) ? MODE_ADD : MODE_DEL))) {
+  if (mode == (MODE_LIMIT | MODE_DEL)) {
       mbuf->mb_rem |= mode;
       return;
   }

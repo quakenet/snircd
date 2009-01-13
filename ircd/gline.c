@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c 1859 2007-12-14 02:37:48Z klmitch $
+ * @version $Id: gline.c 1901 2009-01-13 02:43:56Z entrope $
  */
 #include "config.h"
 
@@ -393,18 +393,25 @@ gline_propagate(struct Client *cptr, struct Client *sptr, struct Gline *gline)
 
 /** Count number of users who match \a mask.
  * @param[in] mask user\@host or user\@ip mask to check.
+ * @param[in] flags Bitmask possibly containing the value GLINE_LOCAL, to limit searches to this server.
  * @return Count of matching users.
  */
 static int
-count_users(char *mask)
+count_users(char *mask, int flags)
 {
+  struct irc_in_addr ipmask;
   struct Client *acptr;
   int count = 0;
+  int ipmask_valid;
   char namebuf[USERLEN + HOSTLEN + 2];
   char ipbuf[USERLEN + SOCKIPLEN + 2];
+  unsigned char ipmask_len;
 
+  ipmask_valid = ipmask_parse(mask, &ipmask, &ipmask_len);
   for (acptr = GlobalClientList; acptr; acptr = cli_next(acptr)) {
     if (!IsUser(acptr))
+      continue;
+    if ((flags & GLINE_LOCAL) && !MyConnect(acptr))
       continue;
 
     ircd_snprintf(0, namebuf, sizeof(namebuf), "%s@%s",
@@ -412,7 +419,9 @@ count_users(char *mask)
     ircd_snprintf(0, ipbuf, sizeof(ipbuf), "%s@%s", cli_user(acptr)->username,
 		  ircd_ntoa(&cli_ip(acptr)));
 
-    if (!match(mask, namebuf) || !match(mask, ipbuf))
+    if (!match(mask, namebuf)
+        || !match(mask, ipbuf)
+        || (ipmask_valid && ipmask_check(&cli_ip(acptr), &ipmask, ipmask_len)))
       count++;
   }
 
@@ -473,6 +482,8 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
 
   assert(0 != userhost);
   assert(0 != reason);
+  assert(((flags & (GLINE_GLOBAL | GLINE_LOCAL)) == GLINE_GLOBAL) ||
+         ((flags & (GLINE_GLOBAL | GLINE_LOCAL)) == GLINE_LOCAL));
 
   Debug((DEBUG_DEBUG, "gline_add(\"%s\", \"%s\", \"%s\", \"%s\", %Tu, %Tu "
 	 "%Tu, 0x%04x)", cli_name(cptr), cli_name(sptr), userhost, reason,
@@ -521,7 +532,7 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
 	break;
       }
 
-      if ((tmp = count_users(uhmask)) >=
+      if ((tmp = count_users(uhmask, flags)) >=
 	  feature_int(FEAT_GLINEMAXUSERCOUNT) && !(flags & GLINE_OPERFORCE))
 	return send_reply(sptr, ERR_TOOMANYUSERS, tmp);
     }
@@ -720,6 +731,42 @@ gline_deactivate(struct Client *cptr, struct Client *sptr, struct Gline *gline,
   /* if it's a local gline or a Uworld gline (and not locally deactivated).. */
   if (GlineIsLocal(gline) || (!gline->gl_lastmod && !(flags & GLINE_LOCAL)))
     gline_free(gline); /* get rid of it */
+
+  return 0;
+}
+
+/** Send a deactivation request for a locally unknown G-line.
+ * @param[in] cptr Client that sent us the G-line modification.
+ * @param[in] sptr Client that originated the G-line modification.
+ * @param[in] userhost Text representation of G-line target.
+ * @param[in] expire Expiration time of G-line.
+ * @param[in] lastmod Last modification time of G-line.
+ * @param[in] lifetime Lifetime of G-line.
+ * @param[in] flags Bitwise combination of GLINE_* flags.
+ * @return Zero.
+ */
+int
+gline_forward_deactivation(struct Client *cptr, struct Client *sptr,
+                           char *userhost, time_t expire, time_t lastmod,
+                           time_t lifetime, unsigned int flags)
+{
+  char *msg = "deactivating unknown global";
+
+  if (!lifetime)
+    lifetime = expire;
+
+  /* Inform ops and log it */
+  sendto_opmask_butone(0, SNO_GLINE, "%s %s GLINE for %s, expiring at %Tu",
+                       (feature_bool(FEAT_HIS_SNOTICES) || IsServer(sptr)) ?
+                         cli_name(sptr) : cli_name((cli_user(sptr))->server),
+		       msg, userhost, expire + TSoffset);
+
+  log_write(LS_GLINE, L_INFO, LOG_NOSNOTICE,
+	    "%#C %s GLINE for %s, expiring at %Tu", sptr, msg, userhost,
+	    expire);
+
+  sendcmdto_serv_butone(sptr, CMD_GLINE, cptr, "* -%s %Tu %Tu %Tu",
+                        userhost, expire, lastmod, lifetime);
 
   return 0;
 }
@@ -989,7 +1036,7 @@ gline_find(char *userhost, unsigned int flags)
 
   if (flags & (GLINE_BADCHAN | GLINE_ANY)) {
     gliter(BadChanGlineList, gline, sgline) {
-      if ((flags & (GlineIsLocal(gline) ? GLINE_GLOBAL : GLINE_LOCAL)) ||
+        if ((flags & (GlineIsLocal(gline) ? GLINE_GLOBAL : GLINE_LOCAL)) ||
 	  (flags & GLINE_LASTMOD && !gline->gl_lastmod))
 	continue;
       else if ((flags & GLINE_EXACT ? ircd_strcmp(gline->gl_user, userhost) :
