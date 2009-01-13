@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_topic.c 1597 2005-12-31 01:41:40Z entrope $
+ * $Id: m_topic.c 1903 2009-01-13 03:54:45Z entrope $
  */
 
 #include "config.h"
@@ -72,8 +72,17 @@ static void do_settopic(struct Client *sptr, struct Client *cptr,
      sendcmdto_serv_butone(sptr, CMD_TOPIC, cptr, "%H %Tu %Tu :%s", chptr,
 		           chptr->creationtime, chptr->topic_time, chptr->topic);
    if (newtopic)
+   {
+     struct Membership *member;
+
+     /* If the member is delayed-join, show them. */
+     member = find_channel_member(sptr, chptr);
+     if (member && IsDelayedJoin(member))
+       RevealDelayedJoin(member);
+
      sendcmdto_channel_butserv_butone(from, CMD_TOPIC, chptr, NULL, 0,
       				       "%H :%s", chptr, chptr->topic);
+   }
       /* if this is the same topic as before we send it to the person that
        * set it (so they knew it went through ok), but don't bother sending
        * it to everyone else on the channel to save bandwidth
