@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c 1902 2009-01-13 03:27:27Z entrope $
+ * @version $Id: channel.c 1906 2009-02-09 03:39:42Z entrope $
  */
 #include "config.h"
 
@@ -1252,34 +1252,6 @@ static void send_ban_list(struct Client* cptr, struct Channel* chptr)
   send_reply(cptr, RPL_ENDOFBANLIST, chptr->chname);
 }
 
-/** Remove bells and commas from channel name
- *
- * @param cn	Channel name to clean, modified in place.
- */
-void clean_channelname(char *cn)
-{
-  int i;
-
-  for (i = 0; cn[i]; i++) {
-    if (i >= IRCD_MIN(CHANNELLEN, feature_int(FEAT_CHANNELLEN))
-        || !IsChannelChar(cn[i])) {
-      cn[i] = '\0';
-      return;
-    }
-    if (IsChannelLower(cn[i])) {
-      cn[i] = ToLower(cn[i]);
-#ifndef FIXME
-      /*
-       * Remove for .08+
-       * toupper(0xd0)
-       */
-      if ((unsigned char)(cn[i]) == 0xd0)
-        cn[i] = (char) 0xf0;
-#endif
-    }
-  }
-}
-
 /** Get a channel block, creating if necessary.
  *  Get Channel block for chname (and allocate a new channel
  *  block, if it didn't exists before).
@@ -2420,15 +2392,41 @@ mode_parse_limit(struct ParseState *state, int *flag_p)
   }
 }
 
-/** Helper function to clean key-like parameters. */
-static void
-clean_key(char *s)
+/** Helper function to validate key-like parameters.
+ *
+ * @param[in] state Parse state for feedback to user.
+ * @param[in] s Key to validate.
+ * @param[in] command String to pass for need_more_params() command.
+ * @return Zero on an invalid key, non-zero if the key was okay.
+ */
+static int
+is_clean_key(struct ParseState *state, char *s, char *command)
 {
-  int t_len = KEYLEN;
+  int ii;
 
-  while (*s > ' ' && *s != ':' && *s != ',' && t_len--)
-    s++;
-  *s = '\0';
+  if (s[0] == '\0') {
+    if (MyUser(state->sptr))
+      need_more_params(state->sptr, command);
+    return 0;
+  }
+  else if (s[0] == ':') {
+    if (MyUser(state->sptr))
+      send_reply(state->sptr, ERR_INVALIDKEY, state->chptr->chname);
+    return 0;
+  }
+  for (ii = 0; (ii <= KEYLEN) && (s[ii] != '\0'); ++ii) {
+    if ((unsigned char)s[ii] <= ' ' || s[ii] == ',') {
+      if (MyUser(state->sptr))
+        send_reply(state->sptr, ERR_INVALIDKEY, state->chptr->chname);
+      return 0;
+    }
+  }
+  if (ii > KEYLEN) {
+    if (MyUser(state->sptr))
+      send_reply(state->sptr, ERR_INVALIDKEY, state->chptr->chname);
+    return 0;
+  }
+  return 1;
 }
 
 /*
@@ -2473,14 +2471,10 @@ mode_parse_key(struct ParseState *state, int *flag_p)
     state->done |= DONE_KEY_DEL;
   }
 
-  /* clean up the key string */
-  clean_key(t_str);
-  if (!*t_str || *t_str == ':') { /* warn if empty */
-    if (MyUser(state->sptr))
-      need_more_params(state->sptr, state->dir == MODE_ADD ? "MODE +k" :
-		       "MODE -k");
+  /* If the key is invalid, tell the user and bail. */
+  if (!is_clean_key(state, t_str, state->dir == MODE_ADD ? "MODE +k" :
+                    "MODE -k"))
     return;
-  }
 
   if (!state->mbuf)
     return;
@@ -2585,14 +2579,10 @@ mode_parse_upass(struct ParseState *state, int *flag_p)
     state->done |= DONE_UPASS_DEL;
   }
 
-  /* clean up the upass string */
-  clean_key(t_str);
-  if (!*t_str || *t_str == ':') { /* warn if empty */
-    if (MyUser(state->sptr))
-      need_more_params(state->sptr, state->dir == MODE_ADD ? "MODE +U" :
-		       "MODE -U");
+  /* If the Upass is invalid, tell the user and bail. */
+  if (!is_clean_key(state, t_str, state->dir == MODE_ADD ? "MODE +U" :
+                    "MODE -U"))
     return;
-  }
 
   if (!state->mbuf)
     return;
@@ -2732,14 +2722,10 @@ mode_parse_apass(struct ParseState *state, int *flag_p)
     state->done |= DONE_APASS_DEL;
   }
 
-  /* clean up the apass string */
-  clean_key(t_str);
-  if (!*t_str || *t_str == ':') { /* warn if empty */
-    if (MyUser(state->sptr))
-      need_more_params(state->sptr, state->dir == MODE_ADD ? "MODE +A" :
-		       "MODE -A");
+  /* If the Apass is invalid, tell the user and bail. */
+  if (!is_clean_key(state, t_str, state->dir == MODE_ADD ? "MODE +A" :
+                    "MODE -A"))
     return;
-  }
 
   if (!state->mbuf)
     return;

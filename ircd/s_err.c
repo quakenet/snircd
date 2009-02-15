@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Error handling support.
- * @version $Id: s_err.c 1815 2007-05-29 03:08:34Z entrope $
+ * @version $Id: s_err.c 1905 2009-02-09 01:30:13Z entrope $
  */
 #include "config.h"
 
@@ -1082,7 +1082,7 @@ static Numeric replyTable[] = {
 /* 524 */
   { ERR_QUARANTINED, "%s :Channel is quarantined : %s", "524" },
 /* 525 */
-  { 0 },
+  { ERR_INVALIDKEY, "%s :Key is not well-formed", "525" },
 /* 526 */
   { 0 },
 /* 527 */

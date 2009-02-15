@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Implementation of configurable feature support.
- * @version $Id: ircd_features.c 1812 2007-05-20 14:50:27Z entrope $
+ * @version $Id: ircd_features.c 1907 2009-02-09 04:11:04Z entrope $
  */
 #include "config.h"
 
@@ -208,6 +208,17 @@ feature_log_get(struct Client* from, const char* const* fields, int count)
   }
 }
 
+/** Update whether #me is a hub or not.
+ */
+static void
+feature_notify_hub(void)
+{
+  if (feature_bool(FEAT_HUB))
+    SetHub(&me);
+  else
+    ClearHub(&me);
+}
+
 /** Sets a feature to the given value.
  * @param[in] from Client trying to set parameters.
  * @param[in] fields Array of parameters to set.
@@ -299,7 +310,7 @@ static struct FeatureDesc {
   F_S(PROVIDER, FEAT_NULL, 0, 0),
   F_B(KILL_IPMISMATCH, FEAT_OPER, 0, 0),
   F_B(IDLE_FROM_MSG, 0, 1, 0),
-  F_B(HUB, 0, 0, 0),
+  F_B(HUB, 0, 0, feature_notify_hub),
   F_B(WALLOPS_OPER_ONLY, 0, 0, 0),
   F_B(NODNS, 0, 0, 0),
   F_N(RANDOM_SEED, FEAT_NODISP, random_seed_set, 0, 0, 0, 0, 0, 0),

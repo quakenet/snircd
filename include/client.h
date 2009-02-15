@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Structures and functions for handling local clients.
- * @version $Id: client.h 1868 2008-03-20 17:41:00Z klmitch $
+ * @version $Id: client.h 1907 2009-02-09 04:11:04Z entrope $
  */
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
@@ -724,6 +724,8 @@ struct Client {
 #define ClearNoIdle(x)          ClrFlag(x, FLAG_NOIDLE)
 /** Clear the client's pending PING flag. */
 #define ClearPingSent(x)        ClrFlag(x, FLAG_PINGSENT)
+/** Clear the client's HUB flag. */
+#define ClearHub(x)             ClrFlag(x, FLAG_HUB)
 /** Remove mode +R (account only) from a client */
 #define ClearAccountOnly(x)     ClrFlag(x, FLAG_ACCOUNTONLY)
 /** Remove mode +P (paranoid) from a client */

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c 1900 2009-01-13 02:30:25Z entrope $
+ * $Id: m_gline.c 1904 2009-02-09 00:03:34Z entrope $
  */
 
 /*
@@ -606,12 +606,6 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return send_reply(sptr, ERR_DISABLED, "GLINE");
     else if (!HasPriv(sptr, PRIV_GLINE))
       return send_reply(sptr, ERR_NOPRIVILEGES);
-  }
-
-  /* If globally disabling a G-line that we do not already have, avoid
-   * creating a temporary one. */
-  if (!agline && action == GLINE_DEACTIVATE) {
-    return gline_forward_deactivation(cptr, sptr, mask, expire, CurrentTime, 0, flags);
   }
 
   Debug((DEBUG_DEBUG, "I have a global G-line I am acting upon now; "
