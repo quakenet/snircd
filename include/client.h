@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Structures and functions for handling local clients.
- * @version $Id: client.h 1868 2008-03-20 17:41:00Z klmitch $
+ * @version $Id: client.h 1907 2009-02-09 04:11:04Z entrope $
  */
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
@@ -660,6 +660,8 @@ struct Client {
 #define ClearHiddenHost(x)      ClrFlag(x, FLAG_HIDDENHOST)
 /** Clear the client's pending PING flag. */
 #define ClearPingSent(x)        ClrFlag(x, FLAG_PINGSENT)
+/** Clear the client's HUB flag. */
+#define ClearHub(x)             ClrFlag(x, FLAG_HUB)
 
 /* free flags */
 #define FREEFLAG_SOCKET	0x0001	/**< socket needs to be freed */

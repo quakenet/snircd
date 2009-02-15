@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_join.c 1763 2007-02-25 14:32:41Z entrope $
+ * $Id: m_join.c 1906 2009-02-09 03:39:42Z entrope $
  */
 
 #include "config.h"
@@ -158,7 +158,7 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
     if (!(chptr = FindChannel(name))) {
       if (((name[0] == '&') && !feature_bool(FEAT_LOCAL_CHANNELS))
-          || strlen(name) >= IRCD_MIN(CHANNELLEN, feature_int(FEAT_CHANNELLEN))) {
+          || strlen(name) > IRCD_MIN(CHANNELLEN, feature_int(FEAT_CHANNELLEN))) {
         send_reply(sptr, ERR_NOSUCHCHANNEL, name);
         continue;
       }

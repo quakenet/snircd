@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief Declarations of numeric replies and supporting functions.
- * @version $Id: numeric.h 1815 2007-05-29 03:08:34Z entrope $
+ * @version $Id: numeric.h 1905 2009-02-09 01:30:13Z entrope $
  */
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
@@ -456,6 +456,7 @@ extern const struct Numeric* get_error_numeric(int err);
 	ERR_WHOSYNTAX	     522        dalnet
 	ERR_WHOLIMEXCEED     523	dalnet */
 #define ERR_QUARANTINED      524       /* Undernet extension -Vampire */
+#define ERR_INVALIDKEY       525        /* Undernet extension */
 
 #define ERR_NOTLOWEROPLEVEL  560	/* Undernet extension */
 #define ERR_NOTMANAGER       561	/* Undernet extension */
