@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Send messages to certain targets.
- * @version $Id: send.c 1835 2007-10-30 01:14:50Z entrope $
+ * @version $Id: send.c 1909 2009-03-18 03:31:58Z entrope $
  */
 #include "config.h"
 
@@ -761,9 +761,9 @@ void sendcmdto_match_butone(struct Client *from, const char *cmd,
   /* send buffer along */
   bump_sentalong(one);
   for (cptr = GlobalClientList; cptr; cptr = cli_next(cptr)) {
-    if (!IsRegistered(cptr) || IsServer(cptr) ||
-	!match_it(from, cptr, to, who) || cli_fd(cli_from(cptr)) < 0 ||
-	cli_sentalong(cptr) == sentalong_marker)
+    if (!IsRegistered(cptr) || IsServer(cptr) || cli_fd(cli_from(cptr)) < 0 ||
+        cli_sentalong(cptr) == sentalong_marker ||
+        !match_it(from, cptr, to, who))
       continue; /* skip it */
     cli_sentalong(cptr) = sentalong_marker;
 

@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c 1843 2007-11-17 14:12:37Z entrope $
+ * @version $Id: s_auth.c 1911 2009-03-26 02:50:39Z entrope $
  */
 #include "config.h"
 
@@ -1736,6 +1736,14 @@ static int iauth_cmd_hostname(struct IAuth *iauth, struct Client *cli,
   }
   /* Set hostname from params. */
   ircd_strncpy(cli_sockhost(cli), params[0], HOSTLEN);
+  /* If we have gotten here, the user is in a "hurry" state and has
+   * been pre-registered.  Their hostname was set during that, and
+   * needs to be overwritten now.
+   */
+  if (FlagHas(&auth->flags, AR_IAUTH_HURRY)) {
+    ircd_strncpy(cli_user(cli)->host, cli_sockhost(cli), HOSTLEN);
+    ircd_strncpy(cli_user(cli)->realhost, cli_sockhost(cli), HOSTLEN);
+  }
   return 1;
 }
 
