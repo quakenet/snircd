@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Entry point and other initialization functions for the daemon.
- * @version $Id: ircd.c 1907 2009-02-09 04:11:04Z entrope $
+ * @version $Id: ircd.c 1912 2009-07-04 22:44:19Z entrope $
  */
 #include "config.h"
 
@@ -752,9 +752,7 @@ int main(int argc, char **argv) {
   cli_lasttime(&me) = cli_since(&me) = cli_firsttime(&me) = CurrentTime;
 
   hAddClient(&me);
-#ifdef IPV6
   SetIPv6(&me);
-#endif
 
   write_pidfile();
   init_counters();

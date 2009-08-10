@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c 1864 2008-03-15 05:33:22Z entrope $
+ * @version $Id: s_user.c 1919 2009-07-31 02:04:15Z entrope $
  */
 #include "config.h"
 
@@ -355,6 +355,16 @@ int register_user(struct Client *cptr, struct Client *sptr)
 
     Count_unknownbecomesclient(sptr, UserStats);
 
+    /*
+     * Set user's initial modes
+     */
+    tmpstr = (char*)client_get_default_umode(sptr);
+    if (tmpstr) {
+      char *umodev[] = { NULL, NULL, NULL, NULL };
+      umodev[2] = tmpstr;
+      set_user_mode(cptr, sptr, 3, umodev, ALLOWMODES_ANY);
+    }
+
     SetUser(sptr);
     cli_handler(sptr) = CLIENT_HANDLER;
     SetLocalNumNick(sptr);
@@ -385,16 +395,6 @@ int register_user(struct Client *cptr, struct Client *sptr)
                            cli_info(sptr), NumNick(cptr) /* two %s's */);
 
     IPcheck_connect_succeeded(sptr);
-    /*
-     * Set user's initial modes
-     */
-    tmpstr = (char*)client_get_default_umode(sptr);
-    if (tmpstr) {
-      char *umodev[] = { NULL, NULL, NULL, NULL };
-      umodev[2] = tmpstr;
-      set_user_mode(cptr, sptr, 1, umodev, ALLOWMODES_ANY);
-    }
-
   }
   else {
     struct Client *acptr = user->server;
@@ -702,10 +702,6 @@ int check_target_limit(struct Client *sptr, void *target, const char *name,
   assert(cli_local(sptr));
   targets = cli_targets(sptr);
 
-  /* If user is invited to channel, give him/her a free target */
-  if (IsChannelName(name) && IsInvited(sptr, target))
-    return 0;
-
   /*
    * Same target as last time?
    */
@@ -723,6 +719,10 @@ int check_target_limit(struct Client *sptr, void *target, const char *name,
    */
   if (!created) {
     if (CurrentTime < cli_nexttarget(sptr)) {
+      /* If user is invited to channel, give him/her a free target */
+      if (IsChannelName(name) && IsInvited(sptr, target))
+        return 0;
+
       if (cli_nexttarget(sptr) - CurrentTime < TARGET_DELAY + 8) {
         /*
          * No server flooding

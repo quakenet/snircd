@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance.
- * @version $Id: channel.h 1860 2007-12-28 15:52:43Z klmitch $
+ * @version $Id: channel.h 1913 2009-07-04 22:46:00Z entrope $
  */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
@@ -405,6 +405,7 @@ extern char *pretty_mask(char *mask);
 extern void del_invite(struct Client *cptr, struct Channel *chptr);
 extern void list_set_default(void); /* this belongs elsewhere! */
 
+extern void RevealDelayedJoinIfNeeded(struct Client *sptr, struct Channel *chptr);
 extern void RevealDelayedJoin(struct Membership *member);
 extern void CheckDelayedJoins(struct Channel *chan);
 

@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Channel management and maintenance
- * @version $Id: channel.c 1910 2009-03-26 02:16:26Z entrope $
+ * @version $Id: channel.c 1915 2009-07-06 01:27:24Z entrope $
  */
 #include "config.h"
 
@@ -2989,17 +2989,19 @@ mode_parse_client(struct ParseState *state, int *flag_p)
     if (colon != NULL) {
       *colon++ = '\0';
       req_oplevel = atoi(colon);
-      if (!(state->flags & MODE_PARSE_FORCE)
+      if (*flag_p == CHFL_VOICE || state->dir == MODE_DEL) {
+        /* Ignore the colon and its argument. */
+      } else if (!(state->flags & MODE_PARSE_FORCE)
           && state->member
           && (req_oplevel < OpLevel(state->member)
               || (req_oplevel == OpLevel(state->member)
                   && OpLevel(state->member) < MAXOPLEVEL)
-              || req_oplevel > MAXOPLEVEL))
+              || req_oplevel > MAXOPLEVEL)) {
         send_reply(state->sptr, ERR_NOTLOWEROPLEVEL,
                    t_str, state->chptr->chname,
                    OpLevel(state->member), req_oplevel, "op",
                    OpLevel(state->member) == req_oplevel ? "the same" : "a higher");
-      else if (req_oplevel <= MAXOPLEVEL)
+      } else if (req_oplevel <= MAXOPLEVEL)
         oplevel = req_oplevel;
     }
     /* find client we're manipulating */
@@ -3635,4 +3637,13 @@ void CheckDelayedJoins(struct Channel *chan)
     sendcmdto_channel_butserv_butone(&his, CMD_MODE, chan, NULL, 0,
                                      "%H -d", chan);
   }
+}
+
+/** Send a join for the user if (s)he is a hidden member of the channel.
+ */
+void RevealDelayedJoinIfNeeded(struct Client *sptr, struct Channel *chptr)
+{
+  struct Membership *member = find_member_link(chptr, sptr);
+  if (member && IsDelayedJoin(member))
+    RevealDelayedJoin(member);
 }
