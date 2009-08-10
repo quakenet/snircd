@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Helper functions to relay various types of messages.
- * @version $Id: ircd_relay.c 1271 2004-12-11 05:14:07Z klmitch $
+ * @version $Id: ircd_relay.c 1913 2009-07-04 22:46:00Z entrope $
  *
  * There are four basic types of messages, each with four subtypes.
  *
@@ -99,7 +99,7 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
   /*
    * This first: Almost never a server/service
    */
-  if (!client_can_send_to_channel(sptr, chptr, 1)) {
+  if (!client_can_send_to_channel(sptr, chptr, 0)) {
     send_reply(sptr, ERR_CANNOTSENDTOCHAN, chptr->chname);
     return;
   }
@@ -128,7 +128,7 @@ void relay_channel_message(struct Client* sptr, const char* name, const char* te
         return;
       }
 
-  
+  RevealDelayedJoinIfNeeded(sptr, chptr);
   sendcmdto_channel_butone(sptr, CMD_PRIVATE, chptr, cli_from(sptr),
 			   SKIP_DEAF | SKIP_BURST, "%H :%s", chptr, text);
 }
@@ -153,7 +153,7 @@ void relay_channel_notice(struct Client* sptr, const char* name, const char* tex
   /*
    * This first: Almost never a server/service
    */
-  if (!client_can_send_to_channel(sptr, chptr, 1))
+  if (!client_can_send_to_channel(sptr, chptr, 0))
     return;
 
   if ((chptr->mode.mode & MODE_NOPRIVMSGS) &&
@@ -178,6 +178,7 @@ void relay_channel_notice(struct Client* sptr, const char* name, const char* tex
       if (*ch++==1)
         return;
 
+  RevealDelayedJoinIfNeeded(sptr, chptr);
   sendcmdto_channel_butone(sptr, CMD_NOTICE, chptr, cli_from(sptr),
 			   SKIP_DEAF | SKIP_BURST, "%H :%s", chptr, text);
 }

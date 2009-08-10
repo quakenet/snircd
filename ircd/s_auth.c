@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c 1843 2007-11-17 14:12:37Z entrope $
+ * @version $Id: s_auth.c 1914 2009-07-05 03:00:52Z entrope $
  */
 #include "config.h"
 
@@ -439,6 +439,26 @@ auth_verify_hostname(const char *host, int maxlen)
   return 1; /* it's a valid hostname */
 }
 
+/** Check whether a client already has a CONF_CLIENT configuration
+ * item.
+ *
+ * @return A pointer to the client's first CONF_CLIENT, or NULL if
+ *   there are none.
+ */
+static struct ConfItem *find_conf_client(struct Client *cptr)
+{
+  struct SLink *list;
+
+  for (list = cli_confs(cptr); list != NULL; list = list->next) {
+    struct ConfItem *aconf;
+    aconf = list->value.aconf;
+    if (aconf->status & CONF_CLIENT)
+      return aconf;
+  }
+
+  return NULL;
+}
+
 /** Assign a client to a connection class.
  * @param[in] cptr Client to assign to a class.
  * @return Zero if client is kept, CPTR_KILLED if rejected.
@@ -450,6 +470,10 @@ static int preregister_user(struct Client *cptr)
 
   ircd_strncpy(cli_user(cptr)->host, cli_sockhost(cptr), HOSTLEN);
   ircd_strncpy(cli_user(cptr)->realhost, cli_sockhost(cptr), HOSTLEN);
+
+  if (find_conf_client(cptr)) {
+    return 0;
+  }
 
   switch (conf_check_client(cptr))
   {
@@ -744,11 +768,11 @@ int auth_ping_timeout(struct Client *cptr)
 
   /* Check for iauth timeout. */
   if (FlagHas(&auth->flags, AR_IAUTH_PENDING)) {
-    sendto_iauth(cptr, "T");
     if (IAuthHas(iauth, IAUTH_REQUIRED)) {
       sendheader(cptr, REPORT_FAIL_IAUTH);
       return exit_client_msg(cptr, cptr, &me, "Authorization Timeout");
     }
+    sendto_iauth(cptr, "T");
     FlagClr(&auth->flags, AR_IAUTH_PENDING);
     return check_auth_finished(auth);
   }
@@ -1714,6 +1738,14 @@ static int iauth_cmd_hostname(struct IAuth *iauth, struct Client *cli,
   }
   /* Set hostname from params. */
   ircd_strncpy(cli_sockhost(cli), params[0], HOSTLEN);
+  /* If we have gotten here, the user is in a "hurry" state and has
+   * been pre-registered.  Their hostname was set during that, and
+   * needs to be overwritten now.
+   */
+  if (FlagHas(&auth->flags, AR_IAUTH_HURRY)) {
+    ircd_strncpy(cli_user(cli)->host, cli_sockhost(cli), HOSTLEN);
+    ircd_strncpy(cli_user(cli)->realhost, cli_sockhost(cli), HOSTLEN);
+  }
   return 1;
 }
 
@@ -1775,7 +1807,7 @@ static struct ConfItem *auth_find_class_conf(const char *class_name)
 
   /* Make sure the configuration class is valid. */
   class = find_class(class_name);
-  if (!class)
+  if (!class || !class->valid)
     return NULL;
 
   /* Look for an existing ConfItem for the class. */
@@ -1792,6 +1824,13 @@ static struct ConfItem *auth_find_class_conf(const char *class_name)
                            ConClass(class));
       return NULL;
     }
+    /* make_conf() "helpfully" links the conf into GlobalConfList,
+     * which we do not want, so undo that.  (Ugh.)
+     */
+    if (aconf == GlobalConfList) {
+      GlobalConfList = aconf->next;
+    }
+    /* Back to business as usual. */
     aconf->conn_class = class;
     aconf->next = aconf_list;
     aconf_list = aconf;
@@ -1805,7 +1844,7 @@ static struct ConfItem *auth_find_class_conf(const char *class_name)
  * @param[in] cli Client referenced by command.
  * @param[in] parc Number of parameters.
  * @param[in] params Optional class name for client.
- * @return One.
+ * @return Negative (CPTR_KILLED) if the connection is refused, one otherwise.
  */
 static int iauth_cmd_done_client(struct IAuth *iauth, struct Client *cli,
 				 int parc, char **params)
@@ -1821,9 +1860,24 @@ static int iauth_cmd_done_client(struct IAuth *iauth, struct Client *cli,
     struct ConfItem *aconf;
 
     aconf = auth_find_class_conf(params[0]);
-    if (aconf)
-      attach_conf(cli, aconf);
-    else
+    if (aconf) {
+      enum AuthorizationCheckResult acr;
+
+      acr = attach_conf(cli, aconf);
+      switch (acr) {
+      case ACR_OK:
+        /* There should maybe be some way to set FLAG_DOID here.. */
+        break;
+      case ACR_TOO_MANY_IN_CLASS:
+        ++ServerStats->is_ref;
+        return exit_client(cli, cli, &me,
+                           "Sorry, your connection class is full - try "
+                           "again later or try another server");
+      default:
+        log_write(LS_IAUTH, L_ERROR, 0, "IAuth: Unexpected AuthorizationCheckResult %d from attach_conf()", acr);
+        break;
+      }
+    } else
       sendto_opmask_butone_ratelimited(NULL, SNO_AUTH, &warn_time,
                                        "iauth tried to use undefined class [%s]",
                                        params[0]);
@@ -1837,7 +1891,8 @@ static int iauth_cmd_done_client(struct IAuth *iauth, struct Client *cli,
  * @param[in] cli Client referenced by command.
  * @param[in] parc Number of parameters.
  * @param[in] params Account name and optional class name for client.
- * @return Non-zero if \a cli authorization should be checked for completion.
+ * @return Negative if the connection is refused, otherwise non-zero
+ *   if \a cli authorization should be checked for completion.
  */
 static int iauth_cmd_done_account(struct IAuth *iauth, struct Client *cli,
 				  int parc, char **params)
@@ -2026,7 +2081,7 @@ static void iauth_parse(struct IAuth *iauth, char *message)
 	/* Report mismatch to iauth. */
 	sendto_iauth(cli, "E Mismatch :[%s] != [%s]", params[1],
 		     ircd_ntoa(&cli_ip(cli)));
-      else if (handler(iauth, cli, parc - 3, params + 3))
+      else if (handler(iauth, cli, parc - 3, params + 3) > 0)
 	/* Handler indicated a possible state change. */
 	check_auth_finished(auth);
     }

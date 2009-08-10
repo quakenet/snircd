@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Miscellaneous user-related helper functions.
- * @version $Id: s_user.c 1864 2008-03-15 05:33:22Z entrope $
+ * @version $Id: s_user.c 1919 2009-07-31 02:04:15Z entrope $
  */
 #include "config.h"
 
@@ -749,10 +749,6 @@ int check_target_limit(struct Client *sptr, void *target, const char *name,
   assert(cli_local(sptr));
   targets = cli_targets(sptr);
 
-  /* If user is invited to channel, give him/her a free target */
-  if (IsChannelName(name) && IsInvited(sptr, target))
-    return 0;
-
   /* opers always have a free target */
   if (IsAnOper(sptr))
     return 0;
@@ -774,6 +770,10 @@ int check_target_limit(struct Client *sptr, void *target, const char *name,
    */
   if (!created) {
     if (CurrentTime < cli_nexttarget(sptr)) {
+      /* If user is invited to channel, give him/her a free target */
+      if (IsChannelName(name) && IsInvited(sptr, target))
+        return 0;
+
       if (cli_nexttarget(sptr) - CurrentTime < TARGET_DELAY + 8) {
         /*
          * No server flooding

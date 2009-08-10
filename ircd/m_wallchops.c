@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_wallchops.c 1903 2009-01-13 03:54:45Z entrope $
+ * $Id: m_wallchops.c 1913 2009-07-04 22:46:00Z entrope $
  */
 
 /*
@@ -135,10 +135,7 @@ int m_wallchops(struct Client* cptr, struct Client* sptr, int parc, char* parv[]
             return 0;
           }
 
-      /* Reveal delayedjoin user */
-     if ((member = find_member_link(chptr, cptr)) && IsDelayedJoin(member))
-       RevealDelayedJoin(member);
-
+      RevealDelayedJoinIfNeeded(sptr, chptr);
       sendcmdto_channel_butone(sptr, CMD_WALLCHOPS, chptr, cptr,
 			       SKIP_DEAF | SKIP_BURST | SKIP_NONOPS,
 			       "%H :@ %s", chptr, parv[parc - 1]);

@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c 1904 2009-02-09 00:03:34Z entrope $
+ * $Id: m_gline.c 1917 2009-07-06 02:02:31Z entrope $
  */
 
 /*
@@ -308,7 +308,7 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	if (!agline || /* gline creation, has to be the reason */
 	    /* trial-convert as lifetime, and if it doesn't fully convert,
 	     * it must be the reason */
-	    ((lifetime = strtoul(parv[5], &tmp, 10)) && !*tmp)) {
+	    (!(lifetime = strtoul(parv[5], &tmp, 10)) && !*tmp)) {
 	  lifetime = 0;
 	  reason = parv[5];
 

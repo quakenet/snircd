@@ -1,3 +1,86 @@
+2009-07-30  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_user.c (register_user): Move the default-usermodes call
+	to set_user_mode() to before SetUser(), so that the former does
+	not increment the UserStats fields.  Add back the explicit
+	adjustments to UserStats for invisible and opered clients.
+
+2009-07-05  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_user.c (register_user): Use correct parc for
+	set_user_mode().  Do not increment UserStats fields here, because
+	set_user_mode() handles that.
+
+2009-07-05  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_gline.c (ms_gline): Fix the sense of the test for
+	strtoul() when parsing G-line lifetimes -- zero indicates failure.
+
+2009-07-05  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/channel.c (mode_parse_client): Ignore anything after a
+	colon when the mode is CHFL_VOICE or the mode is being removed.
+
+2009-07-04  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_auth.c (find_conf_client): New function.
+	(preregister_user): Use it to avoid assigning a second conf class
+	on client connection.
+	(auth_ping_timeout): Send the "T" message only if we do not kill
+	the client (and thus send a "D" message).
+	(auth_find_classs_conf): Do not allow IAuth to select a disabled
+	class.  Unlink new conf items from GlobalConfList.
+	(iauth_cmd_done_client): Handle failures from attach_conf().
+	(iauth_parse): Behave decently when a client is killed by the
+	message handler.
+
+	* tools/iauth-test (%handlers): Add entries to help test this.
+
+2009-07-04  Michael Poole <mdpoole@troilus.org>
+
+	* include/channel.h (RevealDelayedJoinIfNeeded): Declare.
+
+	* ircd/channel.c (RevealDelayedJoinIfNeeded): Implement.
+
+	* ircd/ircd_relay.c (relay_channel_message): Only reveal the user
+	if he passes the check_target_limit() test.
+	(relay_channel_notice): Likewise.
+
+	* ircd/m_wallchops.c (m_wallchops): Likewise.
+
+	* ircd/m_wallvoices.c (m_wallvoices): Likewise.
+
+	* ircd/s_user.c (check_target_limit): Micro-optimize to only check
+	the user's channel list for invites if we are about to deny it.
+
+2009-03-25  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/ircd.c (main): Unconditionally set +6 flag on self.
+
+2009-03-25  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_auth.c (iauth_cmd_hostname): Properly assign the spoofed
+	hostname (yea, even as the "real" host) in the hurry state.
+
+	* tools/iauth-test: Add reminder about perl's RTMIN signal and a
+	new handler to exercise the N command in the hurry state.
+
+2009-03-25  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/channel.c (mode_parse): Add Doxygen comment.  When bouncing
+	a mode from a desynced U-lined server, do not set the modes or
+	send the change as a HACK(4) message.
+
+2009-03-17  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/send.c (sendcmdto_match_butone): Move match_it() to the end
+	of the if() to minimize the number of expensive function calls.
+
+2009-03-17  Michael Poole <mdpoole@troilus.org>
+
+	* patches/diffs/antispambot.diff: Forward port a patch by Dianora
+	to add rudimentary spam bot detection to ircu.
+
 2009-02-08  Michael Poole <mdpoole@troilus.org>
 
 	* include/client.h (ClearHub): New macro.
