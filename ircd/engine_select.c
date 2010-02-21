@@ -18,7 +18,7 @@
  */
 /** @file
  * @brief BSD sockets select() event engine.
- * @version $Id: engine_select.c 1445 2005-07-12 03:10:59Z entrope $
+ * @version $Id: engine_select.c 1930 2010-01-03 21:50:50Z entrope $
  */
 #include "config.h"
 
@@ -265,7 +265,7 @@ engine_loop(struct Generators* gen)
   int nfds;
   int i;
   int errcode;
-  size_t codesize;
+  socklen_t codesize;
   struct Socket *sock;
 
   while (running) {
@@ -402,8 +402,6 @@ engine_loop(struct Generators* gen)
 	  nfds--;
 	break;
       }
-
-      assert(s_fd(sock) == i);
 
       gen_ref_dec(sock); /* we're done with it */
     }

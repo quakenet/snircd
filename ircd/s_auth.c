@@ -31,7 +31,7 @@
  */
 /** @file
  * @brief Implementation of DNS and ident lookups.
- * @version $Id: s_auth.c 1914 2009-07-05 03:00:52Z entrope $
+ * @version $Id: s_auth.c 1934 2010-01-04 17:15:13Z klmitch $
  */
 #include "config.h"
 
@@ -52,6 +52,7 @@
 #include "list.h"
 #include "msg.h"	/* for MAXPARA */
 #include "numeric.h"
+#include "numnicks.h"
 #include "querycmds.h"
 #include "random.h"
 #include "res.h"
@@ -1140,6 +1141,17 @@ void auth_send_exit(struct Client *cptr)
   sendto_iauth(cptr, "D");
 }
 
+/** Forward an XREPLY on to iauth.
+ * @param[in] sptr Source of the XREPLY.
+ * @param[in] routing Routing information for the original XQUERY.
+ * @param[in] reply Contents of the reply.
+ */
+void auth_send_xreply(struct Client *sptr, const char *routing,
+		      const char *reply)
+{
+  sendto_iauth(NULL, "X %#C %s :%s", sptr, routing, reply);
+}
+
 /** Mark that a user has started capabilities negotiation.
  * This blocks authorization until auth_cap_done() is called.
  * @param[in] auth Authorization request for client.
@@ -1188,13 +1200,17 @@ int iauth_do_spawn(struct IAuth *iauth, int automatic)
 
   /* Attempt to allocate a pair of sockets. */
   res = os_socketpair(s_io);
-  if (res)
-    return errno;
+  if (res) {
+    res = errno;
+    Debug((DEBUG_INFO, "Unable to create IAuth socketpair: %s", strerror(res)));
+    return res;
+  }
 
   /* Mark the parent's side of the pair (element 0) as non-blocking. */
   res = os_set_nonblocking(s_io[0]);
   if (!res) {
     res = errno;
+    Debug((DEBUG_INFO, "Unable to make IAuth socket non-blocking: %s", strerror(res)));
     close(s_io[1]);
     close(s_io[0]);
     return res;
@@ -1205,6 +1221,7 @@ int iauth_do_spawn(struct IAuth *iauth, int automatic)
                    SS_CONNECTED, SOCK_EVENT_READABLE, s_io[0]);
   if (!res) {
     res = errno;
+    Debug((DEBUG_INFO, "Unable to register IAuth socket: %s", strerror(res)));
     close(s_io[1]);
     close(s_io[0]);
     return res;
@@ -1214,6 +1231,7 @@ int iauth_do_spawn(struct IAuth *iauth, int automatic)
   res = os_socketpair(s_err);
   if (res) {
     res = errno;
+    Debug((DEBUG_INFO, "Unable to create IAuth stderr: %s", strerror(res)));
     socket_del(i_socket(iauth));
     close(s_io[1]);
     close(s_io[0]);
@@ -1224,6 +1242,7 @@ int iauth_do_spawn(struct IAuth *iauth, int automatic)
   res = os_set_nonblocking(s_err[0]);
   if (!res) {
     res = errno;
+    Debug((DEBUG_INFO, "Unable to make IAuth stderr non-blocking: %s", strerror(res)));
     close(s_err[1]);
     close(s_err[0]);
     socket_del(i_socket(iauth));
@@ -1237,6 +1256,7 @@ int iauth_do_spawn(struct IAuth *iauth, int automatic)
                    SS_CONNECTED, SOCK_EVENT_READABLE, s_err[0]);
   if (!res) {
     res = errno;
+    Debug((DEBUG_INFO, "Unable to register IAuth stderr: %s", strerror(res)));
     close(s_err[1]);
     close(s_err[0]);
     socket_del(i_socket(iauth));
@@ -1250,6 +1270,7 @@ int iauth_do_spawn(struct IAuth *iauth, int automatic)
   if (cpid < 0) {
     /* Error forking the child, still in parent. */
     res = errno;
+    Debug((DEBUG_INFO, "Unable to fork IAuth child: %s", strerror(res)));
     socket_del(i_stderr(iauth));
     close(s_err[1]);
     close(s_err[0]);
@@ -1309,17 +1330,15 @@ int auth_spawn(int argc, char *argv[])
         same = 0;
     }
     /* Check that we have no more pre-existing arguments. */
-    if (iauth->i_argv[ii])
+    if (same && iauth->i_argv[ii])
       same = 0;
-    /* If they are the same and still connected, clear the "closing" flag and exit.*/
+    /* If they are the same and still connected, clear the "closing" flag and exit. */
     if (same && i_GetConnected(iauth)) {
+      Debug((DEBUG_INFO, "Reusing existing IAuth process"));
       IAuthClr(iauth, IAUTH_CLOSING);
       return 2;
     }
-    /* Deallocate old argv elements. */
-    for (ii = 0; iauth->i_argv[ii]; ++ii)
-      MyFree(iauth->i_argv[ii]);
-    MyFree(iauth->i_argv);
+    auth_close_unused();
   }
 
   /* Need to initialize a new connection. */
@@ -1997,6 +2016,55 @@ static int iauth_cmd_challenge(struct IAuth *iauth, struct Client *cli,
   return 0;
 }
 
+/** Send an extension query to a specified remote server.
+ * @param[in] iauth Active IAuth session.
+ * @param[in] cli Client referenced by command.
+ * @param[in] parc Number of parameters (3).
+ * @param[in] params Remote server, routing information, and query.
+ * @return Zero.
+ */
+static int iauth_cmd_xquery(struct IAuth *iauth, struct Client *cli,
+			    int parc, char **params)
+{
+  char *serv;
+  const char *routing;
+  const char *query;
+  struct Client *acptr;
+
+  /* Process parameters */
+  if (EmptyString(params[0])) {
+    sendto_iauth(cli, "E Missing :Missing server parameter");
+    return 0;
+  } else
+    serv = params[0];
+
+  if (EmptyString(params[1])) {
+    sendto_iauth(cli, "E Missing :Missing routing parameter");
+    return 0;
+  } else
+    routing = params[1];
+
+  if (EmptyString(params[2])) {
+    sendto_iauth(cli, "E Missing :Missing query parameter");
+    return 0;
+  } else
+    query = params[2];
+
+  /* Try to find the specified server */
+  if (!(acptr = find_match_server(serv))) {
+    sendto_iauth(cli, "x %s %s :Server not online", serv, routing);
+    return 0;
+  }
+
+  /* If it's to us, do nothing; otherwise, forward the query */
+  if (!IsMe(acptr))
+    /* The "iauth:" prefix helps ircu route the reply to iauth */
+    sendcmdto_one(&me, CMD_XQUERY, acptr, "%C iauth:%s :%s", acptr, routing,
+		  query);
+
+  return 0;
+}
+
 /** Parse a \a message from \a iauth.
  * @param[in] iauth Active IAuth session.
  * @param[in] message Message to be parsed.
@@ -2021,6 +2089,7 @@ static void iauth_parse(struct IAuth *iauth, char *message)
   case 'A': handler = iauth_cmd_config; has_cli = 0; break;
   case 's': handler = iauth_cmd_newstats; has_cli = 0; break;
   case 'S': handler = iauth_cmd_stats; has_cli = 0; break;
+  case 'X': handler = iauth_cmd_xquery; has_cli = 0; break;
   case 'o': handler = iauth_cmd_username_forced; has_cli = 1; break;
   case 'U': handler = iauth_cmd_username_good; has_cli = 1; break;
   case 'u': handler = iauth_cmd_username_bad; has_cli = 1; break;

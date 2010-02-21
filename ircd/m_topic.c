@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_topic.c 1903 2009-01-13 03:54:45Z entrope $
+ * $Id: m_topic.c 1938 2010-01-07 03:23:57Z entrope $
  */
 
 #include "config.h"
@@ -197,6 +197,7 @@ int ms_topic(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     if (parc > 3 && (ts = atoi(parv[2])) && chptr->creationtime < ts)
       continue;
 
+    ts = 0; /* Default to the current time if no topic_time is passed. */
     if (parc > 4 && (ts = atoi(parv[3])) && chptr->topic_time > ts)
       continue;
 

@@ -63,7 +63,7 @@
 /** @file
  * @brief Report configuration lines and other statistics from this
  * server.
- * @version $Id: s_stats.c 1628 2006-03-14 14:56:51Z entrope $
+ * @version $Id: s_stats.c 1922 2010-01-02 04:00:13Z entrope $
  *
  * Note: The info is reported in the order the server uses
  *       it--not reversed as in ircd.conf!
@@ -544,9 +544,12 @@ struct StatDesc statsinfo[] = {
   { 'e', "engine", STAT_FLAG_OPERFEAT, FEAT_HIS_STATS_e,
     stats_engine, 0,
     "Report server event loop engine." },
-  { 'f', "features", STAT_FLAG_OPERFEAT, FEAT_HIS_STATS_f,
+  { 'f', "features", (STAT_FLAG_OPERFEAT | STAT_FLAG_CASESENS), FEAT_HIS_STATS_f,
     feature_report, 0,
     "Feature settings." },
+  { 'F', "featuresall", (STAT_FLAG_OPERFEAT | STAT_FLAG_CASESENS), FEAT_HIS_STATS_f,
+    feature_report, 1,
+    "All feature settings, including defaulted values." },
   { 'g', "glines", STAT_FLAG_OPERFEAT, FEAT_HIS_STATS_g,
     gline_stats, 0,
     "Global bans (G-lines)." },
