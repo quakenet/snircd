@@ -22,7 +22,7 @@
  */
 /** @file
  * @brief Handlers for the SERVER command.
- * @version $Id: m_server.c 1415 2005-05-30 16:51:05Z entrope $
+ * @version $Id: m_server.c 1927 2010-01-03 20:43:17Z entrope $
  */
 
 #include "config.h"
@@ -407,14 +407,14 @@ check_loop_and_lh(struct Client* cptr, struct Client *sptr, time_t *ghost, const
     if (active_lh_line == 1)
     {
       if (exit_client_msg(cptr, LHcptr, &me,
-                          "Leaf-only link %s <- %s, check L:",
+                          "Maximum hops exceeded for %s at %s",
                           cli_name(cptr), host) == CPTR_KILLED)
         return CPTR_KILLED;
     }
     else if (active_lh_line == 2)
     {
       if (exit_client_msg(cptr, LHcptr, &me,
-                          "Non-Hub link %s <- %s, check H:",
+                          "%s is not allowed to hub for %s",
                           cli_name(cptr), host) == CPTR_KILLED)
         return CPTR_KILLED;
     }
@@ -424,11 +424,8 @@ check_loop_and_lh(struct Client* cptr, struct Client *sptr, time_t *ghost, const
       if (exit_client(cptr, LHcptr, &me, "I'm a leaf, define HUB") == CPTR_KILLED)
         return CPTR_KILLED;
     }
-    /*
-     * Did we kill the incoming server off already ?
-     */
-    if (killed)
-      return 0;
+    /* We just squit somebody, and it wasn't cptr. */
+    return 0;
   }
 
   return 1;

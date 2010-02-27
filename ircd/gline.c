@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c 1904 2009-02-09 00:03:34Z entrope $
+ * @version $Id: gline.c 1936 2010-01-07 02:55:33Z entrope $
  */
 #include "config.h"
 
@@ -547,6 +547,9 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
     if (!IsServer(sptr) && MyConnect(sptr))
       send_reply(sptr, ERR_BADEXPIRE, expire);
     return 0;
+  } else if (expire <= CurrentTime) {
+    /* This expired G-line was forced to be added, so mark it inactive. */
+    flags &= ~GLINE_ACTIVE;
   }
 
   if (!lifetime) /* no lifetime set, use expiration time */

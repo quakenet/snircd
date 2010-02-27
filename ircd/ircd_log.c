@@ -969,21 +969,25 @@ log_feature_report(struct Client *to, int flag, int showall)
   for (i = 0; i < LS_LAST_SYSTEM; i++)
   {
     if ((logDesc[i].mark & LOG_MARK_FILE) || (showall)) /* report file */
-      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s FILE %s",
+      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "%c LOG %s FILE %s",
+                 (logDesc[i].mark & LOG_MARK_FILE) ? 'F' : 'f',
                  logDesc[i].name, (logDesc[i].file && logDesc[i].file->file ?
                                    logDesc[i].file->file : "(terminal)"));
 
     if ((logDesc[i].mark & LOG_MARK_FACILITY) || (showall)) /* report facility */
-      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s FACILITY %s",
-		 logDesc[i].name, log_fac_name(logDesc[i].facility));
+      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "%c LOG %s FACILITY %s",
+		 (logDesc[i].mark & LOG_MARK_FACILITY) ? 'F' : 'f',
+                  logDesc[i].name, log_fac_name(logDesc[i].facility));
 
     if ((logDesc[i].mark & LOG_MARK_SNOMASK) || (showall))/* report snomask */
-      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s SNOMASK %s",
-		 logDesc[i].name, log_sno_name(logDesc[i].snomask));
+      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "%c LOG %s SNOMASK %s",
+		 (logDesc[i].mark & LOG_MARK_FACILITY) ? 'F' : 'f',
+                  logDesc[i].name, log_sno_name(logDesc[i].snomask));
 
     if ((logDesc[i].mark & LOG_MARK_LEVEL) || (showall)) /* report log level */
-      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "F LOG %s LEVEL %s",
-		 logDesc[i].name, log_lev_name(logDesc[i].level));
+      send_reply(to, SND_EXPLICIT | RPL_STATSFLINE, "%c LOG %s LEVEL %s",
+		 (logDesc[i].mark & LOG_MARK_FACILITY) ? 'F' : 'f',
+                  logDesc[i].name, log_lev_name(logDesc[i].level));
   }
 
   if (flag) /* report default facility */

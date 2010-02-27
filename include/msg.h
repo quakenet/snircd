@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Command and token declarations and structures.
- * @version $Id: msg.h 1347 2005-04-02 02:50:15Z entrope $
+ * @version $Id: msg.h 1925 2010-01-02 20:33:10Z klmitch $
  */
 #ifndef INCLUDED_msg_h
 #define INCLUDED_msg_h
@@ -371,6 +371,14 @@ struct Client;
 #define MSG_CAP			"CAP"
 #define TOK_CAP			"CAP"
 #define CMD_CAP			MSG_CAP, TOK_CAP
+
+#define MSG_XQUERY		"XQUERY"
+#define TOK_XQUERY		"XQ"
+#define CMD_XQUERY		MSG_XQUERY, TOK_XQUERY
+
+#define MSG_XREPLY		"XREPLY"
+#define TOK_XREPLY		"XR"
+#define CMD_XREPLY		MSG_XREPLY, TOK_XREPLY
 
 /*
  * Constants

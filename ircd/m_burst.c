@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_burst.c 1861 2008-01-03 00:07:21Z klmitch $
+ * $Id: m_burst.c 1941 2010-01-14 02:35:51Z entrope $
  */
 
 /*
@@ -342,25 +342,8 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     modebuf_mode(mbuf, MODE_DEL | chptr->mode.mode); /* wipeout modes */
     chptr->mode.mode &= MODE_BURSTADDED | MODE_WASDELJOINS;
 
-    /* wipe out modes not represented in chptr->mode.mode */
-    if (chptr->mode.limit) {
-      modebuf_mode_uint(mbuf, MODE_DEL | MODE_LIMIT, chptr->mode.limit);
-      chptr->mode.limit = 0;
-    }
-    if (chptr->mode.key[0]) {
-      modebuf_mode_string(mbuf, MODE_DEL | MODE_KEY, chptr->mode.key, 0);
-      chptr->mode.key[0] = '\0';
-    }
-    if (chptr->mode.upass[0]) {
-      modebuf_mode_string(mbuf, MODE_DEL | MODE_UPASS, chptr->mode.upass, 0);
-      chptr->mode.upass[0] = '\0';
-    }
-    if (chptr->mode.apass[0]) {
-      modebuf_mode_string(mbuf, MODE_DEL | MODE_APASS, chptr->mode.apass, 0);
-      chptr->mode.apass[0] = '\0';
-    }
-
-    parse_flags |= (MODE_PARSE_SET | MODE_PARSE_WIPEOUT); /* wipeout keys */
+    /* wipeout any limit and keys that are set */
+    parse_flags |= (MODE_PARSE_SET | MODE_PARSE_WIPEOUT);
 
     /* mark bans for wipeout */
     for (lp = chptr->banlist; lp; lp = lp->next)
@@ -515,6 +498,11 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		  } while (IsDigit(*ptr));
 		  --ptr;
 		  oplevel += level_increment;
+                  if (oplevel > MAXOPLEVEL) {
+                    protocol_violation(sptr, "Invalid cumulative oplevel %u during burst", oplevel);
+                    oplevel = MAXOPLEVEL;
+                    break;
+                  }
 		}
 		else { /* I don't recognize that flag */
 		  protocol_violation(sptr, "Invalid flag '%c' in nick part of burst", *ptr);
@@ -543,7 +531,7 @@ int ms_burst(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      nickstr[nickpos++] = 'v';
 	    if (current_mode & CHFL_CHANOP)
             {
-              if (chptr->mode.apass[0])
+              if (oplevel != MAXOPLEVEL)
 	        nickpos += ircd_snprintf(0, nickstr + nickpos, sizeof(nickstr) - nickpos, "%u", oplevel);
               else
                 nickstr[nickpos++] = 'o';

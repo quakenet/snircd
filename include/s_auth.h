@@ -17,7 +17,7 @@
  */
 /** @file
  * @brief Interface for DNS and ident lookups.
- * @version $Id: s_auth.h 1748 2007-01-16 01:21:37Z entrope $
+ * @version $Id: s_auth.h 1925 2010-01-02 20:33:10Z klmitch $
  */
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
@@ -45,6 +45,7 @@ extern void destroy_auth_request(struct AuthRequest *req);
 
 extern int auth_spawn(int argc, char *argv[]);
 extern void auth_send_exit(struct Client *cptr);
+extern void auth_send_xreply(struct Client *sptr, const char *routing, const char *reply);
 extern void auth_mark_closing(void);
 extern void auth_close_unused(void);
 extern void report_iauth_conf(struct Client *cptr, const struct StatDesc *sd, char *param);

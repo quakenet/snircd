@@ -1,3 +1,186 @@
+2010-02-02  Michael Poole <mdpoole@troilus.org>
+
+	* include/patchlevel.h (PATCHLEVEL): Bump to (u2.10.12.)13-rc2.
+
+2010-01-13  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_burst.c (ms_burst): Do not clear keys or limit here --
+	MODE_PARSE_WIPEOUT gets modebuf_flush() to do that for us.
+
+2010-01-06  Michael Poole <mdpoole@troilus.org>
+
+	* Makefile.in: Remove doc/Makefile from the build.
+
+	* configure.in: Do not generate doc/Makefile.
+
+	* configure: Regenerate.
+
+	* doc/Makefile.in: Delete.
+
+	* doc/irc.1: Delete.
+
+	* doc/ircd.8: Delete.
+
+	* libs: Delete.
+
+2010-01-06  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_topic.c (ms_topic): When no topic timestamp is passed,
+	use the current time instead of the channel creation time.
+
+2010-01-06  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_silence.c (m_silence): Only show the silence list for the
+	requesting client and for channel services, to help keep other
+	clients' servers hidden.
+
+2010-01-06  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/gline.c (gline_add): If a forced G-line has already
+	expired, create it in a deactivated state.
+
+2010-01-06  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_burst.c (ms_burst): Gracefully handle the case where a
+	server sends us a too-large oplevel.  Forward oplevels whenever
+	they are in use, not just when the channel is +A.
+
+2010-01-04  Kevin L. Mitchell  <klmitch@mit.edu>
+
+	* ircd/m_xquery.c (ms_xquery): Resolving my patches with
+	Entrope's--log extension queries sent to us
+
+	* ircd/m_xreply.c (ms_xreply): Resolving my patches with
+	Entrope's--swap order of findNUser() and FindNServer()
+
+	* ircd/Makefile.in (IRCD_SRC): Resolving my patches with
+	Entrope's--swap order of m_xquery.c and m_xreply.c to maintain
+	alphabetic ordering
+
+2010-01-03  Kevin L. Mitchell  <klmitch@mit.edu>
+
+	* ircd/m_xreply.c (ms_xreply): swap order of numeric resolution so
+	we can deal with XR directed to users
+
+	* configure: auto-rebuilt with Autoconf 2.63 (was 2.59)
+
+	* ircd/m_xquery.c: need ircd_reply.h; fix a couple of
+	capitalization errors; log XQUERY directed to "me"
+
+	* ircd/m_xreply.c: need ircd_reply.h and numnicks.h (how'd I miss
+	the latter??); fix a couple of capitalization errors
+
+	* ircd/Makefile.in (IRCD_SRC): it'd be nice if we actually tried
+	to compile the two new commands...
+
+	* ircd/s_auth.c: "serv" is passed to find_match_server(), which
+	does a collapse on the pattern, so it can't be const
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/engine_devpoll.c: Make some variables that were local to
+	engine_loop() file-scoped so engine_delete() can see them.
+	(engine_delete): Discard unprocessed events for the deleted
+	socket.
+	(engine_loop): Update to use the new variable names.  Change a
+	frequent debug statement to DEBUG_ENGINE.  Fix the type of the
+	codesize variable.
+
+	* ircd/engine_epoll.c: Same as ircd/engine_devpoll.c, but the
+	debug statement and codesize variable were already fixed.
+
+	* ircd/engine_kqueue.c: Same as ircd/engine_devpoll.c, but also
+	fix a typo in an engine_signal() assertion, and get rid of dead
+	variables in engine_delete().
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_bsd.c (client_sock_callback): Invalidate cli_fd() when we
+	receive an EBADF error.
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/engine_select.c (engine_loop): Remove a bogus assert() that
+	the structure's FD is correct after the event-handling callback
+	returns.  Also fix a warning about the type of the last parameter
+	passed to getsockopt().
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_names.c (m_names): Terminate the buffer used for listing
+	clients who are not in any channel.
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/channel.c (find_delayed_joins): Move earlier in the file.
+	(modebuf_flush_int): Move the checks for changing between +D and
+	+d to here...
+	(modebuf_flush): ... from here.
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/m_server.c (check_loop_and_lh): Never return 1 when we kill
+	another server.  Update the squit message text for maxhops and hub
+	violations.
+
+2010-01-03  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/Makefile.in (IRCD_SRC): Add m_xquery.c and m_xreply.c to
+	the build.
+
+	* ircd/m_xquery.c: Add missing include.
+	(mo_xquery): Fix spelling of struct Client.
+	(ms_xquery): Likewise.
+
+	* ircd/m_xreply.c: Add missing includes.
+	(ms_xreply): Fix spelling of struct Client and findNUser().
+
+2010-01-01  Kevin L. Mitchell  <klmitch@mit.edu>
+
+	* doc/readme.xquery: documentation for design and use of the
+	extension query mechanism
+
+	* doc/readme.iauth: document X iauth message and X and x server
+	messages
+
+	* include/msg.h: declare XQUERY/XQ and XREPLY/XR commands/tokens
+
+	* include/handlers.h: declare mo_xquery(), ms_xquery(), and
+	ms_xreply() message handlers
+
+	* include/s_auth.h: declare auth_send_xreply() to forward replies
+	to extension queries to the iauth instance
+
+	* ircd/m_xquery.c: process extension queries
+
+	* ircd/m_xreply.c: process replies to extension queries
+
+	* ircd/parse.c: add XQUERY and XREPLY commands to the list
+
+	* ircd/s_auth.c: add support for extension queries to iauth
+	protocol
+
+2010-01-01  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/s_auth.c (iauth_do_spawn): Add debug output to diagnose
+	which system call might be failing.
+	(auth_spawn): Avoid reading past the end of iauth->i_argv[].  When
+	discarding an existing IAuth instance, use auth_close_unused() to
+	close the sockets and avoid leaking memory.
+
+2010-01-01  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/channel.c (mode_process_bans): Bypass total ban count and
+	length checks for OPMODEs.
+
+2010-01-01  Michael Poole <mdpoole@troilus.org>
+
+	* ircd/ircd_features.c (feature_report): If sd->sd_funcdata is
+	non-zero, report even unchanged features (using prefix 'f').
+
+	* ircd/s_stats.c (statsinfo): Make "/stats f" case-sensitive, and
+	use the upper case variant to report all features.
+
 2009-07-30  Michael Poole <mdpoole@troilus.org>
 
 	* ircd/s_user.c (register_user): Move the default-usermodes call

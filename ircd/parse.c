@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Parse input from IRC clients and other servers.
- * @version $Id: parse.c 1827 2007-08-14 03:02:24Z entrope $
+ * @version $Id: parse.c 1925 2010-01-02 20:33:10Z klmitch $
  */
 #include "config.h"
 
@@ -630,6 +630,20 @@ struct Message msgtab[] = {
     0, MAXPARA, MFLG_SLOW, 0, NULL,
     /* UNREG, CLIENT, SERVER, OPER, SERVICE */
     { m_unregistered, m_sethost, ms_sethost, m_sethost, m_ignore }
+  },
+  {
+    MSG_XQUERY,
+    TOK_XQUERY,
+    0, MAXPARA, MFLG_SLOW, 0, NULL,
+    /* UNREG, CLIENT, SERVER, OPER, SERVICE */
+    { m_ignore, m_ignore, ms_xquery, mo_xquery, m_ignore }
+  },
+  {
+    MSG_XREPLY,
+    TOK_XREPLY,
+    0, MAXPARA, MFLG_SLOW, 0, NULL,
+    /* UNREG, CLIENT, SERVER, OPER, SERVICE */
+    { m_ignore, m_ignore, ms_xreply, m_ignore, m_ignore }
   },
 #if WE_HAVE_A_REAL_CAPABILITY_NOW
   {

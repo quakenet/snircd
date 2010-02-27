@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_names.c 1845 2007-11-25 02:42:54Z entrope $
+ * $Id: m_names.c 1929 2010-01-03 21:20:56Z entrope $
  */
 
 /*
@@ -285,6 +285,7 @@ int m_names(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
         if (mlen + idx + NICKLEN + 3 > BUFSIZE)     /* space, \r\n\0 */
         {
+          buf[idx-1] = '\0';
           send_reply(sptr, RPL_NAMREPLY, buf);
           strcpy(buf, "* * :");
           idx = 5;
@@ -292,7 +293,10 @@ int m_names(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
         }
       }
       if (flag)
+      {
+        buf[idx-1] = '\0';
         send_reply(sptr, RPL_NAMREPLY, buf);
+      }
       send_reply(sptr, RPL_ENDOFNAMES, "*");
     }
     else if ((chptr = FindChannel(para)) != NULL)

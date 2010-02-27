@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Functions that now (or in the past) relied on BSD APIs.
- * @version $Id: s_bsd.c 1863 2008-03-15 05:24:14Z entrope $
+ * @version $Id: s_bsd.c 1932 2010-01-04 00:37:28Z entrope $
  */
 #include "config.h"
 
@@ -878,6 +878,11 @@ static void client_sock_callback(struct Event* ev)
   case ET_ERROR: /* an error occurred */
     fallback = cli_info(cptr);
     cli_error(cptr) = ev_data(ev);
+    /* If the OS told us we have a bad file descriptor, we should
+     * record that for future reference.
+     */
+    if (cli_error(cptr) == EBADF)
+      cli_fd(cptr) = -1;
     if (s_state(&(con_socket(con))) == SS_CONNECTING) {
       completed_connection(cptr);
       /* for some reason, the os_get_sockerr() in completed_connect()
