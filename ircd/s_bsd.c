@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Functions that now (or in the past) relied on BSD APIs.
- * @version $Id: s_bsd.c 1932 2010-01-04 00:37:28Z entrope $
+ * @version $Id: s_bsd.c 1944 2010-03-04 13:52:35Z klmitch $
  */
 #include "config.h"
 
@@ -238,7 +238,7 @@ static int connect_inet(struct ConfItem* aconf, struct Client* cptr)
   /*
    * Set the TOS bits - this is nonfatal if it doesn't stick.
    */
-  if (!os_set_tos(cli_fd(cptr), FEAT_TOS_SERVER)) {
+  if (!os_set_tos(cli_fd(cptr), feature_int(FEAT_TOS_SERVER))) {
     report_error(TOS_ERROR_MSG, cli_name(cptr), errno);
   }
   if ((result = os_connect_nonb(cli_fd(cptr), &aconf->address)) == IO_FAILURE) {
