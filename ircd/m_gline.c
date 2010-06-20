@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: m_gline.c 1917 2009-07-06 02:02:31Z entrope $
+ * $Id: m_gline.c 1947 2010-04-18 23:15:10Z entrope $
  */
 
 /*
@@ -113,7 +113,7 @@
  * but you can't have everything in a macro ;)
  */
 #define abs_expire(exp)							\
-  ((exp) >= CurrentTime - PASTWATCH ? (exp) : (exp) + CurrentTime)
+  ((exp) >= TStime() - PASTWATCH ? (exp) : (exp) + TStime())
 
 /*
  * ms_gline - server message handler
@@ -258,13 +258,13 @@ ms_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	   "target %s, mask %s, operforce %s, action %c, expire %Tu, "
 	   "lastmod %Tu, reason: %s", target, mask,
 	   flags & GLINE_OPERFORCE ? "YES" : "NO",
-	   action == GLINE_ACTIVATE ? '+' :  '-', expire, CurrentTime,
+	   action == GLINE_ACTIVATE ? '+' :  '-', expire, TStime(),
 	   reason));
 
     sendcmdto_one(sptr, CMD_GLINE, acptr, "%C %s%c%s %Tu %Tu :%s",
 		  acptr, flags & GLINE_OPERFORCE ? "!" : "",
 		  action == GLINE_ACTIVATE ? '+' : '-', mask,
-		  expire - CurrentTime, CurrentTime, reason);
+		  expire - TStime(), TStime(), reason);
 
     return 0; /* all done */
   }
@@ -427,7 +427,7 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return need_more_params(sptr, "GLINE");
 
     target = parv[2]; /* get the target... */
-    expire = strtol(parv[3], &end, 10) + CurrentTime; /* and the expiration */
+    expire = strtol(parv[3], &end, 10) + TStime(); /* and the expiration */
     if (*end != '\0')
       return send_reply(sptr, SND_EXPLICIT | ERR_BADEXPIRE, "%s :Bad expire time", parv[3]);
 
@@ -464,7 +464,7 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     if (parc > 3) {
       /* get expiration and target */
       reason = parv[parc - 1];
-      expire = strtol(parv[parc - 2], &end, 10) + CurrentTime;
+      expire = strtol(parv[parc - 2], &end, 10) + TStime();
       if (*end != '\0')
         return send_reply(sptr, SND_EXPLICIT | ERR_BADEXPIRE, "%s :Bad expire time", parv[parc - 2]);
 
@@ -552,7 +552,7 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendcmdto_one(sptr, CMD_GLINE, acptr, "%C %s%c%s %Tu %Tu :%s",
 		    acptr, flags & GLINE_OPERFORCE ? "!" : "",
 		    action == GLINE_ACTIVATE ? '+' : '-', mask,
-		    expire - CurrentTime, CurrentTime, reason);
+		    expire - TStime(), TStime(), reason);
 
       return 0; /* all done */
     }
@@ -622,14 +622,14 @@ mo_gline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (agline) /* modifying an existing G-line */
     return gline_modify(cptr, sptr, agline, action, reason, expire,
-			CurrentTime, 0, flags);
+			TStime(), 0, flags);
 
   assert(action != GLINE_LOCAL_ACTIVATE);
   assert(action != GLINE_LOCAL_DEACTIVATE);
   assert(action != GLINE_MODIFY);
 
   /* create a new G-line */
-  return gline_add(cptr, sptr, mask, reason, expire, CurrentTime, 0,
+  return gline_add(cptr, sptr, mask, reason, expire, TStime(), 0,
 		   flags | ((action == GLINE_ACTIVATE) ? GLINE_ACTIVE : 0));
 }
 

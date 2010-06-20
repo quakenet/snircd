@@ -19,7 +19,7 @@
  */
 /** @file
  * @brief Implementation of Gline manipulation functions.
- * @version $Id: gline.c 1936 2010-01-07 02:55:33Z entrope $
+ * @version $Id: gline.c 1947 2010-04-18 23:15:10Z entrope $
  */
 #include "config.h"
 
@@ -88,11 +88,11 @@ struct Gline* BadChanGlineList = 0;
     /* Figure out the next pointer in list... */	\
     if ((((next) = (gl)->gl_next) || 1) &&		\
 	/* Then see if it's expired */			\
-	(gl)->gl_lifetime <= CurrentTime)		\
+	(gl)->gl_lifetime <= TStime())                  \
       /* Record has expired, so free the G-line */	\
       gline_free((gl));					\
     /* See if we need to expire the G-line */		\
-    else if ((((gl)->gl_expire > CurrentTime) ||        \
+    else if ((((gl)->gl_expire > TStime()) ||		\
 	      (((gl)->gl_flags &= ~GLINE_ACTIVE) && 0) ||	\
 	      ((gl)->gl_state = GLOCAL_GLOBAL)) && 0)	\
       ; /* empty statement */				\
@@ -385,7 +385,7 @@ gline_propagate(struct Client *cptr, struct Client *sptr, struct Gline *gline)
                         gline->gl_user,
 			gline->gl_host ? "@" : "",
 			gline->gl_host ? gline->gl_host : "",
-			gline->gl_expire - CurrentTime, gline->gl_lastmod,
+			gline->gl_expire - TStime(), gline->gl_lastmod,
 			gline->gl_lifetime, gline->gl_reason);
 
   return 0;
@@ -543,11 +543,11 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
    * expiration time for greater than GLINE_MAX_EXPIRE.
    */
   if (!(flags & GLINE_FORCE) &&
-      (expire <= CurrentTime || expire > CurrentTime + GLINE_MAX_EXPIRE)) {
+      (expire <= TStime() || expire > TStime() + GLINE_MAX_EXPIRE)) {
     if (!IsServer(sptr) && MyConnect(sptr))
       send_reply(sptr, ERR_BADEXPIRE, expire);
     return 0;
-  } else if (expire <= CurrentTime) {
+  } else if (expire <= TStime()) {
     /* This expired G-line was forced to be added, so mark it inactive. */
     flags &= ~GLINE_ACTIVE;
   }
@@ -572,7 +572,7 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
                        user,
 		       (flags & (GLINE_BADCHAN|GLINE_REALNAME)) ? "" : "@",
 		       (flags & (GLINE_BADCHAN|GLINE_REALNAME)) ? "" : host,
-		       expire + TSoffset, reason);
+		       expire, reason);
 
   /* and log it */
   log_write(LS_GLINE, L_INFO, LOG_NOSNOTICE,
@@ -584,7 +584,7 @@ gline_add(struct Client *cptr, struct Client *sptr, char *userhost,
             user,
 	    flags & (GLINE_BADCHAN|GLINE_REALNAME) ? "" : "@",
 	    flags & (GLINE_BADCHAN|GLINE_REALNAME) ? "" : host,
-	    expire + TSoffset, reason);
+	    expire, reason);
 
   /* make the gline */
   agline = make_gline(nick, user, host, reason, expire, lastmod, lifetime, flags);
@@ -644,8 +644,8 @@ gline_activate(struct Client *cptr, struct Client *sptr, struct Gline *gline,
                        GlineIsBadChan(gline)|GlineIsRealName(gline) ? "" : "!",
                        gline->gl_user, gline->gl_host ? "@" : "",
                        gline->gl_host ? gline->gl_host : "",
-                       gline->gl_expire + TSoffset, gline->gl_reason);
-  
+                       gline->gl_expire, gline->gl_reason);
+
   log_write(LS_GLINE, L_INFO, LOG_NOSNOTICE,
             "%#C activating global %s for %s%s%s%s%s, expiring at %Tu: %s", sptr,
             GlineIsBadChan(gline) ? "BADCHAN" : "GLINE",
@@ -654,7 +654,7 @@ gline_activate(struct Client *cptr, struct Client *sptr, struct Gline *gline,
             gline->gl_user,
 	    gline->gl_host ? "@" : "",
 	    gline->gl_host ? gline->gl_host : "",
-	    gline->gl_expire + TSoffset, gline->gl_reason);
+	    gline->gl_expire, gline->gl_reason);
 
   if (!(flags & GLINE_LOCAL)) /* don't propagate local changes */
     gline_propagate(cptr, sptr, gline);
@@ -717,7 +717,7 @@ gline_deactivate(struct Client *cptr, struct Client *sptr, struct Gline *gline,
                        GlineIsBadChan(gline)|GlineIsRealName(gline) ? "" : "!",
 		       gline->gl_user, gline->gl_host ? "@" : "",
                        gline->gl_host ? gline->gl_host : "",
-		       gline->gl_expire + TSoffset, gline->gl_reason);
+		       gline->gl_expire, gline->gl_reason);
 
   log_write(LS_GLINE, L_INFO, LOG_NOSNOTICE,
             "%#C %s %s for %s%s%s%s%s, expiring at %Tu: %s", sptr, msg,
@@ -727,7 +727,7 @@ gline_deactivate(struct Client *cptr, struct Client *sptr, struct Gline *gline,
             gline->gl_user,
 	    gline->gl_host ? "@" : "",
 	    gline->gl_host ? gline->gl_host : "",
-	    gline->gl_expire + TSoffset, gline->gl_reason);
+	    gline->gl_expire, gline->gl_reason);
 
   if (!(flags & GLINE_LOCAL)) /* don't propagate local changes */
     gline_propagate(cptr, sptr, gline);
@@ -789,7 +789,7 @@ gline_modify(struct Client *cptr, struct Client *sptr, struct Gline *gline,
   /* first, check out the expiration time... */
   if ((flags & GLINE_EXPIRE) && expire) {
     if (!(flags & GLINE_FORCE) &&
-	(expire <= CurrentTime || expire > CurrentTime + GLINE_MAX_EXPIRE)) {
+	(expire <= TStime() || expire > TStime() + GLINE_MAX_EXPIRE)) {
       if (!IsServer(sptr) && MyConnect(sptr)) /* bad expiration time */
 	send_reply(sptr, ERR_BADEXPIRE, expire);
       return 0;
@@ -830,7 +830,7 @@ gline_modify(struct Client *cptr, struct Client *sptr, struct Gline *gline,
       (action == GLINE_LOCAL_DEACTIVATE &&
        (gline->gl_state == GLOCAL_DEACTIVATED)) ||
       /* can't activate an expired G-line */
-      IRCD_MAX(gline->gl_expire, expire) <= CurrentTime)
+      IRCD_MAX(gline->gl_expire, expire) <= TStime())
     action = GLINE_MODIFY; /* no activity state modifications */
 
   Debug((DEBUG_DEBUG,  "About to perform changes; flags 0x%04x, action %s",
@@ -939,7 +939,7 @@ gline_modify(struct Client *cptr, struct Client *sptr, struct Gline *gline,
                           GlineIsBadChan(gline)|GlineIsRealName(gline) ? "" : "!",
 			  gline->gl_user, gline->gl_host ? "@" : "",
 			  gline->gl_host ? gline->gl_host : "",
-			  gline->gl_expire - CurrentTime, gline->gl_lastmod,
+			  gline->gl_expire - TStime(), gline->gl_lastmod,
 			  gline->gl_lifetime, gline->gl_reason);
 
   /* OK, let's do the G-line... */
@@ -1154,7 +1154,7 @@ gline_burst(struct Client *cptr)
                     gline->gl_user,
                     gline->gl_host ? "@" : "",
                     gline->gl_host ? gline->gl_host : "",
-		    gline->gl_expire - CurrentTime, gline->gl_lastmod,
+		    gline->gl_expire - TStime(), gline->gl_lastmod,
                     gline->gl_lifetime, gline->gl_reason);
   }
 
@@ -1162,7 +1162,7 @@ gline_burst(struct Client *cptr)
     if (!GlineIsLocal(gline) && gline->gl_lastmod)
       sendcmdto_one(&me, CMD_GLINE, cptr, "* %c%s %Tu %Tu %Tu :%s",
 		    GlineIsRemActive(gline) ? '+' : '-', gline->gl_user,
-		    gline->gl_expire - CurrentTime, gline->gl_lastmod,
+		    gline->gl_expire - TStime(), gline->gl_lastmod,
 		    gline->gl_lifetime, gline->gl_reason);
   }
 }
@@ -1185,7 +1185,7 @@ gline_resend(struct Client *cptr, struct Gline *gline)
                 gline->gl_user,
 		gline->gl_host ? "@" : "",
                 gline->gl_host ? gline->gl_host : "",
-		gline->gl_expire - CurrentTime, gline->gl_lastmod,
+		gline->gl_expire - TStime(), gline->gl_lastmod,
 		gline->gl_lifetime, gline->gl_reason);
 
   return 0;
@@ -1214,8 +1214,8 @@ gline_list(struct Client *sptr, char *userhost)
                GlineIsBadChan(gline) | GlineIsRealName(gline) ? "" : "!",
                gline->gl_user, GlineIsBadChan(gline) || GlineIsRealName(gline) ? "" : "@",
                gline->gl_host ? gline->gl_host : "",
-	       gline->gl_expire + TSoffset, gline->gl_lastmod,
-	       gline->gl_lifetime + TSoffset,
+	       gline->gl_expire, gline->gl_lastmod,
+	       gline->gl_lifetime,
 	       GlineIsLocal(gline) ? cli_name(&me) : "*",
 	       gline->gl_state == GLOCAL_ACTIVATED ? ">" :
 	       (gline->gl_state == GLOCAL_DEACTIVATED ? "<" : ""),
@@ -1228,8 +1228,8 @@ gline_list(struct Client *sptr, char *userhost)
                  gline->gl_user,
 		 gline->gl_host ? "@" : "",
 		 gline->gl_host ? gline->gl_host : "",
-		 gline->gl_expire + TSoffset, gline->gl_lastmod,
-		 gline->gl_lifetime + TSoffset,
+		 gline->gl_expire, gline->gl_lastmod,
+		 gline->gl_lifetime,
 		 GlineIsLocal(gline) ? cli_name(&me) : "*",
 		 gline->gl_state == GLOCAL_ACTIVATED ? ">" :
 		 (gline->gl_state == GLOCAL_DEACTIVATED ? "<" : ""),
@@ -1238,8 +1238,8 @@ gline_list(struct Client *sptr, char *userhost)
 
     gliter(BadChanGlineList, gline, sgline) {
       send_reply(sptr, RPL_GLIST, gline->gl_user, "", "", "", "",
-		 gline->gl_expire + TSoffset, gline->gl_lastmod,
-		 gline->gl_lifetime + TSoffset,
+		 gline->gl_expire, gline->gl_lastmod,
+		 gline->gl_lifetime,
 		 GlineIsLocal(gline) ? cli_name(&me) : "*",
 		 gline->gl_state == GLOCAL_ACTIVATED ? ">" :
 		 (gline->gl_state == GLOCAL_DEACTIVATED ? "<" : ""),
@@ -1270,8 +1270,8 @@ gline_stats(struct Client *sptr, const struct StatDesc *sd,
                gline->gl_user,
 	       gline->gl_host ? "@" : "",
 	       gline->gl_host ? gline->gl_host : "",
-	       gline->gl_expire + TSoffset, gline->gl_lastmod,
-	       gline->gl_lifetime + TSoffset,
+	       gline->gl_expire, gline->gl_lastmod,
+	       gline->gl_lifetime,
 	       gline->gl_state == GLOCAL_ACTIVATED ? ">" :
 	       (gline->gl_state == GLOCAL_DEACTIVATED ? "<" : ""),
 	       GlineIsRemActive(gline) ? '+' : '-',
