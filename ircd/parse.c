@@ -541,13 +541,6 @@ struct Message msgtab[] = {
     { m_ignore, m_ignore, ms_end_of_burst_ack, m_ignore, m_ignore }
   },
   {
-    MSG_REMOTEMODE,
-    TOK_REMOTEMODE,
-    0, MAXPARA, MFLG_SLOW, 0, NULL,
-    /* UNREG, CLIENT, SERVER, OPER, SERVICE */
-    { m_ignore, m_ignore, ms_remotemode, m_ignore, m_ignore }
-  },
-  {
     MSG_HASH,
     TOK_HASH,
     0, MAXPARA, MFLG_SLOW, 0, NULL,
