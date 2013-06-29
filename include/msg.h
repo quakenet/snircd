@@ -363,6 +363,10 @@ struct Client;
 #define TOK_SETHOST		"SH"
 #define CMD_SETHOST		MSG_SETHOST, TOK_SETHOST
 
+#define MSG_REMOTEMODE            "REMOTEMODE"         /* REMOTEMODE */
+#define TOK_REMOTEMODE            "RM"
+#define CMD_REMOTEMODE            MSG_REMOTEMODE, TOK_REMOTEMODE
+
 #define MSG_CAP			"CAP"
 #define TOK_CAP			"CAP"
 #define CMD_CAP			MSG_CAP, TOK_CAP
