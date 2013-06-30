@@ -1,6 +1,13 @@
 syntax: glob
 Makefile
 *.o
+*.orig
+.*.orig
+\#*
+*~
+.*~
+*.bak
+.*.bak
 autom4te.cache/*
 config.cache
 config.guess
