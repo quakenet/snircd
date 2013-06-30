@@ -1,6 +1,7 @@
 syntax: glob
 Makefile
 *.o
+autom4te.cache/*
 config.cache
 config.guess
 config.h
