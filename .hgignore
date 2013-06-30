@@ -1,16 +1,15 @@
-makefile
+syntax: glob
 Makefile
-config.log
-config.h
-stamp-h
-config.status
+*.o
 config.cache
-.project
-ircu.tags
-
-configure
-
+config.guess
+config.h
+config.log
+config.status
+config.sub
+configure.lineno
 ircd/chattr.tab.c
+ircd/convert-conf
 ircd/ircd
 ircd/lex.yy.c
 ircd/table_gen
@@ -19,7 +18,7 @@ ircd/test/ircd_in_addr_t
 ircd/test/ircd_match_t
 ircd/test/ircd_string_t
 ircd/umkpasswd
+ircd/version.c
 ircd/y.tab.c
 ircd/y.tab.h
-
-.o
+stamp-h
