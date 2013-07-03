@@ -1944,6 +1944,7 @@ static int iauth_cmd_done_account(struct IAuth *iauth, struct Client *cli,
 
   /* Copy account name to User structure. */
   ircd_strncpy(cli_user(cli)->account, params[0], ACCOUNTLEN);
+  cli_user(cli)->account[len] = '\0';
   SetAccount(cli);
 
   /* Fall through to the normal "done" handler. */
