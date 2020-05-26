@@ -374,18 +374,27 @@ struct Ban *find_ban(struct Client *cptr, struct Ban *banlist)
   char        tmphost[HOSTLEN + 1];
   char        iphost[SOCKIPLEN + 1];
   char       *hostmask;
-  char       *sr;
+  char       *sr = NULL;
+  char       *rh = NULL;
   struct Ban *found;
 
   /* Build nick!user and alternate host names. */
   ircd_snprintf(0, nu, sizeof(nu), "%s!%s",
                 cli_name(cptr), cli_user(cptr)->username);
   ircd_ntoa_r(iphost, &cli_ip(cptr));
-  if (!IsAccount(cptr))
-    sr = NULL;
-  else if (HasHiddenHost(cptr) || HasSetHost(cptr))
-    sr = cli_user(cptr)->realhost;
-  else
+
+  /* We basically need to check for three things;
+      * Their host (->host) which is always checked
+      * Their real host (->realhost, incase they're +x or +h)
+      * Their hidden host (if they're authed and not +x'd, or +x and +h)
+  */
+  /* If what we're seeing isn't their real host, also check that one */
+  if (HasHiddenHost(cptr) || HasSetHost(cptr))
+    rh = cli_user(cptr)->realhost;
+
+  /* If they're authed but not +x'd, also check the hidden host */
+  /* +h overrides +x */
+  if (IsAccount(cptr) && (!HasHiddenHost(cptr) || (HasHiddenHost(cptr) && HasSetHost(cptr))))
   {
     ircd_snprintf(0, tmphost, HOSTLEN, "%s.%s",
                   cli_user(cptr)->account, feature_str(FEAT_HIDDEN_HOST));
@@ -409,7 +418,8 @@ struct Ban *find_ban(struct Client *cptr, struct Ban *banlist)
     if (!((banlist->flags & BAN_IPMASK)
          && ipmask_check(&cli_ip(cptr), &banlist->address, banlist->addrbits))
         && match(hostmask, cli_user(cptr)->host)
-        && !(sr && !match(hostmask, sr)))
+        && !(sr && !match(hostmask, sr))
+        && !(rh && !match(hostmask, rh)))
         continue;
     /* If an exception matches, no ban can match. */
     if (banlist->flags & BAN_EXCEPTION)
